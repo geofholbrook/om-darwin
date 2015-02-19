@@ -33,15 +33,7 @@
          "dwn.engine"
 
          "dwn.om2"
-         
-
-;;         "dwn.class-def"
-;;         "dwn.specimens"
-;;         "dwn.criteria"
-;;         "dwn.population"
-;;         "dwn.om"
-;;         "dwn.arrange"
-
+        
          ))
 
 ;--------------------------------------------------

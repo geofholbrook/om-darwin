@@ -1,2 +1,9 @@
 *.xfasl
+*.ofasl
+*.nfasl
+*.ufasl
 *.lisp~
+*.lisp#
+
+*.app/
+
