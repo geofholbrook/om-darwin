@@ -10,6 +10,7 @@
    (population :initform nil :accessor population)
    (message-flag :initform nil :accessor message-flag)
    (generation :initform 0 :accessor generation)
+   (box :initform nil :accessor box)
 
    ;visible slots
    (model :initform nil :initarg :model :accessor model)
@@ -29,42 +30,31 @@
             (arrange->poly (phenotype (cadar (population self))))
           (make-instance 'om::poly))))
 
-
-(defmethod initialize-instance :after ((self ga-engine) &rest args)
+(defmethod initialize-engine ((self ga-engine))
   (when (and (model self)
              (fitness-function self))
     (setf (population self)
           (population-from-model (model self) (fitness-function self))))
-  (update-best-candidate self))
+  (update-best-candidate self)
+  (redraw-editors self))
 
 
-;(defclass ga-scoreeditor (om::polyeditor) ())
+(defmethod initialize-instance :after ((self ga-engine) &rest args)
+  (setf (box self) (get-my-box self))
+  (initialize-engine self))
 
-(defmethod om::class-has-editor-p ((self ga-engine)) t)
-(defmethod om::get-editor-class ((self ga-engine)) 'om::polyeditor)
+
+;(defmethod om::class-has-editor-p ((self ga-engine)) t)
+;(defmethod om::get-editor-class ((self ga-engine)) 'om::polyeditor)
 
 (defmethod om::default-edition-params ((self ga-engine))
   (om::default-edition-params (current-best self)))
 
 (defmethod om::editor-object-from-value ((self ga-engine)) (current-best self))
 
-;;; open editor with current-best
-;(defmethod om::make-editor-window ((class (eql 'ga-scoreeditor)) (object ga-engine) name ref &key 
-;                                   winsize winpos (close-p t) (winshow t) (resize t) (retain-scroll nil)
-;                                   (wintype nil))
-;  (call-next-method class (current-best object) name ref 
-;                    :winsize winsize :winpos winpos :resize resize 
-;                    :close-p close-p :winshow winshow :resize resize
-;                    :retain-scroll retain-scroll :wintype wintype))
+(defmethod om::draw-mini-view ((self t) (value ga-engine))
+  (om::draw-mini-view self (current-best value)))
 
-;(defmethod om::object ((self ga-scoreeditor))
-;  (current-best (slot-value self 'om::object)))
-
-;(defmethod om::inside ((self ga-engine))
-;  (om::inside (current-best self)))
-
-;(defmethod om::voices ((self ga-engine))
-;  (om::voices (current-best self)))
 
 
 
@@ -73,9 +63,6 @@
   (setf (fitness-function self) fitness-function)
   (setf (message-flag self) :new-fitness-function)) 
 
-(defmethod stop ((self ga-engine))
-  (setf (message-flag self) :stop))
-
 (defmethod start ((self ga-engine))
   (if (process self) (om-kill-process (process self)))
   (setf (process self)
@@ -83,47 +70,79 @@
                         #'(lambda ()
                             (run-engine self)))))
 
+(defmethod stop ((self ga-engine))
+  (setf (message-flag self) :stop))
+
+(defmethod reinit ((self ga-engine))
+  (if (or (null (process self))
+          (equal (mp::process-state (process self))
+                 :killed))
+      (initialize-engine self)
+      
+    (setf (message-flag self) :reinit)))
+
+
 
 (defun get-my-box (obj)
-  (let* ((editor-windows (om-get-all-windows 'om::EditorWindow))
-         (my-win (find obj editor-windows :key #'(lambda (w) (om::ref (om::editor w)))
-                      :test #'(lambda (o box) (when box (equal o (om::value box)))))))
-    (when my-win (om::ref (om::editor my-win)))))
-  
-(defmethod run-engine ((self ga-engine))
-  (let ((my-box (get-my-box self)))
+  (let ((patches (remove-if-not #'(lambda (obj) (equal (type-of obj) 'om::ompatch))
+                                (mapcar 'om::obj (om::om-get-all-windows 'om::EditorWindow)))))
+ 
+   (loop for patch in patches
+         for box = (find obj (om::boxes patch)
+                         :key 'om::value)
 
-    (when (and (model self)
-               (fitness-function self))
+
+          if box 
+          return box)))
+
+
+(defmethod redraw-editors ((self ga-engine))
+  (when (box self)
+    (om::update-if-editor (box self))                         ;;; for open editor window
+    (om::om-draw-contents (first (om::frames (box self))))))  ;;; for miniview
+
+
+
+(defmethod run-engine ((self ga-engine))
+
+  (unless (box self)
+    (setf (box self) (get-my-box self)))  ;;; just to be sure
+
+  (when (and (model self)
+             (fitness-function self))
       
-      (setf (message-flag self) nil)
-      (setf (generation self) 0)
+    (setf (message-flag self) nil)
+    (setf (generation self) 0)
     
     ; for now, always reinitialize
     
-      (loop until (equal (message-flag self) :stop)
+    (loop until (equal (message-flag self) :stop)
           
-            do 
+          do
 
-
-            (when (equal (message-flag self) :new-fitness-function)
-              (setf (message-flag self) nil)
+          (when (equal (message-flag self) :reinit)
+            (setf (message-flag self) nil)
+            (initialize-engine self))
+              
+          (when (equal (message-flag self) :new-fitness-function)
+            (setf (message-flag self) nil)
               ;re-evaluate fitnesses
-              (setf (population self)
-                    (loop for entry in (population self)
-                          collect (list (evaluate (second entry) (fitness-function self))
-                                        (second entry)
-                                        0))))
+            (setf (population self)
+                  (loop for entry in (population self)
+                        collect (list (evaluate (second entry) (fitness-function self))
+                                      (second entry)
+                                      0))))
 
-            (iterate (population self) 
-                     (fitness-function self))
+          (iterate (population self) 
+                   (fitness-function self))
 
-            (incf (generation self))
+          (incf (generation self))
 
-            (update-best-candidate self)
-    
-            (om::update-if-editor my-box)
-            ))))
+          (update-best-candidate self)
+
+          (redraw-editors self)  ;;; causes the 'animation' of score editors
+
+          ))))
                 
 
 

@@ -4,7 +4,7 @@
 
 (defparameter *ga-process* nil)
 
-(om::defclass! ga-engine ()
+(om::defclass! ga-engine (oa::om-cleanup-mixin)
   ((current-best :initform nil :accessor current-best)
    (process :initform nil :accessor process)
    (population :initform nil :accessor population)
@@ -18,6 +18,10 @@
    
   (:icon 701))
 
+(defmethod oa::om-cleanup ((self ga-engine))
+  (when (process self) 
+    (print "KILLING PROCESS")
+    (oa::om-kill-process (process self))))
 
 (defmethod update-best-candidate ((self ga-engine))
   (setf (current-best self)
@@ -66,39 +70,60 @@
 
 
 (defmethod set-fitness-function ((self ga-engine) (fitness-function function))
-  (setf (fitness-function self) fitness-function))
+  (setf (fitness-function self) fitness-function)
+  (setf (message-flag self) :new-fitness-function)) 
 
 (defmethod stop ((self ga-engine))
   (setf (message-flag self) :stop))
 
 (defmethod start ((self ga-engine))
+  (if (process self) (om-kill-process (process self)))
   (setf (process self)
         (om-run-process "GA PROCESS"
                         #'(lambda ()
                             (run-engine self)))))
 
 
-
-
+(defun get-my-box (obj)
+  (let* ((editor-windows (om-get-all-windows 'om::EditorWindow))
+         (my-win (find obj editor-windows :key #'(lambda (w) (om::ref (om::editor w)))
+                      :test #'(lambda (o box) (when box (equal o (om::value box)))))))
+    (when my-win (om::ref (om::editor my-win)))))
+  
 (defmethod run-engine ((self ga-engine))
-  (when (and (model self)
-             (fitness-function self))
-   
-    (setf (message-flag self) nil)
-    (setf (generation self) 0)
+  (let ((my-box (get-my-box self)))
+
+    (when (and (model self)
+               (fitness-function self))
+      
+      (setf (message-flag self) nil)
+      (setf (generation self) 0)
     
     ; for now, always reinitialize
     
-    (loop until (equal (message-flag self) :stop)
+      (loop until (equal (message-flag self) :stop)
           
-          do 
+            do 
 
-          (iterate (population self) 
-                   (fitness-function self))
 
-          (incf (generation self))
+            (when (equal (message-flag self) :new-fitness-function)
+              (setf (message-flag self) nil)
+              ;re-evaluate fitnesses
+              (setf (population self)
+                    (loop for entry in (population self)
+                          collect (list (evaluate (second entry) (fitness-function self))
+                                        (second entry)
+                                        0))))
 
-          (update-best-candidate self))))
+            (iterate (population self) 
+                     (fitness-function self))
+
+            (incf (generation self))
+
+            (update-best-candidate self)
+    
+            (om::update-if-editor my-box)
+            ))))
                 
 
 
