@@ -1,0 +1,115 @@
+
+
+(in-package dwn)
+
+(defparameter *ga-process* nil)
+
+(om::defclass! ga-engine ()
+  ((current-best :initform nil :accessor current-best)
+   (process :initform nil :accessor process)
+   (population :initform nil :accessor population)
+   (message-flag :initform nil :accessor message-flag)
+   (generation :initform 0 :accessor generation)
+
+   ;visible slots
+   (model :initform nil :initarg :model :accessor model)
+   (fitness-function :initform nil :initarg :fitness-function :accessor fitness-function)
+   (max-generations :initform 100 :initarg :max-generations :accessor max-generations))
+   
+  (:icon 701))
+
+
+(defmethod update-best-candidate ((self ga-engine))
+  (setf (current-best self)
+        (if (population self)
+            (arrange->poly (phenotype (cadar (population self))))
+          (make-instance 'om::poly))))
+
+
+(defmethod initialize-instance :after ((self ga-engine) &rest args)
+  (when (and (model self)
+             (fitness-function self))
+    (setf (population self)
+          (population-from-model (model self) (fitness-function self))))
+  (update-best-candidate self))
+
+
+;(defclass ga-scoreeditor (om::polyeditor) ())
+
+(defmethod om::class-has-editor-p ((self ga-engine)) t)
+(defmethod om::get-editor-class ((self ga-engine)) 'om::polyeditor)
+
+(defmethod om::default-edition-params ((self ga-engine))
+  (om::default-edition-params (current-best self)))
+
+(defmethod om::editor-object-from-value ((self ga-engine)) (current-best self))
+
+;;; open editor with current-best
+;(defmethod om::make-editor-window ((class (eql 'ga-scoreeditor)) (object ga-engine) name ref &key 
+;                                   winsize winpos (close-p t) (winshow t) (resize t) (retain-scroll nil)
+;                                   (wintype nil))
+;  (call-next-method class (current-best object) name ref 
+;                    :winsize winsize :winpos winpos :resize resize 
+;                    :close-p close-p :winshow winshow :resize resize
+;                    :retain-scroll retain-scroll :wintype wintype))
+
+;(defmethod om::object ((self ga-scoreeditor))
+;  (current-best (slot-value self 'om::object)))
+
+;(defmethod om::inside ((self ga-engine))
+;  (om::inside (current-best self)))
+
+;(defmethod om::voices ((self ga-engine))
+;  (om::voices (current-best self)))
+
+
+
+
+(defmethod set-fitness-function ((self ga-engine) (fitness-function function))
+  (setf (fitness-function self) fitness-function))
+
+(defmethod stop ((self ga-engine))
+  (setf (message-flag self) :stop))
+
+(defmethod start ((self ga-engine))
+  (setf (process self)
+        (om-run-process "GA PROCESS"
+                        #'(lambda ()
+                            (run-engine self)))))
+
+
+
+
+(defmethod run-engine ((self ga-engine))
+  (when (and (model self)
+             (fitness-function self))
+   
+    (setf (message-flag self) nil)
+    (setf (generation self) 0)
+    
+    ; for now, always reinitialize
+    
+    (loop until (equal (message-flag self) :stop)
+          
+          do 
+
+          (iterate (population self) 
+                   (fitness-function self))
+
+          (incf (generation self))
+
+          (update-best-candidate self))))
+                
+
+
+
+#| 
+(defun run ()
+  (setf *ga-process*
+        (om-run-process "GA PROCESS"
+                        #'(lambda () 
+                            (loop for i = 4000 then (funcall #'iterator i) do (print i))))))
+
+
+(om-kill-process *ga-process*)
+|#

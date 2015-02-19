@@ -1,0 +1,1092 @@
+{\rtf1\mac\ansicpg10000\cocoartf824\cocoasubrtf420
+{\fonttbl\f0\fnil\fcharset77 Monaco;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww15060\viewh10160\viewkind0
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+
+\f0\fs18 \cf0 ;OpenMusic\
+;\
+;Copyright (C) 1997, 1998, 1999, 2000 by IRCAM-Centre Georges Pompidou, Paris, France.\
+; \
+;This program is free software; you can redistribute it and/or\
+;modify it under the terms of the GNU General Public License\
+;as published by the Free Software Foundation; either version 2\
+;of the License, or (at your option) any later version.\
+;\
+;See file LICENSE for further informations on licensing terms.\
+; \
+;This program is distributed in the hope that it will be useful,\
+;but WITHOUT ANY WARRANTY; without even the implied warranty of\
+;MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\
+;GNU General Public License for more details.\
+;\
+;You should have received a copy of the GNU General Public License\
+;along with this program; if not, write to the Free Software\
+;Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.\
+;\
+;Authors: Gerard Assayag and Augusto Agon\
+\
+(in-package :om)\
+\
+(defun round_0 (arg &optional div)\
+  (if (plusp arg)\
+  (truncate (+ (/ arg div) 0.5))\
+  (truncate (- (/ arg div) 0.5))))\
+\
+(defun approx-decimals (x y nbdec)\
+  (let ((ndec \
+         (if (> nbdec 0 ) (float (expt 10 nbdec)) (expt 10 nbdec))))\
+    (/ (round_0 (/ x y) (/ ndec)) ndec)))\
+\
+(defun average (xs weights?)\
+  (let ((num 0) (den 0) ampl)\
+    (while xs\
+      (setq ampl (or (if (consp weights?) (nextl weights?) 1) 1))\
+      (incf num (* ampl (nextl xs)))\
+      (incf den ampl) )\
+    (/ num den) ))\
+\
+(defun mulalea (n percent)\
+  (* n (+ 1  (om-random  (- percent) (float percent)) )))\
+\
+\
+(defmethod  tree-min ((self list) &optional (min MOST-POSITIVE-LONG-FLOAT))\
+  (if (null self)\
+    min\
+    (tree-min (rest self) (tree-min (first self) min))))\
+\
+(defmethod  tree-min ((self number) &optional (min MOST-POSITIVE-LONG-FLOAT))\
+  (min self min))\
+\
+(defmethod  tree-max ((self list) &optional (max MOST-NEGATIVE-LONG-FLOAT))\
+  (if (null self)\
+    max\
+    (tree-max (rest self) (tree-max (first self) max))))\
+\
+(defmethod  tree-max ((self number) &optional (max MOST-NEGATIVE-LONG-FLOAT))\
+  (max self max))\
+\
+\
+\
+(defun abc-interpolation (begin end samples curves)\
+  (mapc #'(lambda (curve) (when (<= curve 0) (error "non-positive curve:~S~%" curve)))\
+        curves )\
+    (if (<= samples 1)\
+        (list begin)\
+        (let ((len (1- (min (length begin) (length end))))\
+              (step (/ 1 (decf samples)))\
+              (res ())\
+              (temp ())\
+              (lcurves (length curves)))\
+             (for (j 0 1 samples)\
+                (setq temp ())\
+                (for (i 0 1 len)\
+                   (newl temp\
+                      ;;(round\
+                         (-power-function\
+                           (nth i begin)\
+                           (nth i end)\
+                           (* j step)\
+                           (nth (mod i lcurves) curves) ) ;1\
+                         ))\
+                 (newl res (nreverse temp)) )\
+             (nreverse res))))\
+(defun -power-function (begin end time curve)\
+  (+ (* (- end begin) (expt time curve)) begin))\
+\
+\
+\
+;------------comparison-----------------\
+(defmethod* om< ((self number) (num number))  \
+  :initvals '(0 1) :indoc '("a number" "a number")\
+  :doc "Tests if a number is smaller than another" :icon 255 \
+  (< self num))\
+\
+(defmethod* om> ((self number) (num number))  \
+  :initvals '(0 1) :indoc '("a number" "a number")\
+  :doc "Tests if a number is bigger than another" :icon 256 \
+  (> self num))\
+\
+(defmethod* om<= ((self number) (num number))  \
+  :initvals '(0 1) :indoc '("a number" "a number")\
+  :doc "Tests if a number is smaller or equal to  another" :icon 257 \
+  (<= self num))\
+\
+(defmethod* om>= ((self number) (num number))  \
+  :initvals '(0 1) :indoc '("a number" "a number")\
+  :doc "Tests if a number is bigger or equal to another" :icon 258 \
+  (>= self num))\
+\
+(defmethod* om= ((self number) (num number))  \
+  :initvals '(0 0) :indoc '("a number" "a number")\
+  :doc "Tests if a number is equal to another" :icon 259 \
+  (= self num))\
+\
+(defmethod* om/= ((self number) (num number))  \
+  :initvals '(0 0) :indoc '("a number" "a number")\
+  :doc "Tests if a number is not equal to another" :icon 260 \
+  (/= self num))\
+\
+\
+\
+;------------ADD-----------------\
+(defmethod* om+ ((self number) (num number))  \
+  :initvals '(0 0) :indoc '("first input" "second input")\
+  :doc "Sum of two of numbers or trees." :icon 193 \
+  (+ self num))\
+\
+\
+(defmethod* om+ ((self number) (num list))  \
+  (mapcar #'(lambda (input)\
+              (om+ self input)) num))\
+\
+(defmethod* om+ ((self list) (num number))   \
+  (mapcar #'(lambda (input)\
+              (om+  input num)) self))\
+\
+(defmethod* om+ ((self list) (num list))\
+  (mapcar #'(lambda (input1 input2)\
+              (om+ input1 input2)) self num))\
+\
+\
+\
+\
+;------------TIMES-----------------\
+\
+(defmethod* om* ((self number) (num number))  :initvals '(0 0) :indoc '("first input" "second input") :icon 195\
+  :doc "product of two  numbers or trees."\
+  (* self num))\
+\
+(defmethod* om* ((self number) (num list))  \
+  (mapcar #'(lambda (input)\
+              (om* self input)) num))\
+\
+(defmethod* om* ((self list) (num number))   \
+  (mapcar #'(lambda (input)\
+              (om*  input num)) self))\
+\
+(defmethod* om* ((self list) (num list))\
+  (mapcar #'(lambda (input1 input2)\
+              (om* input1 input2)) self num))\
+\
+\
+;------------MINUS-----------------\
+\
+(defmethod* om- ((self number) (num number))  :initvals '(0 0) :indoc '("first input" "second input") :icon 194\
+  "Difference of two  numbers or trees."\
+  (- self num))\
+\
+(defmethod* om- ((self number) (num list))  \
+  (mapcar #'(lambda (input)\
+              (om- self input)) num))\
+\
+(defmethod* om- ((self list) (num number))   \
+  (mapcar #'(lambda (input)\
+              (om- input num)) self))\
+\
+(defmethod* om- ((self list) (num list))\
+  (mapcar #'(lambda (input input2)\
+              (om- input input2)) self num))\
+\
+;------------RANDOM-----------------\
+\
+;;; COMPATIBILITY\
+(defmethod* aleanum ((high number) (low number)) \
+  :initvals '(0 0) :indoc '("min" "max") :icon 200 \
+  (om-random high low))\
+\
+\
+(defmethod* om-random ((low number) (high number)) \
+  :initvals '(0 0) :indoc '("min" "max") :icon 200 \
+  :doc "random number between <low> and <high>"\
+  (if (zerop (- low high))\
+    (+ low high (- high))\
+    (let ((low-min (min low high)))\
+      (if (or (floatp  low) (floatp high))\
+        (+ (om-random-value (- (max low high) low-min)) low-min)\
+        (+ (om-random-value (- (1+ (max low high)) low-min)) low-min)))))\
+\
+\
+;------------------------------------------------------------------------\
+\
+(defmethod* om/ ((self number) (num number)) \
+  :initvals '(1 1) :indoc '("number or tree" "number or tree") :icon 196\
+  :doc "division of two  numbers or trees."\
+  (/ self num))\
+\
+(defmethod* om/ ((self number) (num list))  \
+  (mapcar #'(lambda (input)\
+                 (om/ self input)) num))\
+\
+(defmethod* om/ ((self list) (num number))   \
+  (mapcar #'(lambda (input)\
+              (om/  input num)) self))\
+\
+(defmethod* om/ ((self list) (num list))\
+  (mapcar #'(lambda (input input2)\
+              (om/  input input2)) self num))\
+\
+;------------------------------------------------------------------------\
+\
+(defmethod* om^ ((self number) (num number)) \
+  :initvals '(1 1) :indoc '("number or tree" "number or tree") :icon 197\
+  :doc "a^b on 2 numbers or trees."\
+  (expt self num))\
+\
+(defmethod* om^ ((self number) (num list))  \
+  (mapcar #'(lambda (input)\
+                 (om^ self input)) num))\
+\
+(defmethod* om^ ((self list) (num number))   \
+  (mapcar #'(lambda (input)\
+              (om^ input num)) self))\
+\
+(defmethod* om^ ((self list) (num list))\
+  (mapcar #'(lambda (input input2)\
+              (om^  input input2)) self num))\
+\
+;------------------------------------------------------------------------\
+\
+(defmethod* om-e ((self number)) \
+  :initvals '(1) :indoc '("number or tree") :icon 198\
+  :doc "e^n on a number or a tree."\
+  (exp  self))\
+\
+\
+(defmethod* om-e ((self list))   \
+  (mapcar #'(lambda (input)\
+              (om-e input)) self))\
+\
+;------------------------------------------------------------------------\
+\
+(defmethod* om-log ((self number) &optional (base (exp 1)))\
+  :initvals (list 1 (exp 1)) :indoc '("number or tree" "base number") :icon 199\
+  :doc "log(n) on a number or a tree. There is an optional <base> argument."\
+  (log  self base))\
+\
+\
+(defmethod* om-log((self list)  &optional (base (exp 1)))\
+  (mapcar #'(lambda (input)\
+              (om-log input base)) self))\
+\
+;------------------------------------------------------------------------\
+\
+(defmethod* om-round ((self number) &optional (decimals 0) (divisor 1))\
+  :initvals '(1 0 1) :indoc '("number or tree" "number of decimals" "divisor") :icon 209\
+  :doc "rounds a number or a list of numbers.\
+Optionals : the number of decimals and a divisor."\
+  (approx-decimals  self divisor decimals))\
+\
+\
+(defmethod* om-round ((self list) &optional (decimals 0) (divisor 1))\
+  (mapcar #'(lambda (input)\
+              (om-round input  decimals divisor)) self))\
+\
+;------------------------------------------------------------------------\
+\
+(defmethod mat-trans-with-nil ((matrix list))\
+ (let ((maxl (1- (loop for elt in matrix maximize (length elt))))\
+        result)\
+    (loop for i from 0 to maxl do\
+         (push (mapcar #'(lambda (list) (nth i list)) matrix) result))\
+    (nreverse result)))\
+\
+(defmethod* om// ((self number) (divisor number))\
+  :initvals '(1 1) :indoc '("number or tree"  "number or tree") :icon 209\
+  :numouts 2\
+  :doc "euclidean division of <self> and <divisor> (numbers or trees). \
+Yields an integer result and the rest of the division. When the divisor is 1, the operation is known as 'floor'."\
+  (floor self divisor))\
+\
+\
+(defmethod* om// ((self number) (num list))  \
+  (values-list \
+   (mat-trans-with-nil (mapcar #'(lambda (input)\
+                          (multiple-value-list (om// self input)))\
+                      num))))\
+\
+(defmethod* om// ((self list) (num number))\
+  (if (null self)\
+    (values nil nil)\
+    (values-list \
+     (mat-trans-with-nil (mapcar #'(lambda (input)\
+                                    (multiple-value-list (om// input num)))\
+                                self)))))\
+\
+(defmethod* om// ((self list) (num list))  \
+  (values-list\
+   (mat-trans-with-nil \
+    (mapcar #'(lambda (input1 input2)\
+                (multiple-value-list (om// input1 input2)))\
+            self num))))\
+\
+\
+;------------------------------------------------------------------------\
+\
+(defmethod* om-abs ((self number))\
+  :initvals (list 1 ) :indoc '("number or tree" ) :icon 209\
+  :doc "absolute value of a number of tree"\
+  (abs  self ))\
+\
+\
+(defmethod* om-abs ((self list) )\
+  (mapcar #'(lambda (input)\
+              (om-abs input)) self))\
+\
+\
+;------------------------------------------------------------------------\
+\
+(defmethod* om-min ((self number) (num number)) \
+  :initvals '(1 1) :indoc '("number or tree" "number or tree") :icon 209\
+  :doc "minimum of two  numbers or trees."\
+  (min self num))\
+\
+(defmethod* om-min ((self number) (num list))  \
+  (mapcar #'(lambda (input)\
+                 (om-min self input)) num))\
+\
+(defmethod* om-min ((self list) (num number))   \
+  (mapcar #'(lambda (input)\
+              (om-min  input num)) self))\
+\
+(defmethod* om-min ((self list) (num list))\
+  (mapcar #'(lambda (input1 input2)\
+              (om-min input1 input2)) self num))\
+\
+\
+(defmethod* list-min ((self list) )\
+  :initvals '((0 1 2)) :indoc '("a list" ) :icon 209\
+  :doc "minimum element of a list"\
+  (and self (list-min2 self MOST-POSITIVE-LONG-FLOAT)))\
+\
+(defmethod* list-min ((self t) )\
+  self)\
+\
+\
+(defun list-min2 (l minimum)\
+  (if (null l)\
+    minimum\
+    (if (atom (first l))\
+      (list-min2 (rest l) (min minimum (first l)))\
+      (list-min2 (first l) (min minimum (list-min2 (rest l) minimum))))))\
+\
+;------------------------------------------------------------------------\
+\
+(defmethod* om-max ((self number) (num number)) \
+  :initvals '(1 1) :indoc '("number or tree" "number or tree") :icon 209\
+  :doc "maximum of two  numbers or trees."\
+  (max self num))\
+\
+(defmethod* om-max ((self number) (num list))  \
+  (mapcar #'(lambda (input)\
+                 (om-max self input)) num))\
+\
+(defmethod* om-max ((self list) (num number))   \
+  (mapcar #'(lambda (input)\
+              (om-max input num)) self))\
+\
+(defmethod* om-max ((self list) (num list))\
+  (mapcar #'(lambda (input1 input2)\
+              (om-max input1 input2)) self num))\
+\
+(defmethod* list-max ((self list) )\
+  :initvals '((0 1 2)) :indoc '("a list" ) :icon 209\
+  :doc "maximum element of a list"\
+  (and self (list-max2 self MOST-NEGATIVE-LONG-FLOAT)))\
+\
+(defmethod* list-max ((self t) )\
+  self)\
+\
+\
+(defun list-max2 (l minimum)\
+  (if (null l)\
+    minimum\
+    (if (atom (first l))\
+      (list-max2 (rest l) (max minimum (first l)))\
+      (list-max2 (first l) (max minimum (list-max2 (rest l) minimum))))))\
+\
+\
+\
+;------------------------------------------------------------------------\
+\
+(defmethod* om-mean ((self list) &optional (weights 1))\
+  :initvals (list '(1) 1) :indoc '("list of numbers" "list of numbers") :icon 209\
+  :doc "arithmetic mean of numbers in a list. Optional input <weights> is a list of weights used to ponderate input numbers."\
+  (average  self weights))\
+\
+;------------------------------------------------------------------------\
+\
+\
+(defmethod* perturbation ((self number) (percent number))\
+  :initvals '(1 0) :indoc '("number or tree"  "number or tree") :icon 200\
+  :doc "applies to <self> a random deviation bounded by the <percent> parameter, a value in [0 1]. Both argument can be trees."\
+  (mulalea self percent))\
+\
+\
+(defmethod* perturbation ((self number) (num list)) \
+  (mapcar #'(lambda (input)\
+                 (perturbation self input)) num))\
+\
+(defmethod* perturbation ((self list) (num number))   \
+  (mapcar #'(lambda (input)\
+              (perturbation  input num)) self))\
+\
+(defmethod* perturbation ((self list) (num list))\
+  (mapcar #'(lambda (input1 input2)\
+              (perturbation input1 input2)) self num))\
+\
+\
+;------------------------------------------------------------------------\
+\
+(defmethod* om-scale ((self number) (minout number) (maxout number) &optional (minin 0) (maxin 0))\
+  :initvals '(1 0 0 0 0) :indoc '("number or tree"  "a number" "a number" ) :icon 209\
+  :doc "Scales <self> considered to be in the interval [<minin> <maxin>] towards the interval [<minout> <maxout>].\
+<self> is a number or a tree. If [<minin> <maxin>] not specified or equal to [0 0], it is bound to the min and the max of the tree."\
+  (if (= maxin minin)\
+    minin\
+    (+ minout (/ (* (- self minin) (- maxout minout)) (- maxin minin)))))\
+\
+(defmethod* om-scale ((self list) (minout number) (maxout number) &optional (minin 0) (maxin 0))\
+  (let ((min (tree-min self)) (max (tree-max self)))\
+    (if (= minin maxin) \
+      (setf min (tree-min self) max (tree-max self))\
+      (setf min minin max maxin))\
+    ;;; jean --> ??\
+    (when (= min max)\
+      (setf min 0 max (abs max)))\
+    (mapcar #'(lambda (item) (om-scale item minout maxout min max)) self)))\
+\
+;------------------------------------------------------------------------\
+;;\
+;;this comes directly from PW. makes some functions generic\
+;;\
+(defmethod less-tree-mapcar ((fun function) (arg1 number) (arg2 number) &optional deep)\
+  (funcall fun (list arg1)\
+           (if deep arg2 (list arg2))))\
+ \
+(defmethod less-tree-mapcar ((fun function) (arg1 cons) (arg2 number) &optional deep)\
+  (if (consp (first arg1))\
+    (cons (less-tree-mapcar fun (car arg1) arg2 deep)\
+          (less-tree-mapcar fun  (cdr arg1) arg2 deep))\
+    (funcall fun arg1 (if deep arg2 (list arg2)))))\
+\
+(defmethod less-tree-mapcar ((fun function) (arg1 null) arg2 &optional deep)\
+  (declare (ignore arg1 arg2 deep)) nil)\
+\
+(defmethod less-tree-mapcar ((fun function) (arg1 number) (arg2 cons) &optional deep)\
+  (if (consp (first arg2))\
+    (cons (less-tree-mapcar fun arg1 (car arg2) deep)\
+          (less-tree-mapcar fun  arg1 (cdr arg2) deep))\
+    (funcall fun (list arg1) (car arg2))))\
+\
+(defmethod less-tree-mapcar ((fun function) arg1 (arg2 null) &optional deep)\
+  (declare (ignore arg1 arg2 deep)) nil)\
+\
+(defmethod less-tree-mapcar ((fun function) (arg1 cons) (arg2 cons) &optional deep)\
+  (if (or deep (consp (first arg1)) (consp (first arg2)))\
+    (cons (less-tree-mapcar fun (car arg1) (car arg2) deep)\
+          (less-tree-mapcar fun  (cdr arg1) (cdr arg2) deep))\
+    (funcall fun arg1 arg2)))\
+\
+(defun g-scaling/sum (list sum)\
+  "scales <list> (may be tree) so that its sum becomes <sum>. Trees must be\
+well-formed. The children of a node must be either all leaves or all\
+nonleaves. "\
+  (less-tree-mapcar #'(lambda (x y) (om* x (/ y (apply #'+ x)))) list sum t))\
+\
+(defmethod* om-scale/sum ((self list) (sum number) )\
+  :initvals (list '(1 2 3) 10) :indoc '("Number or tree"  "a number" ) :icon 209\
+  :doc "Scales <self>  in order that the sum of its elements is <sum>"\
+  (g-scaling/sum self sum))\
+\
+(defmethod* om-scale/sum ((self number) (sum number) )\
+  (g-scaling/sum self sum))\
+\
+\
+;------------------------------------------------------------------------\
+\
+\
+(defmethod* factorize ((number number)) \
+  :initvals '(100)\
+  :indoc '("an integer")\
+  :doc "Returns the prime decomposition of  <number> in the form (... (prime exponent) ...). \
+Primes known to the system are the 1230 primes ranging from 1 to 9973."\
+  :icon 209\
+  (prime-facts number))\
+\
+;------------------------------------------------------------------------\
+(defmethod* reduce-tree ((self t) (function symbol) &optional (accum nil))\
+  :initvals (list '(10 10) '+ nil)\
+  :icon 209\
+  :indoc '("a tree" "a function or a patch" "a neutral value for <function>")\
+  :doc "applies the commutative binary <function> throughout the tree. \
+So, function '+ gets the sum of all elements in the tree.\
+Optional <accum> should be the neutral element for the <function> considered.\
+If <accum> is nil, figures out what the neutral can be (works for +,*,min,max)."\
+  (reduce-tree self (symbol-function function) accum))\
+\
+(defmethod* reduce-tree ((self list) (function function) &optional (accum nil))\
+  (unless accum (setf accum (neutral-element function)))\
+  (if (null self)\
+    accum\
+    (reduce-tree (rest self) function (reduce-tree (first self) function accum))))\
+\
+(defmethod*  reduce-tree ((self number) (function function) &optional (accum nil))\
+  (funcall function self accum))\
+\
+\
+\
+\
+(defun neutral-element (function)\
+  (case (function-name function)\
+    (+ 0)\
+    (* 1)\
+    (min MOST-POSITIVE-LONG-FLOAT)\
+    (max MOST-NEGATIVE-LONG-FLOAT)\
+    (t 0)))\
+\
+\
+;------------------------------------------------------------------------\
+\
+\
+(defmethod* interpolation ((begin number) (end number) (samples integer) (curve float))\
+  :initvals (list 0 1 5 1.0)\
+  :icon 209\
+  :indoc '("a number" "a number" "an integer" "a number in [0.0 2.0]")\
+  :doc "interpolates 2 numbers or 2 trees from <begin> to <end> through <samples> steps.\
+<curve> is 1 for linear interpolation, ]0.0 1.0[ for convex and ]1.0 2.0[ for concave."\
+  (mapcar 'first (abc-interpolation (list begin) (list end) samples (list curve))))\
+\
+(defmethod* interpolation ((begin number) (end list) (samples integer) (curve float))\
+  (mat-trans (mapcar #'(lambda (item)  (interpolation  begin item samples  curve))\
+          end)))\
+          \
+(defmethod* interpolation ((begin list) (end number) (samples integer) (curve float))\
+  (mat-trans (mapcar #'(lambda (item)  (interpolation  item end samples  curve))\
+          begin)))\
+          \
+(defmethod* interpolation ((begin list) (end list) (samples integer) (curve float))\
+  (mat-trans (mapcar #'(lambda (item1 item2)  (interpolation  item1 item2 samples  curve))\
+          begin end)))\
+          \
+;------------------------------------------------------------------------\
+\
+\
+;------------------------------------------------------------------------\
+\
+\
+(defmethod x->dx ((self list))\
+  :initvals (list 0 1)\
+  :indoc '("a list of numbers")\
+  :icon 192\
+  :doc "computes a list of intervals from a list of points."\
+  (loop for x in self\
+        for y in (rest self)\
+        collect (- y x)) )\
+\
+(defmethod dx->x ((start number) (list list))\
+  :initvals (list 0 (list 1 1))\
+  :indoc '("a number" "a list of numbers")\
+  :icon 192\
+  :doc "computes a list of points from a list of intervals and a <start> point"\
+  (cons start (loop for dx in list\
+                    sum dx into thesum\
+                    collect (+ start thesum)) ))\
+\
+;------------------------------------------------------------------------\
+\
+\
+(defun interpol-segment (time t1 t2 v1 v2)\
+   (+ v1 (* (- time t1) \
+            (if (= t1 t2) ;;; ..\
+              (- v2 v1)   \
+              (/ (- v2 v1) (- t2 t1))))))\
+\
+(defun interpolate (list-x list-y step)\
+  (loop for pointer from (first list-x) by step\
+        with x1\
+        with y1 \
+        with x2 = (pop list-x)\
+        with y2 = (pop list-y)\
+        if (>= pointer x2)  do (setf x1 x2 y1 y2 x2 (pop list-x) y2 (pop list-y))\
+        if (null x2)  collect y1 and do (loop-finish)\
+        collect (interpol-segment pointer x1 x2 y1 y2)))\
+\
+(defmethod* bpfsample ((self bpf) (step number))\
+  :initvals (list (make-instance 'bpf) 10)\
+  :indoc '("a BPF" "a number")\
+  :icon 233\
+  :doc "computes a new bpf from <self> (a BPF) by oversampling it using <step>"\
+  (let ((bpf  (make-instance 'bpf))\
+        (new-y (interpolate (x-points self) (y-points self) step)))\
+    (cons-bpf bpf (loop for point in new-y\
+                        for x from 0\
+                        collect (om-make-big-point x (round point))))\
+    bpf))\
+\
+(defmethod* bpfsample ((self list) (step number))\
+  (mapcar #'(lambda (bpf) (bpfsample bpf step)) self))\
+\
+\
+(defun interpole (list-x list-y x-min x-max nbsamples)\
+  (let ((step (/ (- x-max x-min) (1- (float nbsamples)))))\
+    (loop with x = (pop list-x) and xx = (pop list-x) and y = (pop list-y) and yy = (pop list-y)\
+          with x-index = x-min\
+          with s-index = 0\
+          while (and xx  (< s-index nbsamples))\
+          if (and (>= x-index x) (<= x-index xx))\
+            collect (interpol-segment x-index x xx y yy)\
+            and do (setf x-index (+ x-min (*  (incf s-index) step)))\
+          else do (setf x xx xx (pop list-x) y yy yy (pop list-y)))))\
+          \
+\
+\
+          \
+(defmethod* bpf-sample ((self bpf) (xmin number) (xmax number) (nbsamples integer) &optional (coeff 1) (nbdec 0) )\
+  :initvals (list (make-instance 'bpf) 0 100 10 1 0)\
+  :indoc '("a BPF" "a number" "a number" "an integer" "a number" "an integer")\
+  :icon 233\
+  :doc "computes a list of <nbsamples> y values sampled in <self> (a bpf) from xmin to xmax.\
+Optionals <coeff> and <nbdec> are a multiplicative coefficent and the number of decimals in the results."\
+  (cond ((= 0 nbsamples) 0)\
+        ((= 1 nbsamples) xmin)\
+        (t\
+         (let ((interpolation (interpole (x-points self) (y-points self) xmin xmax nbsamples)))\
+           (unless (= coeff 1) (setf interpolation (om* interpolation coeff)))\
+           (om-round interpolation nbdec)))))\
+\
+\
+;;;--------------------------------------\
+;;; JB - 08/06\
+\
+(defmethod! interpole-ypoints ((list1 list) (list2 list) (nbsteps integer) &optional profil)\
+  :icon 233\
+  (unless profil (setf profil (make-instance 'bpf)))\
+  (let ((weightfun (om-scale (om::bpf-sample profil (list-min (x-points profil)) (list-max (x-points profil)) (+ 2 nbsteps) 1 4) 0.0 1.0)))\
+    (loop for i from 0 to (+ 1 nbsteps) collect\
+          (om+ (om* list1 (nth i weightfun)) (om* list2 (om- 1 (nth i weightfun)))))))\
+\
+;------------------------------------------------------------------------\
+;by M. Malt\
+\
+(om::defmethod! rang-p ((liste list) (elem number) &optional (pred 'eq)) \
+  :initvals '( '(6000) 2)\
+  :indoc '("liste"  "\'c2\'8el\'c2\'8ement \'c2\'88 chercher" "predicate")\
+  :icon 128 \
+  :doc "les rangs de elem dans liste"\
+  (let ((aux nil) (index 0))\
+    (mapcar #'(lambda (z) (progn (when (funcall pred  z elem) (push index aux))\
+                                 (incf index))) \
+            liste)\
+    (reverse aux)))\
+\
+\
+(om::defmethod! rang-p ((liste list) (elem list) &optional (pred 'eq)) \
+  :initvals '( '(6000) 2)\
+  :indoc '("liste"  "\'c2\'8el\'c2\'8ement \'c2\'88 chercher" "predicate")\
+  :icon 128 \
+  :doc "les rangs de elem dans liste"\
+  (let ((aux nil) (index 0))\
+    (mapcar #'(lambda (z) (progn (when (funcall pred  z elem) (push index aux))\
+                                 (incf index))) \
+            liste)\
+    (reverse aux)))\
+\
+;;;;;;;;;;;;;;;;;;\
+\
+(om::defmethod! paires ((bpf bpf)) \
+ :initvals '( nil)\
+  :indoc '("liste"  "\'c2\'8el\'c2\'8ement \'c2\'88 chercher" "predicate")\
+  :icon 128 \
+  :doc"retourne une liste avec les coordon\'c2\'8ees des points d'une BPF ou BPC"\
+  (mat-trans (list (x-points bpf) (y-points bpf))))\
+\
+(om::defmethod! paires ((bpc bpc)) \
+ :initvals '( nil)\
+  :indoc '("liste"  "\'c2\'8el\'c2\'8ement \'c2\'88 chercher" "predicate")\
+  :icon 128 \
+  :doc"retourne une liste avec les coordon\'c2\'8ees des points d'une BPF ou BPC"\
+  (mat-trans (list (x-points bpc) (y-points bpc))))\
+\
+\
+;===========================================================================================\
+;by Karim Haddad\
+\
+(defun linear-interpoly (y1 y2 x1 x2 y0)\
+"interpolation lin\'c2\'8faire entre deux points dans le plan\
+\
+          ^\
+          |\
+          |\
+        y2|..................*\
+          |                  .\
+        y0|............\'c2\'a5     .\
+          |            .     . \
+        y1|......*     .     . \
+          |      .     .     . \
+          |      .     .     . \
+          |      .     .     .    \
+          |______._____._____.______>\
+                 x1    x0    x2\
+\
+"\
+(if (= y1 y2) x2\
+\
+(+ x1\
+   (* (- x2 x1)\
+      (/ (- y0 y1)\
+         (- y2 y1))))))\
+\
+\
+\
+\
+\
+\
+\
+\
+(defun y-around (y paires)\
+  "trouve les paires en dessous et au dessus de y"\
+  (let ((lst '()))\
+    (loop \
+      for i in paires\
+      for r in (rest paires)\
+      do (if (or (and (< (second i) y) (>= (second r) y)) \
+                 (and (>= (second i) y) (< (second r) y)))\
+           (push (list i r) lst)))\
+   (reverse lst)))\
+\
+\
+\
+(om::defmethod* y-transfer ((self bpf) (y0 number) (n number))\
+  :initvals (list (make-instance 'bpf)  10  0)\
+  :indoc '("a BPF or BPC"  "an integer"  "an integer")\
+  :icon 233\
+  :doc "Starting from a <bpf> and a given y position <y0> returns a\
+list of corresponding x points. <n> is  the number of desired decimals\
+in the result."\
+  (let* ((paires (paires self))\
+         (y-around (y-around y0 paires))\
+         (x0s (loop  \
+                for i in y-around\
+                collect (om-round (linear-interpoly (second (first i))\
+                                                    (second (second i))\
+                                                    (first (first i))\
+                                                    (first (second i))\
+                                                    y0) n))))\
+         (loop\
+           for i in x0s \
+           collect i)))\
+\
+;===========================================================================================\
+\
+(defun x-around (x paires)\
+  "trouve les paires en dessous et au dessus de x"\
+  (let* ((plus-grand  (find  x paires :test #'(lambda (x r) (<= x (first r)))))\
+         (rang (if (< (1- (first (rang-p  paires  plus-grand 'equalp))) 0) \
+                 0 \
+                 (1- (first (rang-p  paires  plus-grand 'equalp)))))\
+         (plus-petit (nth rang paires)))\
+    (list \
+     (if \
+       (< rang 0) \
+       plus-grand plus-petit) \
+     plus-grand)))\
+\
+\
+\
+;(x-around 45 '((0 0) (41 3) (50 6) (69 5) (100 8)))\
+\
+\
+(defun index-points (liste)\
+  (loop for x in liste\
+        for y from 0 to (1- (length liste))\
+        collect (x-append y x)))\
+\
+;(index-points '(a (b) (c v) d e f g))\
+\
+\
+(defun a->b%  (a b index)\
+  (+ (* a (- 1 index))\
+     (* b index)))\
+\
+\
+(defun bpc-sample_0 (bpc nb-samples)\
+  (let* ((paires (paires bpc))\
+         (len-paires (length paires))\
+         (paires+index (index-points paires)))\
+    (mapcar 'rest\
+            (flat \
+             (loop for index from 0 to (1- len-paires) by (/ (1- len-paires) nb-samples)\
+                   collect (sort. (list \
+                                   (x-append index\
+                                             (a->b% (second (flat (x-around index paires+index ))) \
+                                                    (fifth (flat (x-around index paires+index ))) \
+                                                    (- index (first (flat (x-around index paires+index )))))\
+                                             (a->b% (third (flat (x-around index paires+index ))) \
+                                                    (sixth (flat (x-around index paires+index ))) \
+                                                    (- index (first (flat (x-around index paires+index ))))) \
+                                             ))\
+                                  '<\
+                                  'first)) \
+             1))))\
+\
+\
+(defmethod! bpc-sample ((self bpc)  (nbsamples integer) &optional  (nbdec 0) )\
+  :initvals (list (make-instance 'bpc)  10  0)\
+  :indoc '("a BPC"  "an integer"  "an integer")\
+  :icon 233\
+  :doc "computes a list of <nbsamples> y values sampled in <self> (a bpc). \
+         Optional <nbdec> is  the number of decimals in the results."\
+  (om-round (bpc-sample_0 self nbsamples) nbdec))\
+\
+;------------------------------------------------------------------------\
+; by Hilbert Nono\
+\
+(defmethod! trouve_index ((liste list) (coeff number) (index integer))\
+  (cond\
+   ((null liste) nil)\
+   ((> (car liste) coeff) index)\
+   (t (trouve_index (cdr liste) coeff (1+ index)))\
+   )\
+  )\
+\
+(defmethod! table_xy ( (liste_x list) (liste_y list) (alpha number))\
+  :indoc '("Liste des x" "Liste des y" "valeur \'c2\'88 interpoler")\
+  :icon 999 \
+  :doc  "calcule la valeur y(x) par interpolation d'une bpf donn\'c2\'8ee"\
+  ; (defun table_xy ( liste_x liste_y alpha)\
+  (let ((i) (xa) (xb) (ya) (yb))\
+    ; recherche de l'index i tel que x(i-1)< alpha < x(i)\
+    (setf i (trouve_index liste_x alpha 0))\
+    (cond \
+     ; si i non trouv\'c2\'8e , on donne la derni\'c2\'8fre valeur de la liste y\
+     ((null i) (last-elem liste_y))\
+     ; si alpha < min(liste_x) on donne la premi\'c2\'8fre valeur de liste_y\
+     ((= i 0) (car liste_y))\
+     ; sinon on fait l'interpolation lineaire\
+     (t \
+      (setf xa (nth (1- i) liste_x))\
+      (setf xb (nth i liste_x))\
+      (setf ya (nth (1- i) liste_y))\
+      (setf yb (nth i liste_y))\
+      (/ (+ (* alpha (- yb ya))    (- (* ya xb) (* yb xa)))  (- xb xa))\
+      )\
+     )\
+    )\
+  )\
+\
+\
+(defmethod! bpf-get-val ( (self bpf) (val null))\
+  :indoc '("une bpf" "une valeur ou bien une liste de valeurs \'c2\'88 interpoler par la bpf")\
+  :icon 999 \
+  :doc  "calcul interpol\'c2\'8e de l'image de la valeur ou de la liste de valeurs par la fonction bpf donn\'c2\'8ee"\
+  nil)\
+\
+(defmethod! bpf-get-val ( (self bpf) (val number))\
+  (table_xy  (x-points self) (y-points self) val  ))\
+\
+(defmethod! bpf-get-val ( (self bpf) (val list))\
+  (cons (table_xy  (x-points self) (y-points self) (car val)) (bpf-get-val self (cdr val))))\
+ \
+\
+  \
+;------------------------------------------------------------------------\
+; more list operators\
+\
+; list-explode list-filter table-filter band-filter range-filter posn-match\
+\
+(defmethod* list-explode ((list list) (nlists integer))\
+  :initvals '((1 2 3 4 5 6) 2)\
+  :indoc '("List" "segment size")\
+  :icon 235\
+  :doc\
+  "list-explode segments a list into <nlist> sublists of (if possible) equal length.\
+For example, if <list> is (1 2 3 4 5 6 7 8 9), and <nlists> is 2, the result is\
+((1 2 3 4 5) (6 7 8 9)),\
+if list is (1 2 3 4 5 6 7 8 9), and ncol is 5, the result is:\
+ ((1 2) (3 4) (5 6) (7 8) (9)).\
+If the number of divisions exceeds the number of elements in the list, the\
+remaining divisions are returned as nil."\
+  (if (> nlists (length list))\
+    (setq list (append list (make-list (- nlists (length list))\
+                                       :initial-element (first (last list))))))\
+  (if (<= nlists 1) list\
+      (let* ((length (length list))\
+             (low (floor length nlists))\
+             (high (ceiling length nlists))\
+             (step (if (< (abs (- length (* (1- nlists) high))) (abs (-\
+                                                                      length (* nlists low))))\
+                     high  low))\
+             (rest (mod length nlists))\
+             (end (- length 1 rest))\
+             (ser (arithm-ser 0  (1- step) 1))\
+             res)\
+        (for (i 0 step end)\
+          (push (remove () (posn-match  list (om+  i ser))) res))\
+        (setq low (length (flat-once res)))\
+        (if (< low length) (setq res (cons (append (first res) (nthcdr low\
+                                                                       list)) (rest res))))\
+        (cond ((> (length res) nlists)\
+               (nreverse (cons (nconc (second res) (first res)) (nthcdr 2\
+                                                                        res))))\
+              ((< (length res) nlists)\
+               (when (= (length (first res)) 1)\
+                 (setq res (cons (nconc (second res) (first res)) (nthcdr 2\
+                                                                          res))))\
+               (nreverse (nconc (nreverse (list-explode (first res) (1+ (-\
+                                                                         nlists (length res)))))\
+                                (rest res))))\
+              (t (nreverse res))))))\
+\
+(defmethod* list-filter ( (test symbol) (list list) (mode symbol))\
+  :initvals '(numberp (1 2 3) pass)\
+  :indoc '("test" "list" "mode")\
+  :menuins '((2 (("Reject" 'reject) ("Pass" 'pass))))\
+  :icon 235 \
+  :doc  "List-filter filters out  <list> (a list or a tree) using the predicate <test>.\
+<test> may be a function name (a symbol) or it may be a visual function or patch coming\
+through a connection, with the flag button 'lambda'. <test> is applied to every elt in <list>.\
+<mode> is a menu input. 'Reject' means reject elts that verify the test. \
+'Pass' means retain only elts that verify the test."\
+  \
+  (list-filter  (symbol-function test) list mode))\
+\
+(defmethod* list-filter ( (test function) (list list) (mode symbol))\
+  (if (eq mode 'reject)\
+    (do-filter list #'(lambda (x) (not (funcall  test x))) )\
+    (do-filter list test)))\
+\
+\
+\
+(defmethod* table-filter ((test symbol) (list list) (numcol integer) (mode symbol))\
+  :initvals '(numberp ((1 2) (1 2)) 1 pass)\
+  :indoc '("test" "list" "numcol" "mode")\
+  :menuins '((3 (("Reject" 'reject) ("Pass" 'pass))))\
+  :icon 235 \
+  :doc  "table-filter filters out <list> (a list of lists) using the predicate <test>.\
+<test> may be a function name (a symbol) or it may be a visual function or patch coming\
+through a connection , with the flag button 'lambda'.\
+The predicate <test> is applied to the element of rank <numcol> in every sublist in <list>.\
+<numcol> counts from 0.\
+<mode> is a menu input. 'Reject' means reject sublists whose <numcol>th element verify the test. \
+'Pass' means retain only sublists whose <numcol>th element verify the test.\
+\
+Example :\
+ (table-filter 'oddp '( (1 2 3) '(4 5 6) (7 8 9) ) 1 'Pass)  --> ((1 2 3) (7 8 9))\
+ (table-filter 'oddp '( (1 2 3) '(4 5 6) (7 8 9) ) 1 'Reject)  --> ((4 5 6))\
+"\
+  \
+  (table-filter  (symbol-function test) list numcol mode))\
+\
+(defmethod* table-filter ((test function) (list list) (numcol integer) (mode symbol))\
+  (if (eq mode 'reject)\
+    (do-table-filter list #'(lambda (x) (not (funcall  test x))) numcol)\
+    (do-table-filter list  test numcol)))\
+\
+\
+(defmethod* band-filter ((list list) (bounds list) (mode symbol))\
+  :initvals '((1 2 3 4 5) ((0 2) (5 10)) pass)\
+  :indoc '("list" "bounds" "mode" )\
+  :menuins '((2 (("Reject" 'reject) ("Pass" 'pass))))\
+  :icon 235 \
+  :doc  "filters out <list> (a list or a tree of numbers) using <bounds>.\
+<bounds> is a list of pairs (min-value max-value). Elts in list are selected if they stay between the bounds.\
+<mode> is a menu input. 'Reject' means reject elts that are selected. \
+'Pass' means retain only elts that are selected."\
+  (list-filter \
+   #'(lambda (item)\
+       (some #'(lambda (bound) (and (>= item (first bound)) (<= item (second bound)))) bounds))\
+   list \
+   mode))\
+\
+\
+(defmethod* range-filter ((list list) (posn list) (mode symbol))\
+  :initvals '((1 2 3 4 5) ((0 1) (3 4)) reject)\
+  :indoc '("list" "position bounds" "mode" )\
+  :menuins '((2 (("Reject" 'reject) ("Pass" 'pass))))\
+  :icon 235 \
+  :doc  "Select elts in <list> whose positions (couting from 0) in the list are defined by <posn>\
+<posn> is a list of pairs (min-pos max-pos) in increasing order with no everlap.\
+<mode> is a menu input. 'Reject' means reject elts that are selected. \
+'Pass' means retain only elts that are selected.\
+Example :\
+ (range-filter '(10 11 12 13 14 15 16) '((0 1) (3 4)) 'pass) --> (10 11 13 14)\
+ (range-filter '(10 11 12 13 14 15 16) '((0 1) (3 4)) 'reject) --> (12 13)"\
+  (loop for item in list\
+        for i from 0 \
+        with bound = (pop posn)\
+        while bound\
+        when (and (eq mode 'pass) (>= i (first bound)) (<= i (second bound))) collect item\
+        when (and (eq mode 'reject) (or (< i (first bound)) (> i (second bound)))) collect item\
+        when (> i (second bound)) do (setf bound (pop posn))))\
+\
+\
+\
+(defmethod* posn-match ((list list) (positions list) )\
+  :initvals '('(10 20 30 40 50 60 70 80 90) '((0 1) 4 (6)) )\
+  :indoc '("list" "positions"  )\
+  :icon 235 \
+  :doc  "Constructs a new list by peeking elements in <list> at positions defined by <positions> \
+(a list or tree of positions). <positions> supports the syntax of 'expand-lst'.\
+ex: (posn-match '(10 20 30 40 50 60 70 80 90) '((0 1) 4 (6)) ) --> ((10 20) 40 (60))\
+ex: (posn-match '(10 20 30 40 50 60 70 80 90) '(3* 0 3_6 ) --> (10 10 10 30 40 60)\
+"\
+  (do-posn-match list (expand-lst positions)))\
+\
+(defmethod* posn-match ((list list) (positions integer) )\
+  (nth positions list ))\
+\
+(defmethod do-posn-match ((self list) (positions list))\
+  (cond \
+   ((numberp positions) (nth positions self))\
+   ((listp positions)\
+    (loop for pos in positions\
+          collect (do-posn-match self pos)))))\
+\
+(defmethod do-posn-match ((self list) (positions number))\
+   (nth positions self))\
+   \
+\
+\
+(defmethod do-filter ((self t) (test function))\
+  (if (funcall test self) self 'fail))\
+\
+(defmethod do-filter ((self list) (test function))\
+  (loop for item in self \
+        for elt =  (do-filter item test)\
+        when (not (eq elt 'fail))  collect elt ))\
+\
+(defmethod do-table-filter ((list list) (test function) (numcol integer))\
+  (loop for sublist in list\
+        when (funcall test (nth numcol sublist))\
+        collect sublist))\
+\
+\
+\
+\
+;==========================================================================\
+\
+;ARITHMETIC PACKAGE\
+(AddGenFun2Pack  '(om+ om- om* om/ om// om^ om-e om-abs om-min om-max\
+                   list-min list-max om-mean om-log om-round om-scale om-scale/sum reduce-tree\
+                   interpolation factorize  om-random perturbation) *arith-package*)\
+\
+;ARITHMETIC PACKAGE\
+(AddGenFun2Pack '(om< om> om<= om>= om= om/= prime?) *predicate-package*)\
+\
+\
+;NUM-SERIES PACKAGE\
+(AddGenFun2Pack '(arithm-ser geometric-ser fibo-ser prime-ser x->dx dx->x) *numser-package* )\
+\
+;FUNCTION PACKAGE \
+(AddClass2Pack '(bpf bpf-lib bpc bpc-lib board) *function-package* :position (list (om-make-point 75 115) (om-make-point 75 225) (om-make-point 150 115) (om-make-point 150 225) (om-make-point 150 25)))\
+\
+(AddGenFun2Pack 'bpf-sample *function-package* )\
+(AddGenFun2Pack '(bpc-sample paires y-transfer get-spline-points get-spline-obj bpf-get-val) *function-package* )\
+\
+; LISP PACKAGE\
+(AddLispFun2Pack '(first second third nth rest nthcdr butlast reverse length\
+                   list  remove  cons  append  apply  funcall  mapcar  mapcan) *lisp-package*)\
+\
+; LIST PACKAGE\
+(AddGenFun2Pack '(list-explode list-filter table-filter band-filter range-filter posn-match) *list-package*)}
