@@ -9,7 +9,6 @@
    (message-flag :initform nil :accessor message-flag)
    (generation :initform 0 :accessor generation)
    (box :initform nil :accessor box)
-   (process :initform nil :accessor process)
 
    ;visible slots
    (model :initform nil :initarg :model :accessor model)
@@ -19,13 +18,30 @@
   (:icon 701))
 
 
+(defmethod om::omNG-save ((self ga-engine) &optional (values? nil))
+  `(let ((ga ,(call-next-method)))
+     (setf (current-best ga) ,(om::omng-save (current-best self)))
+     ga))
+
+(defmethod process ((self ga-engine)) 
+  (when (box self)
+    (process (box self))))
+
+(defmethod set-process ((self ga-engine) process)
+  (when (box self)
+    (setf (process (box self)) process)))
+
+
+
 (defclass ga-engine-box (om::omboxeditcall)
   ((process :initform nil :accessor process)))
 
 (defmethod om::get-type-of-ed-box ((self ga-engine)) 'ga-engine-box)
 
-;(defmethod om::omng-remove-element ((self ga-engine-box) elem)
-;   (print "does-this-work") self)
+(defmethod om::omng-remove-element :before ((self om::ompatch) (elem ga-engine-box))
+  (when (process elem) 
+    (print "KILLING PROCESS")
+    (om-kill-process (process elem))))
 
 ;(defmethod oa::om-cleanup ((self ga-engine))
 ;  (when (process (box self)) 
@@ -48,13 +64,12 @@
 
 
 (defmethod initialize-instance :after ((self ga-engine) &rest args)
-  (print 'init-instance)
-  (setf (box self) (get-my-box self))
+  (setf (box self) (get-my-box self))   ;;; don't think this works
   (initialize-engine self))
 
 
-;(defmethod om::class-has-editor-p ((self ga-engine)) t)
-;(defmethod om::get-editor-class ((self ga-engine)) 'om::polyeditor)
+(defmethod om::class-has-editor-p ((self ga-engine)) t)
+(defmethod om::get-editor-class ((self ga-engine)) 'om::polyeditor)
 
 (defmethod om::default-edition-params ((self ga-engine))
   (om::default-edition-params (current-best self)))
@@ -65,22 +80,26 @@
   (om::draw-mini-view self (current-best value)))
 
 
-
-
-
 (defmethod set-fitness-function ((self ga-engine) (fitness-function function))
   (setf (fitness-function self) fitness-function)
   (setf (message-flag self) :new-fitness-function)) 
 
+
 (defmethod start ((self ga-engine))
+
+  (unless (box self)
+    (setf (box self) (get-my-box self)))  ;;; just to be sure
+
   (if (process self) (om-kill-process (process self)))
-  (setf (process self)
-        (om-run-process "GA PROCESS"
-                        #'(lambda ()
-                            (run-engine self)))))
+  (set-process self
+               (om-run-process "GA PROCESS"
+                               #'(lambda ()
+                                   (run-engine self)))))
+
 
 (defmethod stop ((self ga-engine))
   (setf (message-flag self) :stop))
+
 
 (defmethod reinit ((self ga-engine))
   (if (or (null (process self))
@@ -112,8 +131,6 @@
 
 (defmethod run-engine ((self ga-engine))
 
-  (unless (box self)
-    (setf (box self) (get-my-box self)))  ;;; just to be sure
 
   (when (and (model self)
              (fitness-function self))
