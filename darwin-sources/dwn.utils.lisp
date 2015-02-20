@@ -1,16 +1,18 @@
 (in-package dwn)
 
-(defmethod is-enved ((self t)) nil)
-(defmethod is-enved ((self om::om-enved)) t)
+;; from the old enved days
 
-(defun convert-if-bpf (env index)
-  (if (and (listp env)
-           (not (numberp (first env))))  ; enved-xy comes in as a list of lists (list of plots)
-      (om::x-transfer 
-       ;convert to list-pairs for OM function (x-transfer)
-       (loop for k on (first env) by #'cddr collect (subseq k 0 2))
-       index)
-    env))
+;(defmethod is-enved ((self t)) nil)
+;(defmethod is-enved ((self om::om-enved)) t)
+
+;(defun convert-if-bpf (env index)
+;  (if (and (listp env)
+;           (not (numberp (first env))))  ; enved-xy comes in as a list of lists (list of plots)
+;      (om::x-transfer 
+;       ;convert to list-pairs for OM function (x-transfer)
+;       (loop for k on (first env) by #'cddr collect (subseq k 0 2))
+;       index)
+;    env))
 
 ;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
 ;;; »»»»»»»»»»»»»»»»» DECODING »»»»»»»»»»»»»»»»»

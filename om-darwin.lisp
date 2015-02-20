@@ -8,7 +8,7 @@
 (in-package om)
 
 (require-library "om-geof")
-(require-library "om-enved")
+;(require-library "om-enved")
 
 ;--------------------------------------------------
 ;Variable definiton with files to load 

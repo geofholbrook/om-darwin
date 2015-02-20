@@ -1,16 +1,15 @@
 
-
 (in-package dwn)
 
 (defparameter *ga-process* nil)
 
 (om::defclass! ga-engine (oa::om-cleanup-mixin)
   ((current-best :initform nil :accessor current-best)
-   (process :initform nil :accessor process)
    (population :initform nil :accessor population)
    (message-flag :initform nil :accessor message-flag)
    (generation :initform 0 :accessor generation)
    (box :initform nil :accessor box)
+   (process :initform nil :accessor process)
 
    ;visible slots
    (model :initform nil :initarg :model :accessor model)
@@ -19,10 +18,19 @@
    
   (:icon 701))
 
-(defmethod oa::om-cleanup ((self ga-engine))
-  (when (process self) 
-    (print "KILLING PROCESS")
-    (oa::om-kill-process (process self))))
+
+(defclass ga-engine-box (om::omboxeditcall)
+  ((process :initform nil :accessor process)))
+
+(defmethod om::get-type-of-ed-box ((self ga-engine)) 'ga-engine-box)
+
+;(defmethod om::omng-remove-element ((self ga-engine-box) elem)
+;   (print "does-this-work") self)
+
+;(defmethod oa::om-cleanup ((self ga-engine))
+;  (when (process (box self)) 
+;    (print "KILLING PROCESS")
+;    (oa::om-kill-process (process self))))
 
 (defmethod update-best-candidate ((self ga-engine))
   (setf (current-best self)
@@ -40,6 +48,7 @@
 
 
 (defmethod initialize-instance :after ((self ga-engine) &rest args)
+  (print 'init-instance)
   (setf (box self) (get-my-box self))
   (initialize-engine self))
 
@@ -82,15 +91,14 @@
     (setf (message-flag self) :reinit)))
 
 
-
+; searches all boxes of all patch windows ...
 (defun get-my-box (obj)
   (let ((patches (remove-if-not #'(lambda (obj) (equal (type-of obj) 'om::ompatch))
                                 (mapcar 'om::obj (om::om-get-all-windows 'om::EditorWindow)))))
  
-   (loop for patch in patches
-         for box = (find obj (om::boxes patch)
-                         :key 'om::value)
-
+    (loop for patch in patches
+          for box = (find obj (om::boxes patch)
+                          :key 'om::value)
 
           if box 
           return box)))
@@ -100,7 +108,6 @@
   (when (box self)
     (om::update-if-editor (box self))                         ;;; for open editor window
     (om::om-draw-contents (first (om::frames (box self))))))  ;;; for miniview
-
 
 
 (defmethod run-engine ((self ga-engine))
@@ -142,7 +149,7 @@
 
           (redraw-editors self)  ;;; causes the 'animation' of score editors
 
-          ))))
+          )))
                 
 
 
