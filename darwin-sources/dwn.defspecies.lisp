@@ -39,7 +39,7 @@
 (defgeneric update-geno (self))
 (defgeneric phenotype (self))
 
-(defmethod phenotype ((self t)) self) ;; so that code will work in cases where there is no phenotype
+(defmethod phenotype ((self t)) self)        ;; so that code will work in cases where there is no phenotype
 
 (defmethod update ((self specimen))
   (update-geno self)
@@ -83,11 +83,9 @@
 
 
 
-
-
-(defmethod finalize ((self specimen)) self)
-       
-
+;; convert to viewing / auditioning format, not for fitenss functioning
+(defmethod finalize ((self specimen)) (phenotype self))
+     
 ;;; how best to encapsuate the various parts of this macro, which is getting too long ... ?
 (defmacro defspecies (species-name &body args)
 
@@ -162,7 +160,7 @@
                        collect (mki ',(symbol+ namestring "-operon")
                                     ,@(loop for slot in operon-slots
                                             for k from 0
-                                            collect (om::make-keyword (first slot))
+                                            collect (make-keyword (first slot))
                                             collect `(nth ,k list-operon))
                                     :owner self))))
 
@@ -198,7 +196,7 @@
          (defmethod! ,(om-symbol+ "make-" namestring) ((,operon-initarg number))
            :initvals '(,*default-num-operons*)
            :icon 703
-           (make-instance ',species-name ,(om::make-keyword operon-initarg) ,operon-initarg))
+           (make-instance ',species-name ,(make-keyword operon-initarg) ,operon-initarg))
 
            ))))
 

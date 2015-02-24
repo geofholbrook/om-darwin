@@ -3,24 +3,34 @@
 
 (defparameter *ga-process* nil)
 
-(om::defclass! ga-engine (oa::om-cleanup-mixin)
-  ((current-best :initform nil :accessor current-best)
+(om::defclass! ga-engine ()
+  ((fitness-function :initform nil :accessor fitness-function)
    (population :initform nil :accessor population)
-   (message-flag :initform nil :accessor message-flag)
    (generation :initform 0 :accessor generation)
+
+   (result :initform nil :accessor result)  ;finalized phenotype
+   (message-flag :initform nil :accessor message-flag)
+   
    (box :initform nil :accessor box)
 
+
    ;visible slots
-   (model :initform nil :initarg :model :accessor model)
-   (fitness-function :initform nil :initarg :fitness-function :accessor fitness-function)
-   (max-generations :initform 100 :initarg :max-generations :accessor max-generations))
+   (model :initform nil :initarg :model :accessor model))
    
   (:icon 701))
 
 
+(defmethod om::omNG-save ((self specimen) &optional (values? nil))
+  `(let ((spec ,(call-next-method)))
+     (setf (raw-genotype spec) ,(om::omng-save (raw-genotype self)))
+     (update spec)
+     spec))
+     
 (defmethod om::omNG-save ((self ga-engine) &optional (values? nil))
   `(let ((ga ,(call-next-method)))
-     (setf (current-best ga) ,(om::omng-save (current-best self)))
+     (setf (population ga) ,(om::omng-save (population self)))
+     (setf (generation ga) ,(om::omng-save (generation self)))
+     (setf (result ga) ,(om::omng-save (result self))) 
      ga))
 
 (defmethod process ((self ga-engine)) 
@@ -36,6 +46,7 @@
 (defclass ga-engine-box (om::omboxeditcall)
   ((process :initform nil :accessor process)))
 
+
 (defmethod om::get-type-of-ed-box ((self ga-engine)) 'ga-engine-box)
 
 (defmethod om::omng-remove-element :before ((self om::ompatch) (elem ga-engine-box))
@@ -43,28 +54,51 @@
     (print "KILLING PROCESS")
     (om-kill-process (process elem))))
 
+(defmethod om::object-remove-extra :before ((obj ga-engine) box) 
+  (print `(object-remove-extra ,obj ,box))
+  (when (process box)
+    (om-kill-process (process box))))
+
+(defmethod om::omng-box-value :after ((self ga-engine-box) &optional (numout 0))
+  (unless (and (equal (om::allow-lock self) "x") (om::value self))
+    (when (process self) 
+      (om-kill-process (process self)))))
+
+(defmethod cleanup-process ((self t)) nil)
+(defmethod cleanup-process ((self ga-engine-box))
+  (when (process self) 
+      (om-kill-process (process self))))
+
+(defmethod om::load-abstraction-attributes :before ((self om::ompatch) currentpersistent)
+  (declare (ignore currentpersistent))
+  (mapcar #'cleanup-process (om::boxes self)))
+
+
+
 ;(defmethod oa::om-cleanup ((self ga-engine))
 ;  (when (process (box self)) 
 ;    (print "KILLING PROCESS")
 ;    (oa::om-kill-process (process self))))
 
 (defmethod update-best-candidate ((self ga-engine))
-  (setf (current-best self)
+  (setf (result self)
         (if (population self)
-            (arrange->poly (phenotype (cadar (population self))))
+            (finalize (cadar (population self)))
           (make-instance 'om::poly))))
 
-(defmethod initialize-engine ((self ga-engine))
-  (when (and (model self)
-             (fitness-function self))
+
+(defmethod randomize-population ((self ga-engine))
+  (when (model self)
     (setf (population self)
-          (population-from-model (model self) (fitness-function self))))
+          (population-from-model (model self) (or (fitness-function self)
+                                                  #'(lambda (spec) (declare (ignore spec)) 0))))))
+
+(defmethod initialize-engine ((self ga-engine))
+  (randomize-population self)
   (update-best-candidate self)
   (redraw-editors self))
 
-
 (defmethod initialize-instance :after ((self ga-engine) &rest args)
-  (setf (box self) (get-my-box self))   ;;; don't think this works
   (initialize-engine self))
 
 
@@ -72,18 +106,40 @@
 (defmethod om::get-editor-class ((self ga-engine)) 'om::polyeditor)
 
 (defmethod om::default-edition-params ((self ga-engine))
-  (om::default-edition-params (current-best self)))
+  (om::default-edition-params (result self)))
 
-(defmethod om::editor-object-from-value ((self ga-engine)) (current-best self))
+(defmethod om::editor-object-from-value ((self ga-engine)) (result self))
 
 (defmethod om::draw-mini-view ((self t) (value ga-engine))
-  (om::draw-mini-view self (current-best value)))
+  (om::draw-mini-view self (result value)))
 
+
+(defmethod running ((self ga-engine))
+  (and (process self)
+       (not (equal (mp::process-state (process self))
+                   :killed))))
+
+
+(defmethod evaluate-population ((self ga-engine))
+  (setf (population self)
+        (loop for entry in (population self)
+              collect (list (evaluate (second entry) (fitness-function self))
+                            (second entry)
+                            0))))
 
 (defmethod set-fitness-function ((self ga-engine) (fitness-function function))
   (setf (fitness-function self) fitness-function)
-  (setf (message-flag self) :new-fitness-function)) 
+  (if (running self)
+      (setf (message-flag self) :new-fitness-function)
+    (evaluate-population self)))      
 
+
+(defvar *process-counter*)
+(setf *process-counter* 0)
+
+(defmacro run-process (name func &rest args)
+   `(mp:process-run-function ,name '(:priority ,(or oa::*current-priority* 10))
+                             (if (functionp ,func) ,func ',func) ,.args))
 
 (defmethod start ((self ga-engine))
 
@@ -92,9 +148,10 @@
 
   (if (process self) (om-kill-process (process self)))
   (set-process self
-               (om-run-process "GA PROCESS"
-                               #'(lambda ()
-                                   (run-engine self)))))
+               (run-process (om::string+ "GA PROCESS " (prin1-to-string 
+                                                       (incf *process-counter*)))
+                            #'(lambda ()
+                                (run-engine self)))))
 
 
 (defmethod stop ((self ga-engine))
@@ -102,12 +159,9 @@
 
 
 (defmethod reinit ((self ga-engine))
-  (if (or (null (process self))
-          (equal (mp::process-state (process self))
-                 :killed))
-      (initialize-engine self)
-      
-    (setf (message-flag self) :reinit)))
+  (if (running self)
+      (setf (message-flag self) :reinit)
+    (initialize-engine self)))
 
 
 ; searches all boxes of all patch windows ...
@@ -126,7 +180,12 @@
 (defmethod redraw-editors ((self ga-engine))
   (when (box self)
     (om::update-if-editor (box self))                         ;;; for open editor window
-    (om::om-draw-contents (first (om::frames (box self))))))  ;;; for miniview
+    (let ((frame (when (and (box self)
+                                     (om::frames (box self)))
+                            (first (om::frames (box self))))))
+      (when frame
+        (om::om-draw-contents frame))))) ;;; for miniview
+
 
 
 (defmethod run-engine ((self ga-engine))
@@ -146,16 +205,11 @@
 
           (when (equal (message-flag self) :reinit)
             (setf (message-flag self) nil)
-            (initialize-engine self))
+            (randomize-population self))
               
           (when (equal (message-flag self) :new-fitness-function)
             (setf (message-flag self) nil)
-              ;re-evaluate fitnesses
-            (setf (population self)
-                  (loop for entry in (population self)
-                        collect (list (evaluate (second entry) (fitness-function self))
-                                      (second entry)
-                                      0))))
+            (evaluate-population self))
 
           (iterate (population self) 
                    (fitness-function self))

@@ -45,7 +45,7 @@
 (defspecies melody 
             
             :species-slots
-            (range '(60 84))
+            (range '(0 127))
             
             :operon-slots
             (pitch :range (range self))
@@ -58,7 +58,8 @@
 ;(setf m1 (make-instnace 'melody))
 ;(run m1 #'(lambda (m) (count-if 'evenp (mapcar 'pitch (operons m)))) 10 :finalizer #'(lambda (s) (mapcar 'pitch (operons s))))
 
-
+(defmethod finalize ((self melody))
+  (arrange->poly (phenotype self)))
 
 (defspecies dx-melody
             
