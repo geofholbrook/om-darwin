@@ -87,7 +87,7 @@
 (defmethod finalize ((self specimen)) (phenotype self))
      
 ;;; how best to encapsuate the various parts of this macro, which is getting too long ... ?
-(defmacro defspecies (species-name &body args)
+(defmacro defspecies (species-name inheritance &body args)
 
   ;0. parse arguments
   ;1. create specimen class
@@ -130,7 +130,7 @@
       `(progn
 
          ;;; create specimen class
-         (om::defclas! ,species-name (specimen)
+         (om::defclas! ,species-name ,(or inheritance '(specimen))
 
                        ((,operon-initarg :initform ,*default-num-operons*)   ;;; default for number of operons is 8
 

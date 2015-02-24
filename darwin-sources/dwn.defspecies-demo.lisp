@@ -42,10 +42,10 @@
 
 |#
               
-(defspecies melody 
+(defspecies melody ()
             
             :species-slots
-            (range '(0 127))
+            (range '(60 72))
             
             :operon-slots
             (pitch :range (range self))
@@ -61,7 +61,7 @@
 (defmethod finalize ((self melody))
   (arrange->poly (phenotype self)))
 
-(defspecies dx-melody
+(defspecies dx-melody (melody)
             
             :species-slots
             (start 48)
