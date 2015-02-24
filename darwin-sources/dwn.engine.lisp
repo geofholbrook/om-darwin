@@ -33,6 +33,23 @@
      (setf (result ga) ,(om::omng-save (result self))) 
      ga))
 
+(defmethod om::omNG-copy ((self specimen))
+  `(let ((copy ,(call-next-method)))
+     (setf (raw-genotype copy) ',(raw-genotype self))
+     (update copy)
+     copy))
+
+(defmethod om::omNG-copy ((self ga-engine))
+  `(let ((copy (make-instance ',(type-of self))))
+     (setf (population copy) ,(om::omng-copy (population self)))
+     (setf (generation copy) ,(generation self))
+     (setf (result copy) ,(om::omng-copy (result self)))
+     copy))
+
+
+
+
+
 (defmethod process ((self ga-engine)) 
   (when (box self)
     (process (box self))))
