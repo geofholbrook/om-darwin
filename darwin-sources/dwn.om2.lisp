@@ -11,8 +11,7 @@
 ;;;;;;;;;;;
 
 
-(defmethod Objfromobjs ((self dwn::specimen) (type voice))
-  (dwn::arrange->voice (dwn::phenotype self)))
 
-(defmethod Objfromobjs ((self dwn::specimen) (type poly))
-  (dwn::arrange->poly (dwn::phenotype self)))
+
+(defmethod Objfromobjs ((self dwn::specimen) (type tonal-object))
+  (dwn::finalize self))
