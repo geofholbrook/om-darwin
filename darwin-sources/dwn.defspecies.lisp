@@ -1,29 +1,44 @@
 (in-package dwn)
 
-; phenotypers and specimen makers.
+#|  ;;; USAGE ;;;;
 
-; s-dot creates random specimen, appropriate to the corresponding p-dot
+  (defspecies <name-of-species>
+              
+              [ :operon-initarg <initarg> ]  ;;; this is the keyword used to specify the number of operons for a (sub)species
+                                             ;;; defaults to :num-operons.   number of operons defaults to 8.
 
-;===============================
-;===============================
+              :species-slots 
+              ;;; these define characteristics of a subspecies, for example the length or range of a melody ... does not mutate
 
-;;; "CODES"
+              { (<name of slot> <default-value>) }*
 
-; a decoder is a list where each element is of the form '(:set a b c) or '(min max) or '(min max divisor)
-; or (min max divisor float?) ...  somewhat like the arguments to dwn::mod-to-range
-; i.e. '(:set a b c)  or '(0 11) or '((0 0.9) 10 t)
+              :specimen-slots
 
-; it can be a nested list, and can be formatted to be passed to expand-lst
+              ;;; not implemented: slots that mutate but are not part of the repeating operon
 
-; so: '((60 72) (:set :up :down) (3 8) (8* ((1 3)))) 
-; could yield '(69 :down (2 1 3 2 2 3 1 1))
+              { (<name-of-slot> :range <range> [ :cardinality <card-range> ]) }*
 
-; an operon is a group of nucleotides that is understood by one decoder
-; a nucleotide is a single element of the raw genotype
+              :operon-slots
+              ;;; these are the properties of a single operon (the repeating data structure), which are mutated
+              ;;; keywords are :range (a decoder understood by mod-to-range) and :cardinality, for a varying number of values
+              ;;; the same range
 
-;;; defspecies creates a chromosome structure, which should be used to examine a genotype in decoded format
-;;; should define an s.<name> function, and a decoder parameter called *<name>-decoder*
+              { (<name-of-slot> :range <range> [ :cardinality <card-range> ]) }*
 
+              
+
+              :phenotyper
+              ;;; code for creating a phenotype from the genotype (not the raw genotype)
+              ;;; implied is the first line, (defmethod phenotyper ((self <name-of-species)))
+              ;;; good practice is to output the "arrange" data type, in some cases this is assumed.
+
+              <phenotyper-body>
+  
+  )
+
+;;; defspecies  should define an s.<name> function, and a decoder parameter called *<name>-decoder*
+
+|#
 
 (defparameter *default-num-operons* 8)
 
@@ -35,6 +50,15 @@
    (pheno :initform nil)  
    (raw-genotype :initarg :raw :initform nil)
    (decoder)))    
+
+
+;;; blow mind:
+(defclass species (om::omstandardclass) 
+  ((operon-initarg :initform nil :initarg :operon-initarg :accessor operon-initarg)
+   (species-slots :initform nil :initarg :species-slots :accessor species-slots)
+   (operon-slots :initform nil :initarg :operon-slots :accessor operon-slots)))
+
+
 
 (defgeneric update-geno (self))
 (defgeneric phenotype (self))
@@ -110,7 +134,7 @@
            (operon-initarg 'num-operons)
            species-slots 
            operon-slots 
-           (phenotyper-body '(identity self)))
+           phenotyper-body)
 
       (loop for arg in args
             with target = :species-slots
@@ -139,7 +163,9 @@
                                       (if (atom slotdef)
                                           (list slotdef)
                                         (list (first slotdef) :initform (second slotdef))))
-                                  species-slots)))
+                                  species-slots))
+
+                       (:metaclass species))
 
          ;;; create operon class
          (om::defclas ,(symbol+ namestring "-operon") (operon)
@@ -147,11 +173,12 @@
                                    (list (first slotdef))) 
                                operon-slots))
 
-         ;;; specialize the phenotype method
-         (defmethod phenotype ((self ,species-name))
-           (or (pheno self)
-               (setf (pheno self)
-                     ,phenotyper-body)))
+         ;;; specialize the phenotype method (if given)
+         ,@(when phenotyper-body
+             `((defmethod phenotype ((self ,species-name))
+                      (or (pheno self)
+                          (setf (pheno self)
+                                ,phenotyper-body)))))
 
          ;;; specialize the update-geno method    
          (defmethod update-geno ((self ,species-name))
@@ -221,6 +248,25 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
+;===============================
+;===============================
+
+;;; "CODES"     ;;; maybe this should be in a separate file? if it is useful without defspecies ...
+
+; a decoder is a list where each element is of the form '(:set a b c) or '(min max) or '(min max divisor)
+; or (min max divisor float?) ...  somewhat like the arguments to dwn::mod-to-range
+; i.e. '(:set a b c)  or '(0 11) or '((0 0.9) 10 t)
+
+; it can be a nested list, and can be formatted to be passed to expand-lst
+
+; so: '((60 72) (:set :up :down) (3 8) (8* ((1 3)))) 
+; could yield '(69 :down (2 1 3 2 2 3 1 1))
+
+; an operon is a group of nucleotides that is understood by one decoder
+; a nucleotide is a single element of the raw genotype
+
+; (s-dot creates random specimen, appropriate to the corresponding p-dot)
 
 (defun nucleotides-per-operon (decoder)
   (if (equalp (first decoder) :length)

@@ -28,7 +28,9 @@
          "dwn.arrange2"
 
          "dwn.defspecies"
-         "dwn.defspecies-demo"
+         "dwn.defspecies-builtin"
+
+         "dwn.defspecies-custom"
 
          "dwn.engine"
 
