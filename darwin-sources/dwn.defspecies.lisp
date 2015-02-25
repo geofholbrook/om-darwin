@@ -193,11 +193,23 @@
 
          ;; make om creation method
 
-         (defmethod! ,(om-symbol+ "make-" namestring) ((,operon-initarg number))
-           :initvals '(,*default-num-operons*)
+         (defmethod! ,(om-symbol+ "make-" namestring) 
+                     ((,operon-initarg number)
+                      ,@(mapcar #'(lambda (slotdef) (list (car slotdef) t))
+                                species-slots))
+           :initvals '(,*default-num-operons*
+                       ,@(mapcar #'(lambda (slotdef) (if (listp (cadr slotdef))
+                                                         (cadadr slotdef)
+                                                       (cadr slotdef)))  ;; get rid of a quote  
+                                 species-slots))
            :icon 703
-           (make-instance ',species-name ,(make-keyword operon-initarg) ,operon-initarg))
-
+           (make-instance ',species-name 
+                          ,(make-keyword operon-initarg) ,operon-initarg
+                          ,@(loop for slotdef in species-slots
+                                  append (list (make-keyword (prin1-to-string (car slotdef)))
+                                               (car slotdef)))))
+         ;;;;
+                                               
            ))))
 
 ;;; for fun more than convenience:
@@ -207,7 +219,7 @@
                ,@body)
            (operons ,spec)))
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 (defun nucleotides-per-operon (decoder)
