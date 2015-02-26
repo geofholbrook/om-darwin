@@ -1,4 +1,0 @@
-; OM File Header - Saved 2012/12/30 0:44:01
-; (6.050102 :lisp (om-make-point 24 24) (om-make-point 50 50) (om-make-point 500 400) "" 124 0 nil "2012/12/30 0:44:01")
-; End File Header
-(in-package :om)(load-lib-for (quote nil))(setf *om-current-persistent* (om-load-lisp-patch "range-env->two-envs" 6.050102 ";;; Edit a valid LAMBDA EXPRESSION for \"two-bpfs\"$;;; e.g. (lambda (arg1 arg2 ...) ( ... ))$$(lambda (range-env) $  (loop for env in (mapcar$                    #'mat-trans$                    (mat-trans (loop for point in range-env$                                     collect (list (list (car point) $                                                         (caadr point))$                                                   (list (car point) $                                                         (cadadr point))))))$        collect (simple-bpf-from-list$                 (first env)$                 (second env)$                 'bpf$                 4)))"))
