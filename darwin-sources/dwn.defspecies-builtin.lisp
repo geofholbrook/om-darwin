@@ -5,6 +5,8 @@
   (loop for k from 0 to 3
         collect (make-region (/ k 4) 1/4 1 (+ 60 k))))
 
+(defmethod species-concatenator ((self music-mixin)) #'append-arrangements)
+
 (defmethod finalize ((self music-mixin))
   (arrange->poly (phenotype self)))
 

@@ -114,44 +114,37 @@
                      ;               (length (remove-duplicates (mapcar 'first (append population crosses offspring))))))
 
                        
-          (let* ((sorted (sort (append population 
-                                      offspring 
-                                      crosses)
-                                #'(lambda (s1 s2)
-                                    (if (= (car s1) (car s2))
-                                        (> (caddr s1) (caddr s2))
-                                      (< (car s1) (car s2))))))
+    (let ((sorted (sort (append population 
+                                offspring 
+                                crosses)
+                        #'(lambda (s1 s2)
+                            (if (= (car s1) (car s2))
+                                (> (caddr s1) (caddr s2))
+                              (< (car s1) (car s2)))))))
 
-                ;;; sorts first by fitness, then by age ... older specimens survive so that they can't survive
-                ;;; by just alternating between equivalent raw genotypes. if it weren't for this problem,
-                ;;; really the younger specimens should survive!
+          ;;; sorts first by fitness, then by age ... older specimens survive so that they can't survive
+          ;;; by just alternating between equivalent raw genotypes. if it weren't for this problem,
+          ;;; really the younger specimens should survive!
 
-                (res (loop for sp in sorted
+          (loop for sp in sorted
                               
-                              for k from 0
-                              with fitnesses = ()  
-                              until (= (length result) *capacity*)
+                for k from 0
+                with fitnesses = ()  
+                until (= (length result) *capacity*)
 
                               
-                              ;;; testing for duplicates using fitness
-                      ;;; since different raw genotypes can have the same phenotype
-                      ;;; this could potentially pare the population down to 1 if the fitness is low integers or something ...
+                ;;; testing for duplicates using fitness
+                ;;; since different raw genotypes can have the same phenotype
+                ;;; this could potentially pare the population down to 1 if the fitness is low integers or something ...
                       
-                      if (or (= k 0) ;current best
-                             (and (< (caddr sp) ;age
-                                     *longevity*)
-                                  (not (member (car sp) fitnesses))))
+                if (or (= k 0) ;current best
+                       (and (< (caddr sp) ;age
+                               *longevity*)
+                            (not (member (car sp) fitnesses))))
                       
-                      collect sp into result
-                      do (push (car sp) fitnesses)
-                      finally return result)))
-            
-            (rplaca population (car res))
-            (rplacd population (cdr res))
-
-            )
-          )
-  population)
+                collect sp into result
+                do (push (car sp) fitnesses)
+                finally return result))))
 
 
 
@@ -177,7 +170,8 @@
 
                  (print generation)
 
-                 (iterate population criterion)
+                 (setf population
+                       (iterate population criterion))
          
                  ;;; verbosity
                  (when (= (mod generation *display-interval*) 0)

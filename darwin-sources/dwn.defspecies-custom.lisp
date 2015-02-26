@@ -1,22 +1,42 @@
 (in-package dwn)
 
+;inheritance test (good so far)
+(defspecies melody2 (melody))
 
 
-;;; all possible subdivisions of an integer
-(defun split (n)
+(defspecies trills (arrangement)
+  :phenotyper   ;;; change only the pheno
+
+  (loop for op in (operons self)
+        append (loop for start from (start op) by (resolution self)
+                     repeat (floor (len op) (resolution self))
+                     for k from 0
+                     collect (make-region start (resolution self)
+                                          (channel op)
+                                          (+ (pitch op) (if (evenp k)
+                                                            0 1))))))
+
+
+;;;;;;;;;;;;;;;;
+
+;;; all possible compositions (ordered partitions) of an integer 
+(defun all-compositions (n)
   (or (loop for k from 1 to n
-            append (loop for next in (split (- n k))
+            append (loop for next in (all-compositions (- n k))
                          collect (cons k next)))
       '(nil)))
 
-
 ;;; this also works:
-(defun split (n)
+(defun all-compositions (n)
   (if (> n 1)
-      (loop for next in (split (1- n))
+      (loop for next in (all-compositions (1- n))
             append (list (cons 1 next)
                          (cons (1+ (car next)) (cdr next))))
     '((1))))
+
+;;;;;;;;;;;;;;;;;;;;
+
+
 
 (defun pad-with-zeroes (n bits)
   (append (create-list (max 0 (- bits (length n))) 0)
@@ -57,12 +77,7 @@
                                                      (1- (division op))))
                                  collect (make-branch sub (1- max-depth))))))))
     (make-branch 1 2)))
-  
-
-  
-  
-
-
+ 
 (defspecies ga-tree ()
 
   :species-slots 
@@ -76,10 +91,23 @@
         ;;;; 0 is always useless anyway, results in expansion (1 0 0 ...) (no division)
 
   :phenotyper
-  `(? ((,(time-sig self) ,(let ((main (make-tree (operons self))))
-                            (if (atom main) 
-                                (list main)
-                              (second main)))))))
+  `(om::? ((,(time-sig self) ,(let ((main (make-tree (operons self))))
+                                (if (atom main) 
+                                    (list main)
+                                  (second main)))))))
+
+(defmethod finalize ((self ga-tree)) 
+  (mki 'om::voice :tree (phenotype self)))
+
+(defun concat-trees (t1 t2)
+  (list 'om::? (append (second t1)
+                       (second t2))))
+
+(defmethod species-concatenator ((self ga-tree)) 'concat-trees)
+
+
+
+
 
 
 

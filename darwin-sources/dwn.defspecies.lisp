@@ -43,16 +43,18 @@
 (defparameter *default-num-operons* 8)
 
 ;;; the species metaclass (initform of these slots have no effect ... why?)
+;;; gonna have to change this, or change defspecies anyway ...
 (defclass species (om::omstandardclass) 
   ((operon-initarg :initform 'num-operons :initarg :operon-initarg :accessor operon-initarg)
    (species-slots :initform nil :initarg :species-slots :accessor species-slots)
    (operon-slots :initform nil :initarg :operon-slots :accessor operon-slots)))
 
+
 (om::defclas specimen ()
-  ((operons)   
+  ((operons :initform nil)   
    (pheno :initform nil)  
    (raw-genotype :initarg :raw :initform nil)
-   (decoder))
+   (decoder :initform nil))
   (:metaclass species))    
 
 (setf (operon-initarg (find-class 'specimen)) 'num-operons)
@@ -61,19 +63,15 @@
   ((owner))) ;; specimen to which this operon belongs (parent would be confusing in the genetic algorithm context)
 
 
-
-
-
-(defgeneric update-geno (self))
-(defgeneric phenotype (self))
-
-(defmethod phenotype ((self t)) self)        ;; so that code will work in cases where there is no phenotype
+(defmethod update-geno ((self specimen)) nil)
+(defmethod phenotype ((self specimen)) self)  ;;; t?      ;; so that code will work in cases where there is no phenotype
 
 (defmethod update ((self specimen))
   (update-geno self)
   (setf (pheno self)
         nil)
   self)
+
 
 (defmethod mutate ((self specimen))
   (let ((copy (clos::copy-standard-instance self)))
@@ -90,14 +88,17 @@
 
 (defun raw+model (raw model)
 "make a new specimen that is like the model (same species, same species-slot values) but with new raw-genotype"
-  (let ((spec (clos::copy-standard-instance model)))
+  (let ((spec (eval (om::omng-copy model))))
     (setf (raw-genotype spec) raw)
     (update spec)))
 
+(defun randomize-specimen (spec)
+  (raw+model (random-raw-genotype (length (raw-genotype spec)))
+             spec))
+
 (defmethod population-from-model ((model specimen) (criterion function))
   (loop repeat *capacity*
-        collect (let ((spec (raw+model (random-raw-genotype (length (raw-genotype model)))
-                                       model)))
+        collect (let ((spec (randomize-specimen model)))
                   (list (evaluate spec criterion) spec 0))))
 
 ;;; pretty slick!
@@ -114,7 +115,6 @@
 ;; convert to viewing / auditioning format, not for fitenss functioning
 (defmethod finalize ((self specimen)) (phenotype self))
      
-
 
 (defun combine-slotdefs (direct inherited)
   (append (loop for slot in inherited

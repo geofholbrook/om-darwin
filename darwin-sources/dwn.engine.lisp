@@ -232,8 +232,9 @@
             (setf (message-flag self) nil)
             (evaluate-population self))
 
-          (iterate (population self) 
-                   (fitness-function self))
+          (setf (population self)
+                (iterate (population self) 
+                         (fitness-function self)))
 
           (incf (generation self))
 

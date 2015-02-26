@@ -28,6 +28,7 @@
          "dwn.arrange2"
 
          "dwn.defspecies"
+         "dwn.multi-cell"
 
          "dwn.defspecies-builtin"
          "dwn.defspecies-custom"
