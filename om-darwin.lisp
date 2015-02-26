@@ -15,7 +15,7 @@
 ;--------------------------------------------------
 
 (defvar *lib-folder* nil)
-(setf *lib-folder* *load-pathname*)
+(setf *lib-folder* (or *load-pathname* (om-choose-directory-dialog :prompt "om-darwin directory")))
 
 (defvar *res-dir* nil)
 (setf *res-dir* (append (pathname-directory *lib-folder*) (list "resources")))
@@ -47,9 +47,11 @@
 ;Load files 
 ;--------------------------------------------------
 
-(mapc #'(lambda (file) (load ;;; om::compile&load ... no good because of macros that depend on previous classes! bad practice... 
-                        (make-pathname :directory (append (pathname-directory *lib-folder*) (list "darwin-sources")) 
-                                       :name file))) 
+(mapc #'(lambda (file) (let ((path
+                              (make-pathname :directory (append (pathname-directory *lib-folder*) (list "darwin-sources")) 
+                                             :name file)))
+                         (load path)
+                         (compile-file path)))
       *source-files*) 
 
 ;--------------------------------------------------

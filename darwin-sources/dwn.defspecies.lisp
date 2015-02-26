@@ -314,7 +314,7 @@
 
 (defun s.codes (num-operons decoder)
   (loop repeat (* num-operons 
-                  (nucleotides-per-operon decoder))
+                  (nucleotides-per-operon (or decoder (list *gene-range*))))
         collect (rrnd *gene-range*)))
 
 
@@ -335,7 +335,7 @@
 
 ;;; holy confusing
 (defun p.codes (list decoder)
-  (let ((decoder (om::expand-lst decoder)))
+  (let ((decoder (or (om::expand-lst decoder) (list *gene-range*))))
     (labels ((decode (g sub)
                (loop for elt in (if (equal (first sub) :length)
                                     (subseq sub 2 (+ 2 (apply 'mtr (pop g) (second sub))))

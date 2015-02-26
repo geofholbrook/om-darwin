@@ -4,7 +4,7 @@
 (defparameter *ga-process* nil)
 
 (om::defclass! ga-engine ()
-  ((fitness-function :initform nil :accessor fitness-function)
+  (
    (population :initform nil :accessor population)
    (generation :initform 0 :accessor generation)
 
@@ -15,7 +15,8 @@
 
 
    ;visible slots
-   (model :initform nil :initarg :model :accessor model))
+   (model :initform nil :initarg :model :accessor model)
+   (fitness-function :initform nil :initarg :fitness-function :accessor fitness-function))
    
   (:icon 701))
 
@@ -163,6 +164,8 @@
   (unless (box self)
     (setf (box self) (get-my-box self)))  ;;; just to be sure
 
+  (om::lock-after-modif (car (om::frames (box self))))
+
   (if (process self) (om-kill-process (process self)))
   (set-process self
                (run-process (om::string+ "GA PROCESS " (prin1-to-string 
@@ -195,6 +198,7 @@
 
 
 (defmethod redraw-editors ((self ga-engine))
+  ;(print 'what?)
   (when (box self)
     (om::update-if-editor (box self))                         ;;; for open editor window
     (let ((frame (when (and (box self)

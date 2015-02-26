@@ -15,7 +15,7 @@
                                           (channel op)
                                           (+ (pitch op) (if (evenp k)
                                                             0 1))))))
-                                          
-        
+
+
 
 
