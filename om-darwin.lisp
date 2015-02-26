@@ -28,8 +28,8 @@
          "dwn.arrange2"
 
          "dwn.defspecies"
-         "dwn.defspecies-builtin"
 
+         "dwn.defspecies-builtin"
          "dwn.defspecies-custom"
 
          "dwn.engine"
@@ -47,7 +47,7 @@
 ;Load files 
 ;--------------------------------------------------
 
-(mapc #'(lambda (file) (om::compile&load 
+(mapc #'(lambda (file) (load ;;; om::compile&load ... no good because of macros that depend on previous classes! bad practice... 
                         (make-pathname :directory (append (pathname-directory *lib-folder*) (list "darwin-sources")) 
                                        :name file))) 
       *source-files*) 

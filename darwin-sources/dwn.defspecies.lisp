@@ -42,21 +42,25 @@
 
 (defparameter *default-num-operons* 8)
 
-(om::defclas operon ()
-  ((owner))) ;; specimen to which this operon belongs (parent would be confusing in the genetic algorithm context)
+;;; the species metaclass (initform of these slots have no effect ... why?)
+(defclass species (om::omstandardclass) 
+  ((operon-initarg :initform 'num-operons :initarg :operon-initarg :accessor operon-initarg)
+   (species-slots :initform nil :initarg :species-slots :accessor species-slots)
+   (operon-slots :initform nil :initarg :operon-slots :accessor operon-slots)))
 
 (om::defclas specimen ()
   ((operons)   
    (pheno :initform nil)  
    (raw-genotype :initarg :raw :initform nil)
-   (decoder)))    
+   (decoder))
+  (:metaclass species))    
+
+(setf (operon-initarg (find-class 'specimen)) 'num-operons)
+
+(om::defclas operon ()
+  ((owner))) ;; specimen to which this operon belongs (parent would be confusing in the genetic algorithm context)
 
 
-;;; blow mind:
-(defclass species (om::omstandardclass) 
-  ((operon-initarg :initform nil :initarg :operon-initarg :accessor operon-initarg)
-   (species-slots :initform nil :initarg :species-slots :accessor species-slots)
-   (operon-slots :initform nil :initarg :operon-slots :accessor operon-slots)))
 
 
 
@@ -110,6 +114,18 @@
 ;; convert to viewing / auditioning format, not for fitenss functioning
 (defmethod finalize ((self specimen)) (phenotype self))
      
+
+
+(defun combine-slotdefs (direct inherited)
+  (append (loop for slot in inherited
+                collect (or (find slot direct :test #'(lambda (a b) (equalp (car a) (car b)))) 
+                            slot))
+          (loop for slot in direct
+                unless (find slot inherited :test #'(lambda (a b) (equalp (car a) (car b))))
+                collect slot)))
+
+
+
 ;;; how best to encapsuate the various parts of this macro, which is getting too long ... ?
 (defmacro defspecies (species-name inheritance &body args)
 
@@ -121,6 +137,8 @@
   ;5. initialize-instance: set the decoder based on operon structure, create raw genotype
   ;6. 
   
+  (print (om::string+ "expanding " (prin1-to-string species-name)))
+
   (flet ((symbol+ (&rest substrings)
            (intern (string-upcase (apply #'om::string+ substrings))))
 
@@ -131,9 +149,14 @@
            ;;; created symbols must be uppercase
 
     (let* ((namestring (prin1-to-string species-name))
-           (operon-initarg 'num-operons)
-           species-slots 
-           operon-slots 
+           (superclass (if inheritance (find-class (car inheritance))
+                         (find-class 'specimen)))
+
+           (operon-initarg (operon-initarg superclass))
+           direct-species-slots
+           direct-operon-slots
+           species-slots
+           operon-slots
            phenotyper-body)
 
       (loop for arg in args
@@ -144,34 +167,45 @@
               (case target
                 (:operon-initarg (setf operon-initarg arg))
                 (:phenotyper (setf phenotyper-body arg))
-                (:species-slots (push arg species-slots))
-                (:operon-slots (push arg operon-slots))))
+                (:species-slots (push arg direct-species-slots))
+                (:operon-slots (push arg direct-operon-slots))))
 
             finally do
-            (setf species-slots (reverse species-slots))
-            (setf operon-slots (reverse operon-slots)))
+            (setf direct-species-slots (reverse direct-species-slots))
+            (setf direct-operon-slots (reverse direct-operon-slots)))
 
-      `(progn
+      
 
-         ;;; create specimen class
-         (om::defclas! ,species-name ,(or inheritance '(specimen))
+      (setf species-slots (combine-slotdefs direct-species-slots (species-slots superclass)))
+      (setf operon-slots (combine-slotdefs direct-operon-slots (operon-slots superclass)))
 
-                       ((,operon-initarg :initform ,*default-num-operons*)   ;;; default for number of operons is 8
+      `(let ((bogus (print (om::string+ "evaluating " ,(prin1-to-string species-name))))
+             (species (om::defclas! ,species-name ,(or inheritance '(specimen))
+
+                                    ((,operon-initarg :initform ,*default-num-operons*)   ;;; default for number of operons is 8
 
                       ;species-slots -- custom parameters that do not get mutated
-                        ,@(mapcar #'(lambda (slotdef)
-                                      (if (atom slotdef)
-                                          (list slotdef)
-                                        (list (first slotdef) :initform (second slotdef))))
-                                  species-slots))
+                                     ,@(mapcar #'(lambda (slotdef)
+                                                   (if (atom slotdef)
+                                                       (list slotdef)
+                                                     (list (first slotdef) :initform (second slotdef))))
+                                               direct-species-slots))
 
-                       (:metaclass species))
+                                    (:metaclass species))))
 
          ;;; create operon class
-         (om::defclas ,(symbol+ namestring "-operon") (operon)
+         (om::defclas ,(symbol+ namestring "-operon") 
+                      ,(if (and inheritance (not (equalp (car inheritance) 'specimen)))
+                           (list (symbol+ (prin1-to-string (car inheritance)) "-operon"))
+                         '(operon))
                       ,(mapcar #'(lambda (slotdef) 
                                    (list (first slotdef))) 
-                               operon-slots))
+                               direct-operon-slots))
+
+         ;;; set class slots
+         (setf (operon-initarg species) ',operon-initarg)
+         (setf (species-slots species) ',species-slots)
+         (setf (operon-slots species) ',operon-slots)
 
          ;;; specialize the phenotype method (if given)
          ,@(when phenotyper-body
@@ -193,7 +227,7 @@
 
          ;;; create random-specimen maker
          (defmethod initialize-instance ((self ,species-name) &rest rest)
-           (call-next-method)
+           (apply #'shared-initialize self t rest)
 
            ;;; set decoder
            (setf (decoder self)
@@ -211,6 +245,7 @@
                                          ;;; corresponding to upper range of cardinality 
 
                                          range))))
+           
 
            (unless (raw-genotype self)
              (setf (raw-genotype self) 
