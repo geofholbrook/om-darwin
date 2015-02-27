@@ -137,16 +137,54 @@
   (initialize-engine self))
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(defclass ga-editor (om::EditorView om::object-editor) 
+  ())
+
 (defmethod om::class-has-editor-p ((self ga-engine)) t)
-(defmethod om::get-editor-class ((self ga-engine)) 'om::polyeditor)
+(defmethod om::get-editor-class ((self ga-engine)) 'ga-editor)
 
 (defmethod om::default-edition-params ((self ga-engine))
   (om::default-edition-params (result self)))
 
-(defmethod om::editor-object-from-value ((self ga-engine)) (result self))
+;(defmethod om::editor-object-from-value ((self ga-engine)) (result self))
 
 (defmethod om::draw-mini-view ((self t) (value ga-engine))
-  (om::draw-mini-view self (result value)))
+  ;(call-next-method)
+  (om::draw-mini-view self (result value))
+  )
+
+(defmethod initialize-instance :after ((self ga-editor) &rest initargs)
+  (let ((win (om::make-editor-window (om::get-editor-class (result (om::object self))) 
+                                     (result (om::object self)) "GA RESULT" self)))
+    (push win (om::attached-editors self)))
+  (om-add-subviews self 
+                   ;(om-make-dialog-item 'om-slider (om-make-point 20 20) (om-make-point 20 60) ""
+                   ;                     :di-action #'(lambda (slider)
+                   ;                                    (print (om-slider-value slider))))
+                   ;(om-make-dialog-item 'om-check-box (om-make-point 200 20) (om-make-point 20 60) ""
+                   ;                     :di-action #'(lambda (slider)
+                   ;                                    (print (om-checked-p slider))))
+
+                   (om-make-dialog-item 'om-button (om-make-point 20 50) (om-make-point 80 20) "Start"
+                                        :di-action #'(lambda (button)
+                                                       (start (om::object (om-view-container button)))))
+
+                   (om-make-dialog-item 'om-button (om-make-point 20 80) (om-make-point 80 20) "Stop"
+                                        :di-action #'(lambda (button)
+                                                       (stop (om::object (om-view-container button)))))
+
+                   (om-make-dialog-item 'om-button (om-make-point 20 110) (om-make-point 80 20) "Reinit"
+                                        :di-action #'(lambda (button)
+                                                       (reinit (om::object (om-view-container button)))))
+                   )
+  )
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 (defmethod running ((self ga-engine))
