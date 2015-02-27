@@ -207,10 +207,7 @@
       (when frame
         (om::om-draw-contents frame))))) ;;; for miniview
 
-
-
 (defmethod run-engine ((self ga-engine))
-
 
   (when (and (model self)
              (fitness-function self))
@@ -224,6 +221,8 @@
           
           do
 
+          (incf (generation self))
+
           (when (equal (message-flag self) :reinit)
             (setf (message-flag self) nil)
             (randomize-population self))
@@ -234,12 +233,11 @@
 
           (setf (population self)
                 (iterate (population self) 
-                         (fitness-function self)))
-
-          (incf (generation self))
+                                 (fitness-function self)))     ;;; only sets raw genotypes
+   
+          (update (cadar (population self)))
 
           (update-best-candidate self)
-
           (redraw-editors self)  ;;; causes the 'animation' of score editors
 
           )))

@@ -103,12 +103,12 @@
                                          (fitness (evaluate crossed criterion)))
                                     (list fitness crossed 0)))))
 
-         (offspring (loop for entry in (append population crosses)
-                          append (loop repeat *litter-size*
-                                       collect
-                                       (let* ((mutated (mutate (second entry)))
-                                              (fitness (evaluate mutated criterion)))
-                                         (list fitness mutated 0))))))
+         (offspring  (loop for entry in (append population crosses)
+                               append (loop repeat *litter-size*
+                                            collect
+                                            (let* ((mutated (mutate (second entry)))
+                                                   (fitness (evaluate mutated criterion)))
+                                              (list fitness mutated 0))))))
 
                      ;(print (format nil "number of unique fitnesses: ~D"
                      ;               (length (remove-duplicates (mapcar 'first (append population crosses offspring))))))

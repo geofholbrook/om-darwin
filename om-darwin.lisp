@@ -31,7 +31,7 @@
          "dwn.multi-cell"
 
          "dwn.defspecies-builtin"
-         "dwn.defspecies-custom"
+         ; "dwn.defspecies-custom"    ;;; in user folder
 
          "dwn.engine"
 
