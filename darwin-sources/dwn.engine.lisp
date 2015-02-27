@@ -92,11 +92,28 @@
   (mapcar #'cleanup-process (om::boxes self)))
 
 
+;; spacebar to play (or <p>lay and <s>top ) ;;;;;;;;;;;;;
 
-;(defmethod oa::om-cleanup ((self ga-engine))
-;  (when (process (box self)) 
-;    (print "KILLING PROCESS")
-;    (oa::om-kill-process (process self))))
+(defmethod is-ga-box-p ((self t)) nil)
+(defmethod is-ga-box-p ((self ga-engine-box)) t)
+
+(defmethod om::play-boxes :after ((boxlist list))
+  (loop for ga-box in (remove-if-not 'is-ga-box-p boxlist)
+        do (let ((ga (om::value ga-box)))
+             (if (running ga)
+                 (stop ga)
+               (start ga)))))
+
+(defmethod om::stop-boxes :after ((boxlist list))
+  (loop for ga-box in (remove-if-not 'is-ga-box-p boxlist)
+        do (stop (om::value ga-box))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+
+
 
 (defmethod update-best-candidate ((self ga-engine))
   (setf (result self)
@@ -164,7 +181,7 @@
   (unless (box self)
     (setf (box self) (get-my-box self)))  ;;; just to be sure
 
-  (om::lock-after-modif (car (om::frames (box self))))
+  ;(om::lock-after-modif (car (om::frames (box self))))
 
   (if (process self) (om-kill-process (process self)))
   (set-process self
