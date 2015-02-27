@@ -1,0 +1,3 @@
+# treat omp files as binary
+
+*.omp binary
