@@ -12,7 +12,7 @@
    (message-flag :initform nil :accessor message-flag)
    
    (box :initform nil :accessor box)
-
+   (mini-view-mode :initform :result :accessor mini-view-mode)
 
    ;visible slots
    (model :initform nil :initarg :model :accessor model)
@@ -62,8 +62,8 @@
 
 
 (defclass ga-engine-box (om::omboxeditcall)
-  ((process :initform nil :accessor process)))
-
+  ((process :initform nil :accessor process)
+   ))
 
 (defmethod om::get-type-of-ed-box ((self ga-engine)) 'ga-engine-box)
 
@@ -115,32 +115,6 @@
 
 
 
-(defmethod update-best-candidate ((self ga-engine))
-  (setf (result self)
-        (if (population self)
-            (finalize (cadar (population self)))
-          (make-instance 'om::poly))))
-
-
-(defmethod randomize-population ((self ga-engine))
-  (when (model self)
-    (setf (population self)
-          (population-from-model (model self) (or (fitness-function self)
-                                                  #'(lambda (spec) (declare (ignore spec)) 0))))))
-
-(defmethod initialize-engine ((self ga-engine))
-  (randomize-population self)
-  (update-best-candidate self)
-  (redraw-editors self))
-
-(defmethod initialize-instance :after ((self ga-engine) &rest args)
-  (initialize-engine self))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;
-
-
 (defclass ga-editor (om::EditorView om::object-editor) 
   ())
 
@@ -152,10 +126,29 @@
 
 ;(defmethod om::editor-object-from-value ((self ga-engine)) (result self))
 
+(defmethod om::update-if-editor :after ((self ga-engine-box))
+  (when (om::editorFrame self)
+    (om-invalidate-view (first (om::attached-editors (om::editorFrame self))))))
+
+
 (defmethod om::draw-mini-view ((self t) (value ga-engine))
-  ;(call-next-method)
-  (om::draw-mini-view self (result value))
-  )
+  (if (equalp (mini-view-mode value) :result)
+      (om::draw-mini-view self (result value))
+     (call-next-method)))
+
+;;;;;;;;;;;;;;;;
+;;; toggle miniview hack
+(defmethod om::get-frame-class ((self ga-engine-box)) 'ga-engine-frame)
+(defclass ga-engine-frame (om::boxEditorFrame) ())
+(defmethod om::change-edit-mode :after ((self ga-engine-frame))
+  (when (om::showpict (om::object self))
+    (let ((val (om::value (om::object self))))
+      (setf (mini-view-mode val)
+            (if (equalp (mini-view-mode val) :result)
+                :engine
+              :result)))))
+;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (defmethod initialize-instance :after ((self ga-editor) &rest initargs)
   (let ((win (om::make-editor-window (om::get-editor-class (result (om::object self))) 
@@ -182,6 +175,46 @@
                                                        (reinit (om::object (om-view-container button)))))
                    )
   )
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+(defmethod update-best-candidate ((self ga-engine))
+  (setf (result self)
+        (if (population self)
+            (finalize (cadar (population self)))
+          (make-instance 'om::poly))))
+
+
+(defmethod randomize-population ((self ga-engine))
+  (when (model self)
+    (setf (population self)
+          (population-from-model (model self) (or (fitness-function self)
+                                                  #'(lambda (spec) (declare (ignore spec)) 0))))))
+
+(defmethod initialize-engine ((self ga-engine))
+  (randomize-population self)
+  (update-best-candidate self)
+  (redraw-editors self))
+
+(defmethod initialize-instance :after ((self ga-engine) &rest args)
+  (initialize-engine self))
+
+
+(defmethod redraw-editors ((self ga-engine))
+  ;(print 'what?)
+  (when (box self)
+    (om::update-if-editor (box self))                         ;;; for open editor window
+ 
+    ;;; for miniview
+    (let ((frame (when (and (box self)
+                                     (om::frames (box self)))
+                            (first (om::frames (box self))))))
+      (when frame
+        (om::om-draw-contents frame))))) 
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;
@@ -252,15 +285,6 @@
           return box)))
 
 
-(defmethod redraw-editors ((self ga-engine))
-  ;(print 'what?)
-  (when (box self)
-    (om::update-if-editor (box self))                         ;;; for open editor window
-    (let ((frame (when (and (box self)
-                                     (om::frames (box self)))
-                            (first (om::frames (box self))))))
-      (when frame
-        (om::om-draw-contents frame))))) ;;; for miniview
 
 (defmethod run-engine ((self ga-engine))
 
