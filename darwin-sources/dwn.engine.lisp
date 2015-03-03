@@ -268,7 +268,7 @@
              (fitness-function self))
       
     (setf (message-flag self) nil)
-    (setf (generation self) 0)
+    ;(setf (generation self) 0)
     
     ; for now, always reinitialize
     
@@ -280,6 +280,7 @@
 
           (when (equal (message-flag self) :reinit)
             (setf (message-flag self) nil)
+            (setf (generation self) 0)
             (randomize-population self))
               
           (when (equal (message-flag self) :new-fitness-function)
