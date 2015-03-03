@@ -27,11 +27,11 @@
         (setf (raw-genotype cell) raw)
         (update cell)))
 
-
 (defmethod phenotype ((self multi-cell))
   (reduce (or (concatenator self)
               (species-concatenator (car (cells self))))    ;;; use first cell, for now 
           (mapcar 'phenotype (cells self))))
+
 
 (om::defmethod! om::make-multi ((cells list) &optional concatenator)
                 :icon 703
@@ -39,6 +39,8 @@
                      :cells cells
                      :concatenator concatenator))
 
+;;; finalize the multi-cell phenotype the same way a single cell would be finalized.
+;;; if that's not gonna work you have to specialize multi-cell
 (defmethod finalize ((self multi-cell))
   (let ((dummy (mki (type-of (first (cells self))))))
     (setf (slot-value dummy 'pheno) (phenotype self))     ;;; quietly change the phenotype
@@ -46,9 +48,34 @@
     
 
 
+;;;;
 
 
+(defclass stack (multi-cell) ())    ;;; should probably inherit in the other direction ...
 
+(om::defmethod! om::make-stack ((cells list))
+                :icon 703
+                (mki 'stack
+                     :cells cells))
 
+(defmethod phenotype ((self stack))
+  (loop for arr in (mapcar 'phenotype (cells self))
+        with highest-channel = 0
+        append (let* ((minmax (loop for region in arr
+                                    minimize (region-chan region) into min
+                                    maximize (region-chan region) into max
+                                    finally return (list min max)))
 
-  
+                      (offset (1+ (- (first minmax) 
+                                     highest-channel))))
+
+                 (incf highest-channel (1+ (- (second minmax)
+                                              (first minmax))))
+
+                 (if (= highest-channel 0)
+                     arr
+                   (loop for region in arr
+                         collect `(,(region-start region)
+                                   ,(region-len region)
+                                   ,(+ (region-chan region) offset)
+                                   ,@(nthcdr 3 region)))))))

@@ -124,12 +124,6 @@
 (defmethod om::default-edition-params ((self ga-engine))
   (om::default-edition-params (result self)))
 
-;(defmethod om::editor-object-from-value ((self ga-engine)) (result self))
-
-(defmethod om::update-if-editor :after ((self ga-engine-box))
-  (when (om::editorFrame self)
-    (om-invalidate-view (first (om::attached-editors (om::editorFrame self))))))
-
 
 (defmethod om::draw-mini-view ((self t) (value ga-engine))
   (if (equalp (mini-view-mode value) :result)
@@ -176,8 +170,31 @@
                    )
   )
 
+
+
+;(defmethod om::editor-object-from-value ((self ga-engine)) (result self))
+
+(defmethod om::update-if-editor :after ((self ga-engine-box))
+  (when (om::editorFrame self)
+    (om::update-editor-after-eval (first (om::attached-editors (om::editorFrame self))))))
+
+
+(defmethod redraw-editors ((self ga-engine))
+  ;(print 'what?)
+  (when (box self)
+    (om::update-if-editor (box self))                         ;;; for open editor window
+ 
+    ;;; for miniview
+    (let ((frame (when (and (box self)
+                                     (om::frames (box self)))
+                            (first (om::frames (box self))))))
+      (when frame
+        (om::om-draw-contents frame))))) 
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 
 
@@ -203,17 +220,6 @@
   (initialize-engine self))
 
 
-(defmethod redraw-editors ((self ga-engine))
-  ;(print 'what?)
-  (when (box self)
-    (om::update-if-editor (box self))                         ;;; for open editor window
- 
-    ;;; for miniview
-    (let ((frame (when (and (box self)
-                                     (om::frames (box self)))
-                            (first (om::frames (box self))))))
-      (when frame
-        (om::om-draw-contents frame))))) 
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
