@@ -76,11 +76,13 @@
   (labels ((make-branch (num max-depth gene-position)
              (let ((op (nth gene-position operons)))
                (if (or (null op)
-                       (= (division op) 1) 
-                       (= max-depth 0))
+                       (= (division op) 1)   ;;; no division
+                       (< num 0)             ;;; num represents a rest (so, no division!)
+                       (= max-depth 0)
+                       )
                    num
                  (list num (loop for sub in (branch-from-operon op)
-                                 sum sub into branch-pos
+                                 sum (floor (abs sub)) into branch-pos      ;;; remove rest/tie data
                                  collect (make-branch sub 
                                                       (1- max-depth)
                                                       (+ (* gene-position max-div)
@@ -98,9 +100,10 @@
 
 (defmethod species-concatenator ((self ga-simple-tree)) 'concat-trees)
 
+
+
 ;;;;; 
 
-#|
 (defspecies ga-tree (ga-simple-tree)
 
   :species-slots
@@ -108,9 +111,43 @@
   (allow-ties t)
 
   :operon-slots
-  (rests :range (list 1 (expt 2 (1- (second (div-range self))))))
-  (tied :range '(:set :tied :untied)) )
-|#
+  (rests :range (list 0 (1- (expt 2 (second (div-range self))))))  ;;; on-off should be this way also
+  (tied :range '(:set nil t)))
+
+(defmethod branch-from-operon ((op ga-tree-operon))
+  (let ((rests? (allow-rests (owner op)))
+        (ties? (allow-ties (owner op))))
+    (if (not (or rests? ties?))
+        (call-next-method)
+      (loop with rests = (and rests?
+                              (om- (om* (last-n (binary-expansion (rests op) (division op)) 
+                                                (division op)) 2) 1))  ;;; bits become -1 and 1
+            with pos = 0
+            for part in (additive-from-bits 
+                         (last-n (binary-expansion (on-off op) (1- (division op))) 
+                                 (1- (division op))))
+        
+            collect (if rests? (* (nth pos rests) part) part)
+            into parts
+
+            do (incf pos part) ;ex (1 3 1) --> (0 1 4)
+
+            finally return (cons (if (and ties? (tied op))
+                                     (float (car parts))   ;haha
+                                   (car parts))
+                                 (cdr parts))))))
+       
+
+        
+
+            
+        
+
+        
+
+        
+
+
 
 
 

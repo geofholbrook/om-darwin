@@ -1,4 +1,4 @@
-; OM File Header - Saved 2015/03/04 16:40:52
-; (6.090014 :lisp (om-make-point 24 24) (om-make-point 50 50) (om-make-point 500 400) "" 124 0 nil "2015/03/04 16:40:52")
+; OM File Header - Saved 2015/03/04 18:23:14
+; (6.090014 :lisp (om-make-point 24 24) (om-make-point 50 50) (om-make-point 500 400) "" 124 0 nil "2015/03/04 18:23:14")
 ; End File Header
 (in-package :om)(load-lib-for (quote nil))(setf *om-current-persistent* (om-load-lisp-patch "range and rising" 6.090014 ";;; Edit a valid LAMBDA EXPRESSION for \"lispfunction\"$;;; e.g. (lambda (arg1 arg2 ...) ( ... ))$$(lambda (spec range)$  (let ((len (length (d::phenotype spec))))$    (loop for sub on (mapcar 'd::region-pitch (d::phenotype spec))$        for pitch = (car sub)$        for melod = (when (cdr sub)$                      (- (cadr sub) $                         (car sub)))$        for index from 0$$        sum (+ (d::within-M pitch range)$               (if (and melod (<= melod 0)) $                   (* (- melod)$                      (- len index)) $                 0)$               ))))$  "))
