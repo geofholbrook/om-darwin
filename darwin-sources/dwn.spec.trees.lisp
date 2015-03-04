@@ -46,31 +46,7 @@
         finally return result))
 
 
-
-
-(defun make-tree (operons max-div)
-
-  (labels ((make-branch (num max-depth gene-position)
-             (let ((op (nth gene-position operons)))
-               (if (or (null op)
-                       (= (division op) 1) 
-                       (= max-depth 0))
-                   num
-                 (list num (loop for sub in (additive-from-bits 
-                                             (last-n (binary-expansion (on-off op) (1- (division op))) 
-                                                     (1- (division op))))
-                                 sum sub into branch-pos
-                                 collect (make-branch sub 
-                                                      (1- max-depth)
-                                                      (+ (* gene-position max-div)
-                                                         branch-pos))))))))
-
-    (make-branch 1 2 0)))
- 
-
-
-
-(defspecies ga-tree ()
+(defspecies ga-simple-tree ()
 
   :species-slots 
   (div-range '(1 5))
@@ -88,18 +64,53 @@
                                     (list main)
                                   (second main)))))))
 
-(defmethod finalize ((self ga-tree)) 
+
+;;; this has to appear after defspecies, because it defines the class
+(defmethod branch-from-operon ((op ga-simple-tree-operon))
+  (additive-from-bits 
+   (last-n (binary-expansion (on-off op) (1- (division op))) 
+           (1- (division op)))))
+
+
+(defun make-tree (operons max-div)
+  (labels ((make-branch (num max-depth gene-position)
+             (let ((op (nth gene-position operons)))
+               (if (or (null op)
+                       (= (division op) 1) 
+                       (= max-depth 0))
+                   num
+                 (list num (loop for sub in (branch-from-operon op)
+                                 sum sub into branch-pos
+                                 collect (make-branch sub 
+                                                      (1- max-depth)
+                                                      (+ (* gene-position max-div)
+                                                         branch-pos))))))))
+
+    (make-branch 1 2 0)))
+ 
+
+(defmethod finalize ((self ga-simple-tree)) 
   (mki 'om::voice :tree (phenotype self)))
 
 (defun concat-trees (t1 t2)
   (list 'om::? (append (second t1)
                        (second t2))))
 
-(defmethod species-concatenator ((self ga-tree)) 'concat-trees)
+(defmethod species-concatenator ((self ga-simple-tree)) 'concat-trees)
 
 ;;;;; 
 
+#|
+(defspecies ga-tree (ga-simple-tree)
 
+  :species-slots
+  (allow-rests t)
+  (allow-ties t)
+
+  :operon-slots
+  (rests :range (list 1 (expt 2 (1- (second (div-range self))))))
+  (tied :range '(:set :tied :untied)) )
+|#
 
 
 

@@ -35,6 +35,7 @@
          ;reorganize these two files
          "dwn.engine"
          "dwn.om2"
+         "dwn.tests"
 
          
         
