@@ -16,17 +16,47 @@
 
 (defvar *mutation-func* 'm.diffdx)
 (defvar *mutation-args* '(0.5))
-(defvar *mutation-rpt* 1)                ;;; maximum number of point mutations
-
-(defvar *gene-range* '(0 255))           ;;; numeric range for a nucleotide (unit of the raw genotype)
 
 (defvar *fix-offset* 1)
 
 (defvar *most-recent-result* nil)
 (defun get-recent-result () *most-recent-result*)
+  
+(defparameter *default-ga-params* 
+  (list :gene-range '(0 255)             ; numeric range for a nucleotide (unit of the raw genotype)
 
+        :seeding nil                     ; initialize population with decent solutions ?
 
-(defmethod random-raw-genotype (n) (loop repeat n collect (rrnd *gene-range*)))
+        :mutation-rpt 1                  ; maximum number of mutations  
+
+        :allow-free t 
+
+        :allow-dx t
+        :max-dx 5
+
+        :allow-swap t
+        :swap-dist-range '(1 5)
+         
+        :compensation-chance 0.5
+        :compensation-offset 1
+
+        :xover-mode :single-point        ; { :single-point :uniform }
+        :xover-chance nil                
+
+        :alternate-mutation-funs nil
+        :supress-default-mutation-fun nil))     
+        
+        
+(defun get-param (key &optional ga-params)
+  (let ((pos (position key ga-params :test 'equal)))
+    (if pos
+        (nth (1+ pos) ga-params)
+      (let ((defpos (position key *default-ga-params* :test 'equal)))
+        (when defpos
+          (nth (1+ defpos) *default-ga-params*))))))
+
+(defmethod random-raw-genotype (n &optional ga-params) 
+  (loop repeat n collect (rrnd (get-param :gene-range ga-params))))
 
 (defmethod evaluate ((self t) (crit function) &rest args)
   (let ((result 
@@ -36,12 +66,58 @@
       (if result 0 1))))  ;;; i.e., true means 0, which means good.
 
 
-(defmethod mutate ((self list))
-  (let ((new (copy-list self)))
-    (loop repeat (rrnd 1 *mutation-rpt*)
-          do (setf new 
-                   (apply *mutation-func* new *mutation-args*)))
-    new))
+(defmethod mutate ((self list) &optional ga-params)
+  (let ((range (get-param :gene-range ga-params))
+        mut-ops)
+    
+    (mapc #'(lambda (key mut-op)
+              (when (get-param key ga-params) (push mut-op mut-ops)))
+          '(:allow-free :allow-dx :allow-swap)
+          '(:free :dx :swap))
+
+    (flet ((constrain (n)
+             (+ (mod (- n (first range))
+                     (1+ (- (second range) (first range))))
+                (first range))))
+
+      (loop with new = (copy-list self)
+            repeat (rrnd 1 (get-param :mutation-rpt ga-params))
+
+            for spot = (rrnd 0 (1- (length new)))
+            for mut-op = (nth-random mut-ops)
+            with tmp
+
+            do 
+
+          ;store original value
+            (setf tmp (nth spot new))
+               
+          ;primary alteration
+          (case mut-op
+            (:free (setf (nth spot new) 
+                         (rnd-other (nth spot new) range)))
+            (:dx (setf (nth spot new)
+                       (constrain (+ (nth spot new)
+                                     (* (nth-random '(-1 1))
+                                        (rrnd 1 (get-param :max-dx ga-params)))))))
+            (:swap (let ((dist (rrnd (get-param :swap-dist-range ga-params))))
+                     (when (< (+ spot dist) (length new))
+                       (setf (nth spot new) (nth (+ spot dist) new))
+                       (setf (nth (+ spot dist) new) tmp)))))
+                       
+               
+          ;'compensation' alteration
+            (when (and (member mut-op '(:free :dx))
+                       (weighted-coin (* (get-param :compensation-chance ga-params)
+                                    100)))
+              (let ((offset (get-param :compensation-offset ga-params)))
+                (when (< spot (- (length new) offset))
+                  (setf (nth (+ spot offset) new)
+                        (constrain (+ (nth (+ spot offset) new)
+                                      (- tmp (nth spot new))))))))
+                                   
+
+            finally return new))))
 
 (defmacro mutate! (thing)
   `(setf ,thing (mutate ,thing)))
@@ -60,24 +136,18 @@
 
     ;primary alteration
     (setf (nth spot lis) 
-          (rnd-other (nth spot lis) *gene-range*))
+          (rnd-other (nth spot lis) (get-param :gene-range)))
 
     ;'correction' alteration
     (when (and fix? (< spot (- (length lis) *fix-offset*)))
       (setf (nth (+ spot *fix-offset*) lis)
             (mod-to-range (- (nth (+ spot *fix-offset*) lis)
                              (- (nth spot lis) tmp))
-                          *gene-range*)))
+                          (get-param :gene-range))))
     
     lis))
     
    
-
-;; for OM
-(defun set-mutation-mode (mode) (setf *mutation-mode* mode))
-(defun set-fix-offset (x) (setf *fix-offset* x))
-(defun set-gene-range (range) (setf *gene-range* range))
-
 
 
 ;;; assumes lists are the same length. takes first part of self, second part of other
@@ -93,7 +163,7 @@
 ;; note: each individual is represented as a list: (<fitness>  <specimen> <age>)
 
 ;;; destructively iterates population
-(defmethod iterate ((population t) (criterion function))
+(defmethod iterate ((population t) (criterion function) &optional variation-params)
   (let* ((crosses (when (> (length population) 1)
                     (loop repeat *capacity*
                           collect (let* ((index1 (random (length population)))
@@ -148,16 +218,17 @@
 
 
 
-(defmethod population-from-model ((model list) (criterion function))
+(defmethod population-from-model ((model list) (criterion function) &optional ga-params)
   (loop repeat *capacity*
         collect 
         ;;; each 'entry' is a list: (<fitness>  <specimen> <age>)
-        (let ((spec (random-raw-genotype (length model))))
+        (let ((spec (loop repeat (length model) 
+                          collect (rrnd (get-param :gene-range ga-params)))))
           (list (evaluate spec criterion) spec 0))))
 
 
 
-(defmethod run ((model t) (criterion function) (max-generations number) &key (finalizer #'identity))
+(defmethod run ((model t) (criterion function) (max-generations number) &key (finalizer #'identity) variation-params)
   (let ((best
          (let ((population (population-from-model model criterion)))
                        
@@ -168,10 +239,8 @@
 
                  do 
 
-                 (print generation)
-
                  (setf population
-                       (iterate population criterion))
+                       (iterate population criterion variation-params))
          
                  ;;; verbosity
                  (when (= (mod generation *display-interval*) 0)

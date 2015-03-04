@@ -73,7 +73,7 @@
   self)
 
 
-(defmethod mutate ((self specimen))
+(defmethod mutate ((self specimen) &optional ga-params)
   (let ((copy (clos::copy-standard-instance self)))
     (mutate! (raw-genotype copy))
     (update copy)))
@@ -92,13 +92,14 @@
     (setf (raw-genotype spec) raw)
     (update spec)))
 
-(defun randomize-specimen (spec)
-  (raw+model (random-raw-genotype (length (raw-genotype spec)))
+(defun randomize-specimen (spec &optional ga-params)
+  (raw+model (loop repeat (length (raw-genotype spec)) 
+                   collect (rrnd (get-param :gene-range ga-params)))
              spec))
 
-(defmethod population-from-model ((model specimen) (criterion function))
+(defmethod population-from-model ((model specimen) (criterion function) &optional ga-params)
   (loop repeat *capacity*
-        collect (let ((spec (randomize-specimen model)))
+        collect (let ((spec (randomize-specimen model ga-params)))
                   (list (evaluate spec criterion) spec 0))))
 
 ;;; pretty slick!
@@ -316,8 +317,8 @@
 
 (defun s.codes (num-operons decoder)
   (loop repeat (* num-operons 
-                  (nucleotides-per-operon (or decoder (list *gene-range*))))
-        collect (rrnd *gene-range*)))
+                  (nucleotides-per-operon (or decoder (list (get-param :gene-range)))))
+        collect (rrnd (get-param :gene-range))))
 
 
 (defmacro popn (symbol n)
@@ -337,7 +338,7 @@
 
 ;;; holy confusing
 (defun p.codes (list decoder)
-  (let ((decoder (or (om::expand-lst decoder) (list *gene-range*))))
+  (let ((decoder (or (om::expand-lst decoder) (list (get-param :gene-range)))))
     (labels ((decode (g sub)
                (loop for elt in (if (equal (first sub) :length)
                                     (subseq sub 2 (+ 2 (apply 'mtr (pop g) (second sub))))
