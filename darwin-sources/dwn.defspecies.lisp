@@ -307,7 +307,9 @@
   (if (equalp (first decoder) :length)
       (nucleotides-per-operon (cdr decoder))
     (loop for d in (om::expand-lst decoder)
-          sum (if (some #'listp d)
+          sum (if (some #'(lambda (elt) (and elt
+                                             (listp elt)))  ;; consider nil an atom for this purpose
+                        d)
                   (nucleotides-per-operon d)
                 1))))
 
