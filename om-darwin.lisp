@@ -24,18 +24,19 @@
 (setf *source-files* 
       '( "dwn.utils"
          "dwn.basic"
-         "dwn.criterion-utils"
+         "dwn.criterion-utils"  ;remove?
          "dwn.arrange2"
 
          "dwn.defspecies"
          "dwn.multi-cell"
+         "dwn.defspecies-builtin"   ;; rename
+         "dwn.spec.trees"
 
-         "dwn.defspecies-builtin"
-         ; "dwn.defspecies-custom"    ;;; in user folder
-
+         ;reorganize these two files
          "dwn.engine"
-
          "dwn.om2"
+
+         
         
          ))
 
