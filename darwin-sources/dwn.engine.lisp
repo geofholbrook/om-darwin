@@ -192,7 +192,6 @@
       (when frame
         (om::om-draw-contents frame))))) 
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -233,8 +232,6 @@
 
 (defmethod initialize-instance :after ((self ga-engine) &rest args)
   (initialize-engine self))
-
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;

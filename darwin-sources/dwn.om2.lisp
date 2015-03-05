@@ -20,20 +20,23 @@
 (defvar *raw-buffer* nil)
 (defvar *om-gene-mode* :random)    ;;;; {:random :test :buffer}
 
+(defvar *raw-buffer-lock* nil)
+(setf *raw-buffer-lock* (mp::make-lock :name "gene-lock"))
+
 (defmacro with-om-gene-mode (mode &body body)
   (let ((tmp (gensym)))
-    `(let ((,tmp *om-gene-mode*))
-       (setf *om-gene-mode* ,mode)
-       (prog1
-           (handler-bind
-               ((error #'(lambda (err)
-                           (setf *om-gene-mode* ,tmp)
-                           (capi::display-message "An error of type ~a occurred: ~a" (type-of err) (format nil "~A" err))
-                           (abort err))))
-             ,@body)
-         (setf *om-gene-mode* ,tmp)))))
+    `(mp::with-lock (*raw-buffer-lock*)
+       (let ((,tmp *om-gene-mode*))
+         (setf *om-gene-mode* ,mode)
+         (prog1
+             (handler-bind
+                 ((error #'(lambda (err)
+                             (setf *om-gene-mode* ,tmp)
+                             (capi::display-message "An error of type ~a occurred: ~a" (type-of err) (format nil "~A" err))
+                             (abort err))))
+               ,@body)
+           (setf *om-gene-mode* ,tmp))))))
   
-
 
 (defparameter *number-of-tests* 10)
 
@@ -63,8 +66,8 @@
 
 (defmethod d::phenotype ((self d::om-specimen))
   (when (om-function self)
-    (setf *raw-buffer* (d::raw-genotype self))
     (with-om-gene-mode :buffer
+      (setf *raw-buffer* (d::raw-genotype self))
       (funcall (om-function self)))))
 
 (defun count-gene-calls (fun)
