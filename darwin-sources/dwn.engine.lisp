@@ -197,7 +197,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defmethod copy-attributes (from to) to)
+(defmethod copy-attributes ((from t) (to t)) to)
 
 (defmethod copy-attributes ((from om::bpf) (to om::bpf))
   (setf (om::bpfcolor to) (om::bpfcolor from))
@@ -205,12 +205,11 @@
 
 (defmethod copy-attributes ((from om::bpc-lib) (to om::bpc-lib))
   (setf (om::bpf-list to) 
-        (print (loop for bpcfrom in (om::bpf-list from)
+        (loop for bpcfrom in (om::bpf-list from)
               for bpcto in (om::bpf-list to)
               do 
               (setf (om::point-list bpcfrom) (om::point-list bpcto))
-              ;(copy-attributes bpcfrom bpcto)
-              collect bpcfrom)))
+              collect bpcfrom))
   to)
 
 (defmethod update-best-candidate ((self ga-engine))
