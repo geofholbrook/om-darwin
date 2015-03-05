@@ -54,15 +54,15 @@
 
   :operon-slots
   (division :range (div-range self))
-  (on-off :range (list 1 (expt 2 (1- (second (div-range self))))))    
-        ;;;; 2^(n-1) possibilities, barring rests or ties!
-        ;;;; 0 is always useless anyway, results in expansion (1 0 0 ...) (no division)
+  (on-off :range (list 0 (1- (expt 2 (1- (second (div-range self)))))))    
+  ;;;; 2^(n-1) possibilities, barring rests or ties!
+  ;;;; 0 is always useless anyway, results in expansion (1 0 0 ...) (no division)
 
   :phenotyper
-  `(om::? ((,(time-sig self) ,(let ((main (make-tree (operons self) (second (div-range self)))))
-                                (if (atom main) 
-                                    (list main)
-                                  (second main)))))))
+  (om::reducetree `(om::? ((,(time-sig self) ,(let ((main (make-tree (operons self) (second (div-range self)))))
+                                                (if (atom main) 
+                                                    (list main)
+                                                  (second main))))))))
 
 
 ;;; this has to appear after defspecies, because it defines the class
@@ -114,6 +114,26 @@
   (rests :range (list 0 (1- (expt 2 (second (div-range self))))))  ;;; on-off should be this way also
   (tied :range '(:set nil t)))
 
+#|
+(defmethod correct-branch ((op ga-tree-operon) branch)
+  ; problem remains: tied note when a rest precedes it ... would have to handled outside this function. voice seems to deal with it anyway.
+
+  (let ((
+  
+  (let ((frst (car branch)))
+    (when (= (length branch) 1) 
+      (setf frst (/ frst (abs frst))))   ;;; preserves sign, type
+
+    (when (and (floatp frst) (< frst 0)) 
+      (setf frst (abs frst)))            ;;; convert tied rest to tied note
+
+
+
+             (if (< (first branch 0))
+          (if (floatp
+|#
+          
+
 (defmethod branch-from-operon ((op ga-tree-operon))
   (let ((rests? (allow-rests (owner op)))
         (ties? (allow-ties (owner op))))
@@ -133,9 +153,9 @@
             do (incf pos part) ;ex (1 3 1) --> (0 1 4)
 
             finally return (cons (if (and ties? (tied op))
-                                     (float (car parts))   ;haha
-                                   (car parts))
-                                 (cdr parts))))))
+                                                        (float (car parts))   ;haha
+                                                      (car parts))
+                                                    (cdr parts))))))
        
 
         
