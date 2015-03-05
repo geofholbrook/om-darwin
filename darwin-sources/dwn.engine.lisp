@@ -140,13 +140,15 @@
       (setf (mini-view-mode val)
             (if (equalp (mini-view-mode val) :result)
                 :engine
-              :result)))))
+              :result))))) 
 ;;;;;;;;;;;;;;;;;;;;;;;
 
 
 (defmethod initialize-instance :after ((self ga-editor) &rest initargs)
   (let ((win (om::make-editor-window (om::get-editor-class (result (om::object self))) 
-                                     (result (om::object self)) "GA RESULT" self)))
+                                     (result (om::object self)) "GA RESULT" self
+                                     :close-p nil
+                                     :wintype '(:toolbox))))
     (push win (om::attached-editors self)))
   (om-add-subviews self 
                    ;(om-make-dialog-item 'om-slider (om-make-point 20 20) (om-make-point 20 60) ""
