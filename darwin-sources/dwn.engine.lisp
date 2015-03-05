@@ -176,7 +176,8 @@
 
 (defmethod om::update-if-editor :after ((self ga-engine-box))
   (when (om::editorFrame self)
-    (om::update-editor-after-eval (first (om::attached-editors (om::editorFrame self))))))
+    (om::update-editor-after-eval (om::editor (first (om::attached-editors (om::editorFrame self))))
+                                  (result (om::value self)))))
 
 
 (defmethod redraw-editors ((self ga-engine))
