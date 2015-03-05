@@ -197,13 +197,28 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+(defmethod copy-attributes (from to) to)
 
+(defmethod copy-attributes ((from om::bpf) (to om::bpf))
+  (setf (om::bpfcolor to) (om::bpfcolor from))
+  to)
+
+(defmethod copy-attributes ((from om::bpc-lib) (to om::bpc-lib))
+  (setf (om::bpf-list to) 
+        (print (loop for bpcfrom in (om::bpf-list from)
+              for bpcto in (om::bpf-list to)
+              do 
+              (setf (om::point-list bpcfrom) (om::point-list bpcto))
+              ;(copy-attributes bpcfrom bpcto)
+              collect bpcfrom)))
+  to)
 
 (defmethod update-best-candidate ((self ga-engine))
-  (setf (result self)
-        (if (population self)
+  (let ((new-best (if (population self)
             (finalize (cadar (population self)))
-          (make-instance 'om::poly))))
+                    (make-instance 'om::poly))))
+    (setf (result self) (copy-attributes (result self) new-best))
+    ))
 
 
 (defmethod randomize-population ((self ga-engine))
