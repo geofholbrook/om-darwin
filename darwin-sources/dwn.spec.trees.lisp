@@ -91,8 +91,9 @@
     (make-branch 1 2 0)))
  
 
-(defmethod finalize ((self ga-simple-tree)) 
-  (mki 'om::voice :tree (phenotype self)))
+(defmethod finalizer ((self ga-simple-tree))
+  #'(lambda (tree)
+      (mki 'om::voice :tree tree)))
 
 (defun concat-trees (t1 t2)
   (list 'om::? (append (second t1)

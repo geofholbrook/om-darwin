@@ -7,8 +7,7 @@
 
 (defmethod species-concatenator ((self music-mixin)) #'append-arrangements)
 
-(defmethod finalize ((self music-mixin))
-  (arrange->poly (phenotype self)))
+(defmethod finalizer ((self music-mixin)) #'arrange->poly)
 
 (defspecies melody (music-mixin)         
   :species-slots (range '(60 72))

@@ -41,10 +41,8 @@
 
 ;;; finalize the multi-cell phenotype the same way a single cell would be finalized.
 ;;; if that's not gonna work you have to specialize multi-cell
-(defmethod finalize ((self multi-cell))
-  (let ((dummy (mki (type-of (first (cells self))))))
-    (setf (slot-value dummy 'pheno) (phenotype self))     ;;; quietly change the phenotype
-    (finalize dummy)))
+(defmethod finalizer ((self multi-cell))
+  (finalizer (first (cells self))))
     
 
 

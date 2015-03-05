@@ -113,8 +113,12 @@
 
 
 
+(defmethod finalizer ((self specimen)) #'identity)
+
 ;; convert to viewing / auditioning format, not for fitenss functioning
-(defmethod finalize ((self specimen)) (phenotype self))
+(defmethod finalize ((self specimen)) 
+  (funcall (finalizer self)
+           (phenotype self)))
      
 
 (defun combine-slotdefs (direct inherited)
