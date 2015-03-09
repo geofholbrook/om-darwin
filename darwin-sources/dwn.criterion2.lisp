@@ -18,12 +18,20 @@
               (index-exponent :initform *default-index-expt*)
               (fun)))
 
+
+(defmethod correct-boolean ((output t))
+  (if (numberp output)
+      output
+    (if output 0 1)))
+
+(defmethod correct-boolean ((output list)) (mapcar 'correct-boolean output))
+
+
 (defmethod evaluate ((self t) (crit criterion) &rest args)
-  (expt (* (apply '+ (list! (om^ (funcall (fun crit) self)
+  (expt (* (apply '+ (list! (om^ (correct-boolean (funcall (fun crit) self))
                                  (index-exponent crit))))
            (weight crit))
         (exponent crit)))
-
 
 ;;; with-subject-loop provides _subj and _length
 
@@ -42,9 +50,21 @@
                  )))
 
 ;direct
-(defmethod om::crit ((evaluator function) (subject t) (test-value t) (rate t) &optional weight exponent index-exponent)
+(defmethod! om::crit ((evaluator function) (subject t) (test-value t) (rate t) 
+                     &optional weight exponent index-exponent)
+  :icon 704
   (special-make-criterion :direct () (spec) 
     (funcall evaluator spec)))
+
+(defmethod om::crit ((evaluator function) (subject (eql :operons)) (test-value t) (rate t)  
+                     &optional weight exponent index-exponent)
+  :icon 704
+  (special-make-criterion :iterator () (spec)
+    (loop for op in (operons spec)
+          collect (funcall evaluator op))))
+
+
+
                                 
 
 ;(defcrit simple-iterator (:fun :iterator nil nil)

@@ -163,7 +163,7 @@
 ;; note: each individual is represented as a list: (<fitness>  <specimen> <age>)
 
 ;;; destructively iterates population
-(defmethod iterate ((population t) (criterion function) &optional variation-params)
+(defmethod iterate ((population t) (criterion t) &optional variation-params)
   (let* ((crosses (when (> (length population) 1)
                     (loop repeat *capacity*
                           collect (let* ((index1 (random (length population)))
@@ -218,7 +218,7 @@
 
 
 
-(defmethod population-from-model ((model list) (criterion function) &optional ga-params)
+(defmethod population-from-model ((model list) (criterion t) &optional ga-params)
   (loop repeat *capacity*
         collect 
         ;;; each 'entry' is a list: (<fitness>  <specimen> <age>)

@@ -97,7 +97,7 @@
                    collect (rrnd (get-param :gene-range ga-params)))
              spec))
 
-(defmethod population-from-model ((model specimen) (criterion function) &optional ga-params)
+(defmethod population-from-model ((model specimen) (criterion t) &optional ga-params)
   (loop repeat *capacity*
         collect (let ((spec (randomize-specimen model ga-params)))
                   (list (evaluate spec criterion) spec 0))))
