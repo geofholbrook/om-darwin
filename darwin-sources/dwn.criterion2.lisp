@@ -44,24 +44,49 @@
         :rate rate
         :weight (or weight *default-weight*)
         :exponent (or exponent *default-expt*)
-        :addend-exponent (or index-exponent *default-index-expt*)
+        :index-exponent (or index-exponent *default-index-expt*)
         :fun #'(lambda ,lambda-list
                  ,@body
                  )))
 
+(defmethod get-subject-list ((self list) (subject-keyword t))   ;;; arrangement?
+  (case subject-keyword
+    (:pitch (mapcar 'region-pitch self))
+    (:melodic (loop for sub on self
+                    if (cddr sub)
+                    collect (- (region-pitch (cadr sub))
+                               (region-pitch (car sub)))))))
+
+(defmethod get-subject-list ((self specimen) (subject-keyword t))
+  (case subject-keyword
+    (:operons (operons self))
+    (otherwise (get-subject-list (phenotype self)
+                                 subject-keyword))))
+    
+
 ;direct
-(defmethod! om::crit ((evaluator function) (subject t) (test-value t) (rate t) 
+(defmethod! om::criterion ((evaluator t) (subject t) (test-value t) (rate t) 
                      &optional weight exponent index-exponent)
   :icon 704
   (special-make-criterion :direct () (spec) 
     (funcall evaluator spec)))
 
-(defmethod om::crit ((evaluator function) (subject (eql :operons)) (test-value t) (rate t)  
+
+
+(defmethod compare-to-test-value ((eval-result number) (test-value t))
+  (if test-value
+      (offby eval-result test-value)
+    eval-result))
+
+(defmethod! om::criterion ((evaluator t) (subject symbol) (test-value t) (rate t) 
                      &optional weight exponent index-exponent)
   :icon 704
   (special-make-criterion :iterator () (spec)
-    (loop for op in (operons spec)
-          collect (funcall evaluator op))))
+    (loop for elt in (get-subject-list spec subject)
+          collect (compare-to-test-value (funcall (or evaluator #'identity) elt)
+                                         test-value))))
+
+
 
 
 

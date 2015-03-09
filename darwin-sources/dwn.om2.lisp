@@ -53,6 +53,11 @@
                       (pop *raw-buffer*)
                     (error "Error: raw genotype buffer depleted. Raw genotype size should be determinate.")))))
     (d::mod-to-range nucleo (list min max) step floatp)))
+
+
+(defmethod! nth-gene (lis)
+  :icon 706
+  (nth (om-gene 0 (1- (length lis))) lis))
                
 
 (defclass d::om-specimen (d::specimen) 
