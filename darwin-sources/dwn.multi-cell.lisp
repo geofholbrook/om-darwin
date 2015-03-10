@@ -49,7 +49,7 @@
 ;;;;
 
 
-(defclass stack (multi-cell) ())    ;;; should probably inherit in the other direction ...
+(defclass stack (multi-cell) () (:metaclass species))    ;;; should probably inherit in the other direction ...
 
 (om::defmethod! om::make-stack ((cells list))
                 :icon 703

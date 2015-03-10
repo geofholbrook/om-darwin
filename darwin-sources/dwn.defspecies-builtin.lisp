@@ -15,6 +15,20 @@
   :phenotyper (make-even-melody (mapcar 'pitch (operons self))
                      1/16))
 
+(defspecies even-melody (melody)
+  :species-slots (note-value 1/16)
+  :phenotyper (make-even-melody (mapcar 'pitch (operons self))
+                                (note-value self)))
+
+(defspecies grid-melody (even-melody)
+  :species-slots (len-range '(1 4)) ;; measured in units
+  :operon-slots (units :range (len-range self))
+  :phenotyper (loop for op in (operons self)
+                    with start = 0
+                    for len = (* (units op) (note-value self))
+                    collect (make-region start len 1 (pitch op))
+                    do (incf start len)))
+
 
 (defspecies arrangement (music-mixin)
 
