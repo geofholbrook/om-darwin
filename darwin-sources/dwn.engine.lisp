@@ -98,10 +98,19 @@
 (defmethod om::play-obj? ((self ga-engine)) t)
 (defmethod om::get-obj-to-play ((self ga-engine-box)) (result (om::value self)))
 
+(defmethod om::handle-key-event :around ((self om::patchPanel) char) 
+  
+  (om::modify-patch self)
+  (let* ((ga-frames (om::get-actives self 'ga-engine-frame)))
+    (case char
+      (#\g  (let* ((boxes (mapcar 'om::object ga-frames))
+                   (vals (mapcar 'om::value boxes)))
+              (if (some #'running vals)
+                  (mapc #'stop vals)
+                (mapc #'start vals))))
 
-
-
-
+      (otherwise (call-next-method self char)))))
+      
 
 (defclass ga-editor (om::EditorView om::object-editor) 
   ())
