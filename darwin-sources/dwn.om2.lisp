@@ -1,12 +1,16 @@
 (in-package om)
 
 
-;;; main method ;;;;;;;;
+;;; EVOULTE METHOD (update ... been using ga-engine) ;;;;;;;;
 
 (defmethod! evolute ((model t) (criterion function) (generations number))
   :initvals (list nil nil 100)
   :icon 701
   (d::run model criterion generations))
+
+(defmethod! evaluate ((spec t) (criterion t))
+  :icon 704
+  (d::evaluate spec criterion))
 
 ;;;;;;;;;;;
 

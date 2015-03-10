@@ -55,11 +55,19 @@
 
 (defmethod get-subject-list ((arr list) (subject-keyword t))   ;;; hope it's an arrangement?
   (case subject-keyword
+    (:region arr)
+    
     (:pitch (mapcar 'region-pitch arr))
+    (:pitch-class (mapcar #'(lambda (r)
+                        (mod (region-pitch r) 12) arr)))
+
     (:adjacent (adjacent-pairs-by-channel arr))
+
     (:melodic (loop for pairs in (adjacent-pairs-by-channel arr)
                     collect (- (region-pitch (second pairs))
-                               (region-pitch (first pairs)))))))
+                               (region-pitch (first pairs)))))
+
+    (:melodic-unsigned (om-abs (get-subject-list arr :melodic)))))
 
 (defmethod get-subject-list ((self specimen) (subject-keyword t))
   (case subject-keyword
@@ -71,7 +79,7 @@
 ;direct
 (defmethod! om::criterion ((evaluator t) (subject t) (test-value t) (rate t) 
                      &optional weight exponent index-exponent)
-  :icon 704
+  :icon 702
   (special-make-criterion :direct () (spec) 
     (funcall evaluator spec)))
 
@@ -85,7 +93,7 @@
 
 (defmethod! om::criterion ((evaluator t) (subject symbol) (test-value t) (rate t) 
                      &optional weight exponent index-exponent)
-  :icon 704
+  :icon 702
   (special-make-criterion :iterator () (spec)
     (loop for elt in (get-subject-list spec subject)
           collect (compare-to-test-value (funcall (or evaluator #'identity) elt)
