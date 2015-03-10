@@ -21,6 +21,64 @@
   (intern (string-upcase str) :keyword))
 
 
+
+(unless (fboundp 'om::find-keyword)
+  (defun om::find-keyword (keyword keylist)
+    (system::zzzz-simple-find-keyword keyword keylist)))
+
+(unless (fboundp 'om::rrnd)
+  (defun om::rrnd (lower-limit &optional upper-limit)
+    (if (listp lower-limit)
+        (apply 'rrnd lower-limit)
+      (+ lower-limit
+         (random (+ (- upper-limit lower-limit)
+                    (if (integerp lower-limit)
+                        1
+                      0)))))))
+
+(unless (fboundp 'om::demix)
+  (defun om::demix (lis test &optional sortp)
+    "creates a categorized list of lists, the original elements of _lis_ separated
+ into lists according to _test_
+ original order is preserved"
+    (let (result)
+      (loop for item in lis
+            do
+            (let ((p (position item result :test #'(lambda (i r)
+                                                     (equalp (funcall test i)
+                                                             (funcall test (first r)))))))
+              (if p 
+                  (push item (nth p result))
+                (push (list item) result))))
+      (if sortp
+          (sort (mapcar #'nreverse result) #'< :key #'(lambda (item-list) (funcall test (first item-list))))
+        (nreverse (mapcar #'nreverse result)))))
+
+  (export 'om::demix "OM"))
+
+
+(unless (fboundp 'om::withinp)
+  (defun withinp (num lo hi &key (ordered t) (tolerance 0))
+    (or (and (<= num (+ hi tolerance))
+             (>= num (- lo tolerance)))
+        (and (not ordered)
+             (>= num (- hi tolerance))
+             (<= num (+ lo tolerance))))))
+
+(export 'om::withinp "OM")
+
+
+(unless (fboundp 'om::om-clip)
+  (defmethod om-clip ((val number) (min number) &optional max)
+    (if (and min (< val min))
+        min
+      (if (and max (> val max))
+          max
+        val)))
+  (export 'om::om-clip "OM"))
+
+
+
 ;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
 ;;; »»»»»»»»»»»»»»»»» DECODING »»»»»»»»»»»»»»»»»
 ;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»

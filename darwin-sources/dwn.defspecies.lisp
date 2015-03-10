@@ -130,6 +130,21 @@
                 collect slot)))
 
 
+;;; could be defined by om-geof
+(unless (fboundp 'om::defclas!)
+  (defmacro om::defclas! (name inheritance &rest rest)
+  "simpler defclass!"
+  (let ((slots (pop rest)))
+    `(om::defclass!
+       ,name
+       ,inheritance
+       ,(mapcar #'(lambda (slot) 
+                    `( ,(first slot) :accessor ,(first slot) :initarg 
+                       ,(intern (symbol-name (first slot)) 'keyword)
+                       ,. (rest slot)))
+                slots)
+       ,. rest))))
+
 
 ;;; how best to encapsuate the various parts of this macro, which is getting too long ... ?
 (defmacro defspecies (species-name inheritance &body args)

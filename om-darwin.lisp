@@ -7,7 +7,9 @@
 
 (in-package om)
 
-(require-library "om-geof")
+(export '(om::rrnd om::mki) "OM") 
+
+;(require-library "om-geof")
 ;(require-library "om-enved")
 
 ;--------------------------------------------------
