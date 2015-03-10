@@ -19,11 +19,8 @@
               (fun)))
 
 
-(defmethod correct-boolean ((output t))
-  (if (numberp output)
-      output
-    (if output 0 1)))
-
+(defmethod correct-boolean ((output t)) 0)
+(defmethod correct-boolean ((outpu (eql nil))) 1)
 (defmethod correct-boolean ((output list)) (mapcar 'correct-boolean output))
 
 
@@ -33,7 +30,6 @@
            (weight crit))
         (exponent crit)))
 
-;;; with-subject-loop provides _subj and _length
 
 (defmacro special-make-criterion (kind class lambda-list &body body)
   `(mki ',(or class 'criterion)
@@ -77,6 +73,7 @@
   (if test-value
       (offby eval-result test-value)
     eval-result))
+
 
 (defmethod! om::criterion ((evaluator t) (subject symbol) (test-value t) (rate t) 
                      &optional weight exponent index-exponent)

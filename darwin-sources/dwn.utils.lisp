@@ -619,13 +619,19 @@ in between are possible."
               (within-M n min max tolerance))
           self))
 
+
+;;;;;;;;;; 
+
 "how much is it off by?"
 (defmethod offby ((self number) (value number))
   (abs (- value self)))
 
 (defmethod offby ((self number) (value list))
-  (within-M self value) ;;the old function
-)
+  (case (car value)
+    (:unsigned (offby (abs self) (cdr value)))
+    (:class (offby (mod self 12) (cdr value)))
+    (:set (memberp self (cdr value)))
+    (otherwise (within-M self value)))) ;; the old function
 
 (defmethod offby ((self list) (value t))
   (mapcar #'(lambda (elt)
@@ -637,11 +643,8 @@ in between are possible."
   (lambda (n) (om* (funcall arg1 n) arg2)))
 
 
-
 (defun collect (&rest results)
   (apply '+ (om::flat (remove-if #'null results))))
-
-
 
 
 
