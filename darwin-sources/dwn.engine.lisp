@@ -98,6 +98,16 @@
 (defmethod om::play-obj? ((self ga-engine)) t)
 (defmethod om::get-obj-to-play ((self ga-engine-box)) (result (om::value self)))
 
+
+(defmethod om::om-geof-keys ((self om::patchPanel) char) 
+  (let ((actives (om::get-actives self)))
+    (case char
+      (#\E (om::om-encapsulate self actives))
+      (#\L (om::om-funnel self actives))
+      (#\Y (om::om-align self actives)
+           (om::make-move-after self actives))
+      (#\C (om::om-cascade self actives)))))
+
 (defmethod om::handle-key-event :around ((self om::patchPanel) char) 
   
   (om::modify-patch self)
@@ -109,7 +119,8 @@
                   (mapc #'stop vals)
                 (mapc #'start vals))))
 
-      (otherwise (call-next-method self char)))))
+      (otherwise (progn (om::om-geof-keys self char)
+                   (call-next-method self char))))))
       
 
 (defclass ga-editor (om::EditorView om::object-editor) 

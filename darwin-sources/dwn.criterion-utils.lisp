@@ -1,5 +1,38 @@
-(in-package dwn)
 
+(in-package om)
+
+(defmethod! c-list (c1 c2 &rest cs)
+  :icon 702
+  #'(lambda (x)
+      (loop for crit in `(,c1 ,c2 ,@cs)
+            sum (evaluate x crit))))
+
+(defmethod! c-print ()
+  :icon 702
+  #'(lambda (x)
+      (print x)
+      1.0))
+
+
+(defmethod! c-pc (test-value)
+  :icon 702
+  (criterion nil :pitch-class test-value nil))
+
+(defmethod! c-pitch (test-value)
+  :icon 702
+  (criterion nil :pitch test-value nil))
+
+(defmethod! c-rate ((self d::criterion) rate)
+  (criterion (d::evaluator self)
+             (d::subject self)
+             (d::test-value self)
+             rate))
+
+
+
+
+
+(in-package dwn)
 
 (om::defmethod! add (&rest functions)
   :icon 702

@@ -26,7 +26,6 @@
 (setf *source-files* 
       '( "dwn.utils"
          "dwn.basic"
-         "dwn.criterion-utils"  ;remove?
          "dwn.arrange2"
 
          "dwn.defspecies"
@@ -39,6 +38,7 @@
          "dwn.om2"
 
          "dwn.criterion2"
+         "dwn.criterion-utils" 
 
          "dwn.tests"
 

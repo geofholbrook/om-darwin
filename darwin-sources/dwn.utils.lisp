@@ -58,18 +58,18 @@
 
 
 (unless (fboundp 'om::withinp)
-  (defun withinp (num lo hi &key (ordered t) (tolerance 0))
+  (defun om::withinp (num lo hi &key (ordered t) (tolerance 0))
     (or (and (<= num (+ hi tolerance))
              (>= num (- lo tolerance)))
         (and (not ordered)
              (>= num (- hi tolerance))
-             (<= num (+ lo tolerance))))))
+             (<= num (+ lo tolerance)))))
 
-(export 'om::withinp "OM")
+  (export 'om::withinp "OM"))
 
 
 (unless (fboundp 'om::om-clip)
-  (defmethod om-clip ((val number) (min number) &optional max)
+  (defmethod om::om-clip ((val number) (min number) &optional max)
     (if (and min (< val min))
         min
       (if (and max (> val max))
