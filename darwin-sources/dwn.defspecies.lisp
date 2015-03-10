@@ -157,7 +157,7 @@
   ;5. initialize-instance: set the decoder based on operon structure, create raw genotype
   ;6. 
   
-  (print (om::string+ "expanding " (prin1-to-string species-name)))
+  ;(print (om::string+ "expanding " (prin1-to-string species-name)))
 
   (flet ((symbol+ (&rest substrings)
            (intern (string-upcase (apply #'om::string+ substrings))))
@@ -199,7 +199,7 @@
       (setf species-slots (combine-slotdefs direct-species-slots (species-slots superclass)))
       (setf operon-slots (combine-slotdefs direct-operon-slots (operon-slots superclass)))
 
-      `(let ((bogus (print (om::string+ "evaluating " ,(prin1-to-string species-name))))
+      `(let (;(bogus (print (om::string+ "evaluating " ,(prin1-to-string species-name))))
              (species (om::defclas! ,species-name ,(or inheritance '(specimen))
 
                                     ((,operon-initarg :initform ,*default-num-operons*)   ;;; default for number of operons is 8
