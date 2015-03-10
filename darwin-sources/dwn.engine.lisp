@@ -60,10 +60,13 @@
     (setf (process (box self)) process)))
 
 
-
 (defclass ga-engine-box (om::omboxeditcall)
   ((process :initform nil :accessor process)
    ))
+
+(defmethod is-ga-box-p ((self t)) nil)
+(defmethod is-ga-box-p ((self ga-engine-box)) t)
+
 
 (defmethod om::get-type-of-ed-box ((self ga-engine)) 'ga-engine-box)
 
@@ -92,23 +95,8 @@
   (mapcar #'cleanup-process (om::boxes self)))
 
 
-;; spacebar to play (or <p>lay and <s>top ) ;;;;;;;;;;;;;
-
-(defmethod is-ga-box-p ((self t)) nil)
-(defmethod is-ga-box-p ((self ga-engine-box)) t)
-
-(defmethod om::play-boxes :after ((boxlist list))
-  (loop for ga-box in (remove-if-not 'is-ga-box-p boxlist)
-        do (let ((ga (om::value ga-box)))
-             (if (running ga)
-                 (stop ga)
-               (start ga)))))
-
-(defmethod om::stop-boxes :after ((boxlist list))
-  (loop for ga-box in (remove-if-not 'is-ga-box-p boxlist)
-        do (stop (om::value ga-box))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defmethod om::play-obj? ((self ga-engine)) t)
+(defmethod om::get-obj-to-play ((self ga-engine-box)) (result (om::value self)))
 
 
 
