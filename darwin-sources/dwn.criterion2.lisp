@@ -19,7 +19,9 @@
               (fun)))
 
 
-(defmethod correct-boolean ((output t)) 0)
+
+(defmethod correct-boolean ((output (eql t))) 0)
+(defmethod correct-boolean ((output number)) output)
 (defmethod correct-boolean ((outpu (eql nil))) 1)
 (defmethod correct-boolean ((output list)) (mapcar 'correct-boolean output))
 
@@ -45,13 +47,19 @@
                  ,@body
                  )))
 
-(defmethod get-subject-list ((self list) (subject-keyword t))   ;;; arrangement?
+(defun adjacent-pairs-by-channel (arr)
+  (loop for chan in (demix arr 'region-chan)
+        append (loop for sub on chan
+                     if (cddr sub)
+                     collect (first-n sub 2))))
+
+(defmethod get-subject-list ((arr list) (subject-keyword t))   ;;; hope it's an arrangement?
   (case subject-keyword
-    (:pitch (mapcar 'region-pitch self))
-    (:melodic (loop for sub on self
-                    if (cddr sub)
-                    collect (- (region-pitch (cadr sub))
-                               (region-pitch (car sub)))))))
+    (:pitch (mapcar 'region-pitch arr))
+    (:adjacent (adjacent-pairs-by-channel arr))
+    (:melodic (loop for pairs in (adjacent-pairs-by-channel arr)
+                    collect (- (region-pitch (second pairs))
+                               (region-pitch (first pairs)))))))
 
 (defmethod get-subject-list ((self specimen) (subject-keyword t))
   (case subject-keyword
