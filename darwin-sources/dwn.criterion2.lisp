@@ -94,11 +94,14 @@
 (defmethod! om::criterion ((evaluator t) (subject symbol) (test-value t) (rate t) 
                      &optional weight exponent index-exponent)
   :icon 702
+  :initvals (list nil nil nil nil)
 
- ; doesn't work
- ;:menuins `( (1 ( ,(mapcar #'(lambda (sym) `'(,(string-downcase (symbol-name sym))
- ;                                              ,sym))
- ;                          '(:regions :adjacent :pitch :pitch-class :signed-melodic :melodic)))))
+  :menuins '((1 (("regions" :regions)
+                ("adjacent" :adjacent)
+                ("pitch" :pitch)
+                ("pitch-class" :pitch-class)
+                ("melodic" :melodic)
+                ("signed-melodic" :signed-melodic))))
 
   (special-make-criterion :iterator () (spec)
     (loop for elt in (get-subject-list spec subject)
