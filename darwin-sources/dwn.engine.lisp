@@ -1,7 +1,7 @@
 
 (in-package dwn)
 
-(defparameter *ga-process* nil)
+
 
 (om::defclass! ga-engine ()
   (
@@ -20,56 +20,24 @@
    
   (:icon 701))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; GA-ENGINE-BOX    (stores GA process)
 
-(defmethod om::omNG-save ((self specimen) &optional (values? nil))
-  `(let ((spec ,(call-next-method)))
-     (setf (raw-genotype spec) ,(om::omng-save (raw-genotype self)))
-     (update spec)
-     spec))
-     
-(defmethod om::omNG-save ((self ga-engine) &optional (values? nil))
-  `(let ((ga ,(call-next-method)))
-     (setf (population ga) ,(om::omng-save (population self)))
-     (setf (generation ga) ,(om::omng-save (generation self)))
-     (setf (result ga) ,(om::omng-save (result self))) 
-     ga))
-
-(defmethod om::omNG-copy ((self specimen))
-  `(let ((copy ,(call-next-method)))
-     (setf (raw-genotype copy) ',(raw-genotype self))
-     (update copy)
-     copy))
-
-(defmethod om::omNG-copy ((self ga-engine))
-  `(let ((copy (make-instance ',(type-of self))))
-     (setf (population copy) ,(om::omng-copy (population self)))
-     (setf (generation copy) ,(generation self))
-     (setf (result copy) ,(om::omng-copy (result self)))
-     copy))
-
-
-
-
-
-(defmethod process ((self ga-engine)) 
-  (when (box self)
-    (process (box self))))
-
-(defmethod set-process ((self ga-engine) process)
-  (when (box self)
-    (setf (process (box self)) process)))
-
-
+(defmethod om::get-type-of-ed-box ((self ga-engine)) 'ga-engine-box)
 (defclass ga-engine-box (om::omboxeditcall)
-  ((process :initform nil :accessor process)
-   ))
+  ((process :initform nil :accessor process)))
 
 (defmethod is-ga-box-p ((self t)) nil)
 (defmethod is-ga-box-p ((self ga-engine-box)) t)
 
+(defmethod process ((self ga-engine)) 
+  (when (box self) (process (box self))))
+(defmethod set-process ((self ga-engine) process)
+  (when (box self) (setf (process (box self)) process)))
 
-(defmethod om::get-type-of-ed-box ((self ga-engine)) 'ga-engine-box)
 
+;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;  specializing methods for all ways box might be removed or re-evaluated ... to prevent orphaned processes
 (defmethod om::omng-remove-element :before ((self om::ompatch) (elem ga-engine-box))
   (when (process elem) 
     (print "KILLING PROCESS")
@@ -93,11 +61,13 @@
 (defmethod om::load-abstraction-attributes :before ((self om::ompatch) currentpersistent)
   (declare (ignore currentpersistent))
   (mapcar #'cleanup-process (om::boxes self)))
+;;;;;;;;;;;;;;;;;;;;
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; KEY INTERACTION 
 
 (defmethod om::play-obj? ((self ga-engine)) t)
 (defmethod om::get-obj-to-play ((self ga-engine-box)) (result (om::value self)))
-
 
 (defmethod om::om-geof-keys ((self om::patchPanel) char) 
   (let ((actives (om::get-actives self)))
@@ -109,7 +79,6 @@
       (#\C (om::om-cascade self actives)))))
 
 (defmethod om::handle-key-event :around ((self om::patchPanel) char) 
-  
   (om::modify-patch self)
   (let* ((ga-frames (om::get-actives self 'ga-engine-frame)))
     (case char
@@ -119,12 +88,19 @@
                   (mapc #'stop vals)
                 (mapc #'start vals))))
 
-      (otherwise (progn (om::om-geof-keys self char)
+      (otherwise (progn 
+                   ;(when (find-library "om-geof" (om::om-geof-keys self char)))
                    (call-next-method self char))))))
-      
 
+
+
+;;;;;;;;;;;;;;;;;;;;
+;;;; GA-EDITOR
+      
 (defclass ga-editor (om::EditorView om::object-editor) 
   ())
+
+(defmethod om::editor-compatible-params-p ((ed1 om::scoreeditor) (ed2 ga-editor)) t)
 
 (defmethod om::class-has-editor-p ((self ga-engine)) t)
 (defmethod om::get-editor-class ((self ga-engine)) 'ga-editor)
@@ -138,7 +114,7 @@
       (om::draw-mini-view self (result value))
      (call-next-method)))
 
-;;;;;;;;;;;;;;;;
+
 ;;; toggle miniview hack
 (defmethod om::get-frame-class ((self ga-engine-box)) 'ga-engine-frame)
 (defclass ga-engine-frame (om::boxEditorFrame) ())
@@ -149,7 +125,7 @@
             (if (equalp (mini-view-mode val) :result)
                 :engine
               :result))))) 
-;;;;;;;;;;;;;;;;;;;;;;;
+
 
 
 (defmethod initialize-instance :after ((self ga-editor) &rest initargs)
@@ -159,13 +135,6 @@
                                      :wintype '(:toolbox))))
     (push win (om::attached-editors self)))
   (om-add-subviews self 
-                   ;(om-make-dialog-item 'om-slider (om-make-point 20 20) (om-make-point 20 60) ""
-                   ;                     :di-action #'(lambda (slider)
-                   ;                                    (print (om-slider-value slider))))
-                   ;(om-make-dialog-item 'om-check-box (om-make-point 200 20) (om-make-point 20 60) ""
-                   ;                     :di-action #'(lambda (slider)
-                   ;                                    (print (om-checked-p slider))))
-
                    (om-make-dialog-item 'om-button (om-make-point 20 50) (om-make-point 80 20) "Start"
                                         :di-action #'(lambda (button)
                                                        (start (om::object (om-view-container button)))))
@@ -180,11 +149,11 @@
                    )
   )
 
-
+#| ;;; no longer necessary?
 ;;;; BAD HACK/FIX ;;;;;
 ; redefines an OM method
 (in-package om)
-(defmethod change-select-system ((self multiseqPanel) (obj simple-container) newsys)
+(defmethod change-select-system ((self multiseqPanel) (obj simple-container) newsys) (call-next-method))
   (let ((oldpar (get-edit-param (om-view-container self) 'staff)))
     (loop for pos from 0 to (- (length (staff-sys self)) 1) do
           (setf (nth pos (staff-sys self)) (get-staff-system newsys))
@@ -196,6 +165,7 @@
     (set-edit-param (om-view-container self) 'staff oldpar)))
 
 (in-package dwn)
+|#
 
 
 ;(defmethod om::editor-object-from-value ((self ga-engine)) (result self))
@@ -204,7 +174,6 @@
   (when (om::editorFrame self)
     (om::update-editor-after-eval (om::editor (first (om::attached-editors (om::editorFrame self))))
                                   (result (om::value self)))))
-
 
 (defmethod redraw-editors ((self ga-engine))
   ;(print 'what?)
@@ -368,6 +337,31 @@
                 
 
 
+(defmethod om::omNG-save ((self specimen) &optional (values? nil))
+  `(let ((spec ,(call-next-method)))
+     (setf (raw-genotype spec) ,(om::omng-save (raw-genotype self)))
+     (update spec)
+     spec))
+     
+(defmethod om::omNG-save ((self ga-engine) &optional (values? nil))
+  `(let ((ga ,(call-next-method)))
+     (setf (population ga) ,(om::omng-save (population self)))
+     (setf (generation ga) ,(om::omng-save (generation self)))
+     (setf (result ga) ,(om::omng-save (result self))) 
+     ga))
+
+(defmethod om::omNG-copy ((self specimen))
+  `(let ((copy ,(call-next-method)))
+     (setf (raw-genotype copy) ',(raw-genotype self))
+     (update copy)
+     copy))
+
+(defmethod om::omNG-copy ((self ga-engine))
+  `(let ((copy (make-instance ',(type-of self))))
+     (setf (population copy) ,(om::omng-copy (population self)))
+     (setf (generation copy) ,(generation self))
+     (setf (result copy) ,(om::omng-copy (result self)))
+     copy))
 
 #| 
 (defun run ()
