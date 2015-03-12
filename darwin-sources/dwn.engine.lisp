@@ -181,6 +181,22 @@
   )
 
 
+;;;; BAD HACK/FIX ;;;;;
+; redefines an OM method
+(in-package om)
+(defmethod change-select-system ((self multiseqPanel) (obj simple-container) newsys)
+  (let ((oldpar (get-edit-param (om-view-container self) 'staff)))
+    (loop for pos from 0 to (- (length (staff-sys self)) 1) do
+          (setf (nth pos (staff-sys self)) (get-staff-system newsys))
+          ;(setf (nth pos oldpar) newsys)
+          )
+    (setf oldpar (create-list (length (staff-sys self)) newsys))
+    ;i think this is the same thing.
+    
+    (set-edit-param (om-view-container self) 'staff oldpar)))
+
+(in-package dwn)
+
 
 ;(defmethod om::editor-object-from-value ((self ga-engine)) (result self))
 

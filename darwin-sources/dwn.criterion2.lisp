@@ -26,9 +26,16 @@
 (defmethod correct-boolean ((output list)) (mapcar 'correct-boolean output))
 
 
+(defmethod process-evaluator-output ((output list) (crit criterion))
+  (if (rate crit)
+      (offby (rate crit)
+             (/ (count 0 (correct-boolean output))
+                (length output)))
+    (apply '+ (list! (om^ (correct-boolean output)
+                          (index-exponent crit))))))
+
 (defmethod evaluate ((self t) (crit criterion) &rest args)
-  (expt (* (apply '+ (list! (om^ (correct-boolean (funcall (fun crit) self))
-                                 (index-exponent crit))))
+  (expt (* (process-evaluator-output (funcall (fun crit) self) crit)
            (weight crit))
         (exponent crit)))
 

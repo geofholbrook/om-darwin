@@ -23,6 +23,7 @@
   (criterion nil :pitch test-value nil))
 
 (defmethod! c-rate ((self d::criterion) rate)
+  :icon 702
   (criterion (d::evaluator self)
              (d::subject self)
              (d::test-value self)
