@@ -3,7 +3,7 @@
 ;;; GA TREES
 ;;;;;;;;;;;;;;;;
 
-;;; all possible compositions (ordered partitions) of an integer 
+;;; all possible compositions (ordered partitions) of an integer    (not actually used?)
 (defun all-compositions (n)
   (or (loop for k from 1 to n
             append (loop for next in (all-compositions (- n k))

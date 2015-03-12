@@ -2,7 +2,7 @@
 
 (defparameter *capacity* 10)             ;;; number of specimens that survive each generation
 (defparameter *litter-size* 5)           ;;; number of copies made of each specimen
-(defparameter *longevity* 50)            ;;; number of generations a specimen can survive while not in first place
+(defparameter *longevity* 10)            ;;; number of generations a specimen can survive while not in first place
 
 (defparameter *display-interval* 1)      ;;; how often, in generations, the current best fitness (lowest score) is displayed
 
@@ -23,7 +23,7 @@
 (defun get-recent-result () *most-recent-result*)
   
 (defparameter *default-ga-params* 
-  (list :gene-range '(0 255)             ; numeric range for a nucleotide (unit of the raw genotype)
+  (list :gene-range '(0 11)             ; numeric range for a nucleotide (unit of the raw genotype)
 
         :seeding nil                     ; initialize population with decent solutions ?
 
@@ -162,7 +162,7 @@
 
 ;; note: each individual is represented as a list: (<fitness>  <specimen> <age>)
 
-;;; destructively iterates population
+;;; returns new population, iterated once
 (defmethod iterate ((population t) (criterion t) &optional variation-params)
   (let* ((crosses (when (> (length population) 1)
                     (loop repeat *capacity*
@@ -187,10 +187,18 @@
     (let ((sorted (sort (append population 
                                 offspring 
                                 crosses)
-                        #'(lambda (s1 s2)
-                            (if (= (car s1) (car s2))
-                                (> (caddr s1) (caddr s2))
-                              (< (car s1) (car s2)))))))
+
+                        #'<
+                        :key #'(lambda (s)
+                                 (* (car s)
+                                    (1+ (expt (* (max (- (caddr s) 
+                                                         *longevity*) 0) 0.01) 2))))
+                        
+                        ;#'(lambda (s1 s2)
+                        ;    (if (= (car s1) (car s2))
+                        ;        (> (caddr s1) (caddr s2))
+                        ;      (< (car s1) (car s2))))
+                        )))
 
           ;;; sorts first by fitness, then by age ... older specimens survive so that they can't survive
           ;;; by just alternating between equivalent raw genotypes. if it weren't for this problem,
@@ -208,11 +216,18 @@
                 ;;; this could potentially pare the population down to 1 if the fitness is low integers or something ...
                       
                 if (or (= k 0) ;current best
-                       (and (< (caddr sp) ;age
-                               *longevity*)
-                            (not (member (car sp) fitnesses))))
+                       ;(and (< (caddr sp) ;age
+                       ;        *longevity*)
+                            (not (member (car sp) fitnesses))
+                            )
                       
-                collect sp into result
+                collect (list (* (car sp)
+                                 (let ((n (1+ (expt (* (max (- (caddr sp) 
+                                                      *longevity*) 0) 0.01) 2))))
+                                   (if (> n 1) (print n))
+                                   n))
+                              (second sp)
+                              (1+ (third sp))) into result
                 do (push (car sp) fitnesses)
                 finally return result))))
 
