@@ -60,6 +60,17 @@
                      if (cdr sub)
                      collect (first-n sub 2))))
 
+(defmethod get-subject-list ((cseq chord-seq) (subject-keyword t))
+  (case subject-keyword
+    (:chord (om::inside cseq))
+    
+    (:pitch (flat (mapcar #'om::lmidic (om::inside cseq))))
+
+    (:pitch-class (mapcar #'(lambda (midic) (mod midic 1200))
+                          (flat (mapcar #'om::lmidic (om::inside cseq)))))
+
+    ))
+
 (defmethod get-subject-list ((arr list) (subject-keyword t))   ;;; hope it's an arrangement?
   (case subject-keyword
     (:region arr)
