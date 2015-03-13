@@ -197,7 +197,7 @@
          :tree (mktree (or (make-ratio-list arr) '(-1)) time-sig)
          :chords (mapcar #'(lambda (region)
                              (om::mki 'chord
-                                  :lmidic (list! (om* (region-prop region 1) 100))
+                                  :lmidic (list! (region-prop region 1))
                                   :lvel (list (or (when (fifth region)
                                                     (if (atom (fifth region))
                                                         (fifth region)
