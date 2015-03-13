@@ -22,6 +22,15 @@
   :icon 702
   (criterion nil :pitch test-value nil))
 
+(defmethod! c-melodic (test-value &optional signed?)
+  :icon 702
+  (criterion nil 
+             (if signed?
+                 :signed-melodic
+               :melodic)
+             test-value 
+             nil))
+
 (defmethod! c-rate ((self d::criterion) rate)
   :icon 702
   (criterion (d::evaluator self)
