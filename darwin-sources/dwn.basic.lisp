@@ -23,7 +23,7 @@
 (defun get-recent-result () *most-recent-result*)
   
 (defparameter *default-ga-params* 
-  (list :gene-range '(0 11)             ; numeric range for a nucleotide (unit of the raw genotype)
+  (list :gene-range '(0 255)             ; numeric range for a nucleotide (unit of the raw genotype)
 
         :seeding nil                     ; initialize population with decent solutions ?
 

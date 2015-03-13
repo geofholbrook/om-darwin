@@ -66,27 +66,15 @@
 ; OM subpackages initialization
 ; ("sub-pack-name" subpacke-lists class-list function-list class-alias-list)
 ;--------------------------------------------------
-
-
 (defvar *darwin-subpackages* nil)
 (setf *darwin-subpackages*
-      '(("criteria" (("custom" nil nil (c-fun c-note c-chord c-melody c-block
-                                              c-subchord c-subblock) nil)
-                     ("special" nil nil (c-pset c-diatonish) nil))
-                    nil
-                    (c-list)
-                    nil)
 
-        ("specimens" (("standard" nil nil (s-melody s-chords om-spec) nil)
-                      ("mapping" nil nil (s-mapmelody s-mapchords) nil))
-                     nil
-                     nil
-                     nil)))
+      '( ("species" nil nil (make-even-melody make-grid-melody make-ga-tree) nil) 
+         ("criteria" nil nil (c-list c-pitch c-rate))
+         ("engine" nil (d::ga-engine) (d::start d::stop d::set-fitness-function) nil)))
 
 ;--------------------------------------------------
 ;filling packages
 ;--------------------------------------------------
-
-
 (fill-library *darwin-subpackages*)
 

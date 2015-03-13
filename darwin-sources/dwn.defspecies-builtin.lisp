@@ -9,18 +9,21 @@
 
 (defmethod finalizer ((self music-mixin)) #'arrange->poly)
 
-(defspecies melody (music-mixin)         
-  :species-slots (range '(60 72))
-  :operon-slots (pitch :range (range self))           
+(defspecies melody (music-mixin)   
+  :operon-initarg num-notes
+  :species-slots (range '(6000 7200))
+  :operon-slots (pitch :range `(,@(range self) 100))           
   :phenotyper (make-even-melody (mapcar 'pitch (operons self))
                      1/16))
 
 (defspecies even-melody (melody)
+  :operon-initarg num-notes
   :species-slots (note-value 1/16)
   :phenotyper (make-even-melody (mapcar 'pitch (operons self))
                                 (note-value self)))
 
 (defspecies grid-melody (even-melody)
+  :operon-initarg num-notes
   :species-slots (len-range '(1 4)) ;; measured in units
   :operon-slots (units :range (len-range self))
   :phenotyper (loop for op in (operons self)
