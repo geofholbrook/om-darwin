@@ -224,7 +224,7 @@
                 collect (list (* (car sp)
                                  (let ((n (1+ (expt (* (max (- (caddr sp) 
                                                       *longevity*) 0) 0.01) 2))))
-                                   (if (> n 1) (print n))
+                                   ;(if (> n 1) (print n))
                                    n))
                               (second sp)
                               (1+ (third sp))) into result
