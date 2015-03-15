@@ -1,10 +1,10 @@
 
 (in-package om)
 
-(defmethod! c-list (c1 c2 &rest cs)
+(defmethod! c-list (&rest cs)
   :icon 702
   #'(lambda (x)
-      (loop for crit in `(,c1 ,c2 ,@cs)
+      (loop for crit in cs
             sum (evaluate x crit))))
 
 (defmethod! c-print ()
@@ -37,6 +37,15 @@
              (d::subject self)
              (d::test-value self)
              rate))
+
+(defmethod! c-weight ((self d::criterion) weight &optional (expt d::*default-expt*) (index-expt d::*default-index-expt*))
+  :icon 702
+   (criterion (d::evaluator self)
+              (d::subject self)
+              (d::test-value self)
+              (d::rate self)
+              weight expt index-expt))
+  
 
 
 

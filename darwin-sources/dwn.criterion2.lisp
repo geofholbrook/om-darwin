@@ -39,6 +39,9 @@
            (weight crit))
         (exponent crit)))
 
+(defmethod evaluate ((self t) (crit list) &rest args)
+  (evaluate self (apply 'om::c-list crit)))
+
 
 (defmacro special-make-criterion (kind class lambda-list &body body)
   `(mki ',(or class 'criterion)
@@ -63,6 +66,10 @@
 (defmethod get-subject-list ((cseq chord-seq) (subject-keyword t))
   (case subject-keyword
     (:chord (om::inside cseq))
+
+    (:adjacent (loop for sub on (om::inside cseq)
+                     if (cdr sub)
+                     collect (first-n sub 2)))
     
     (:pitch (flat (mapcar #'om::lmidic (om::inside cseq))))
 
@@ -75,9 +82,11 @@
   (case subject-keyword
     (:region arr)
     
-    (:pitch (mapcar 'region-pitch arr))
-    (:pitch-class (mapcar #'(lambda (r)
-                              (mod (region-pitch r) 12)) arr))
+    (:pitch (flat (mapcar 'region-pitch arr)))
+    (:pitch-class (flat (mapcar #'(lambda (r)
+                                    (second (multiple-value-list 
+                                             (om// (om/ (region-pitch r) 100) 12))))
+                                arr)))
 
     (:adjacent (adjacent-pairs-by-channel arr))
 
@@ -108,6 +117,8 @@
       (offby eval-result test-value)
     eval-result))
 
+(defmethod compare-to-test-value ((eval-result t) (test-value (eql nil))) eval-result)
+
 
 (defmethod! om::criterion ((evaluator t) (subject symbol) (test-value t) (rate t) 
                      &optional weight exponent index-exponent)
@@ -115,15 +126,24 @@
   :initvals (list nil nil nil nil)
 
   :menuins '((1 (("regions" :regions)
-                ("adjacent" :adjacent)
-                ("pitch" :pitch)
-                ("pitch-class" :pitch-class)
-                ("melodic" :melodic)
-                ("signed-melodic" :signed-melodic))))
+                 ("adjacent" :adjacent)
+                 ("nthcdr" :nthcdr)
+                 ("pitch" :pitch)
+                 ("pitch-class" :pitch-class)
+                 ("melodic" :melodic)
+                 ("signed-melodic" :signed-melodic))))
 
   (special-make-criterion :iterator () (spec)
     (loop for elt in (get-subject-list spec subject)
           collect (compare-to-test-value (funcall (or evaluator #'identity) elt)
+                                         test-value))))
+
+(defmethod! om::criterion ((evaluator t) (subject (eql :nthcdr)) (test-value t) (rate t)
+                           &optional weight exponent index-exponent)
+   :icon 702         
+   (special-make-criterion :on-iterator () (spec)
+    (loop for sub on (phenotype spec)
+          collect (compare-to-test-value (funcall (or evaluator #'identity) sub)
                                          test-value))))
 
 

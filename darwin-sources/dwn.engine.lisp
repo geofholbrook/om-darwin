@@ -89,7 +89,7 @@
                 (mapc #'start vals))))
 
       (otherwise (progn 
-                   ;(when (find-library "om-geof" (om::om-geof-keys self char)))
+                   (when (find-library "om-geof") (om::om-geof-keys self char))
                    (call-next-method self char))))))
 
 
@@ -246,7 +246,7 @@
                             (second entry)
                             0))))
 
-(defmethod set-fitness-function ((self ga-engine) (fitness-function function))
+(defmethod set-fitness-function ((self ga-engine) (fitness-function t))
   (setf (fitness-function self) fitness-function)
   (if (running self)
       (setf (message-flag self) :new-fitness-function)

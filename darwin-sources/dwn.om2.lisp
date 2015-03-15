@@ -14,8 +14,13 @@
 
 ;;;;;;;;;;;
 
-(defmethod Objfromobjs ((self dwn::specimen) (type tonal-object))
-  (dwn::finalize self))
+(defmethod Objfromobjs ((self d::specimen) (type tonal-object))
+  (d::finalize self))
+
+(defmethod Objfromobjs ((self d::ga-engine) (type tonal-object))
+  (d::finalize (cadar (d::population self))))
+
+
 
 ;;;;;;;;
 

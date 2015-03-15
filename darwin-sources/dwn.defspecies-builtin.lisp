@@ -36,17 +36,17 @@
 (defspecies arrangement (music-mixin)
 
   :species-slots
-  (range '(60 72))
+  (range '(6000 7200))
   (resolution 1/16)
   (extent 2)        ;in whole notes
-  (length-range '(1 16))  ;in whole notes
+  (length-range '(1/4 1))  ;in whole notes
   (channel-range '(1 4))
 
   :operon-slots
   (start :range (list 0 (extent self) (resolution self)))
   (len :range `(,@(length-range self) ,(resolution self)))
   (channel :range (channel-range self))
-  (pitch :range (range self))
+  (pitch :range `(,@(range self) 100))
 
   :phenotyper
   (loop for op in (operons self)

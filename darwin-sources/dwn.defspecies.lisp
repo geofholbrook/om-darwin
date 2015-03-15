@@ -50,11 +50,12 @@
    (operon-slots :initform nil :initarg :operon-slots :accessor operon-slots)))
 
 
+
 (om::defclas specimen ()
-  ((operons :initform nil)   
-   (pheno :initform nil)  
-   (raw-genotype :initarg :raw :initform nil)
-   (decoder :initform nil))
+  ((raw-genotype :initarg :raw :initform nil)
+   (decoder :initform nil)
+   (operons :initform nil)   
+   (pheno :initform nil))
   (:metaclass species))    
 
 (setf (operon-initarg (find-class 'specimen)) 'num-operons)
