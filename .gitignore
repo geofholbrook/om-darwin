@@ -7,5 +7,5 @@
 
 *.app/
 
-presentation-ws/**
 dev-ws/**
+presentation-ws/**

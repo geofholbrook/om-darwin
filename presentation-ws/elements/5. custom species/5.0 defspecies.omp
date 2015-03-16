@@ -1,0 +1,4 @@
+; OM File Header - Saved 2015/03/16 2:28:31
+; (6.0901 :patc (om-make-point 334 60) (om-make-point 67 158) (om-make-point 582 521) "" 183 0 "2015/03/16 2:12:46" "2015/03/16 2:28:31")
+; End File Header
+(in-package :om)(load-lib-for (quote nil))(setf *om-current-persistent* (om-load-patch1 "5.0 defspecies" (quote ((let ((box (om-load-boxcomment "comment" (om-make-point 303 57) (quote "load overtones.lisp") nil (om-make-point 61 34) nil (om-make-color 0 0 0) (om-make-font "Verdana" 18.0 :family "Verdana" :style (quote (:plain)) :mode (quote nil))))) (when (fboundp (quote set-active)) (set-active box nil)) box))) (quote nil) nil 6.0901))

@@ -76,6 +76,10 @@
     (:pitch-class (mapcar #'(lambda (midic) (mod midic 1200))
                           (flat (mapcar #'om::lmidic (om::inside cseq)))))
 
+    (:signed-melodic (x->dx (get-subject-list cseq :pitch)))
+
+    (:melodic (om-abs (get-subject-list cseq :signed-melodic)))
+    
     ))
 
 (defmethod get-subject-list ((arr list) (subject-keyword t))   ;;; hope it's an arrangement?

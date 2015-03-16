@@ -146,6 +146,56 @@
                    (om-make-dialog-item 'om-button (om-make-point 20 110) (om-make-point 80 20) "Reinit"
                                         :di-action #'(lambda (button)
                                                        (reinit (om::object (om-view-container button)))))
+
+                   (om-make-dialog-item 'om-check-box (om-make-point 150 50) (om-make-point 200 20)
+                                  "retain best candidate")
+                                  ;:font *controls-font*
+
+                   (om-make-dialog-item 'om-check-box (om-make-point 150 80) (om-make-point 200 20)
+                                  "seed initial population")
+
+                   (om-make-dialog-item 'om-static-text (om-make-point 150 120) (om-make-point 260 60)
+                                  "selection method:")
+
+                   (om-make-dialog-item 'om-pop-up-dialog-item
+                                        (om-make-point 150 140)
+                                        (om-make-point 150 20)
+                                        "selection method"
+                                        :range  (list "simple ranking" "roulette wheel" "tournament")
+                                        :value nil 
+                                        )
+
+
+                   (om-make-dialog-item 'om-static-text (om-make-point 150 170) (om-make-point 260 60)
+                                  "crossover method:")
+
+                   (om-make-dialog-item 'om-pop-up-dialog-item
+                                        (om-make-point 150 190)
+                                        (om-make-point 150 20)
+                                        "crossover method"
+                                        :range  (list "single-point" "n-point" "uniform")
+                                        :value nil 
+                                        )
+
+
+                   (om-make-dialog-item 'om-static-text (om-make-point 150 220) (om-make-point 260 60)
+                                        "mutation method:")
+
+                   (om-make-dialog-item 'om-pop-up-dialog-item
+                                        (om-make-point 150 240)
+                                        (om-make-point 150 20)
+                                        "mutation method"
+                                        :range  (list "single-point" "permutation" "custom")
+                                        :value nil 
+                                        )
+
+                   (om-make-dialog-item 'om-check-box (om-make-point 150 270) (om-make-point 200 20)
+                                  "simulated annealing")
+
+
+
+
+
                    )
   )
 
