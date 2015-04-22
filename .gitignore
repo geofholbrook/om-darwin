@@ -5,6 +5,8 @@
 *.lisp~
 *.lisp#
 
+.DS_Store
+
 *.app/
 
 dev-ws/**

@@ -49,6 +49,16 @@
    (species-slots :initform nil :initarg :species-slots :accessor species-slots)
    (operon-slots :initform nil :initarg :operon-slots :accessor operon-slots)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; fake inheritance
+(defvar species-slot-tracker nil)
+
+(defstruct species-info ()
+  (operon-name)
+  (species-slots)
+  (operon-slots))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 (om::defclas specimen ()
