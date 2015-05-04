@@ -42,22 +42,22 @@
 
 (defparameter *default-num-operons* 8)
 
-;;; the species metaclass (initform of these slots have no effect ... why?)
-;;; gonna have to change this, or change defspecies anyway ...
-(defclass species (om::omstandardclass) 
-  ((operon-initarg :initform 'num-operons :initarg :operon-initarg :accessor operon-initarg)
-   (species-slots :initform nil :initarg :species-slots :accessor species-slots)
-   (operon-slots :initform nil :initarg :operon-slots :accessor operon-slots)))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; fake inheritance
-(defvar species-slot-tracker nil)
 
 (defstruct species-info ()
   (operon-name)
   (species-slots)
   (operon-slots))
 
+(defvar *species-info-alist* `((specimen ,(make-species-info :operon-name 'operon))))
+           
+(defun operon-name (class-name)
+  (species-info-operon-name (second (assoc class-name *species-info-alist*))))
+(defun species-slots (class-name)
+  (species-info-species-slots (second (assoc class-name *species-info-alist*))))
+(defun operon-slots (class-name)
+  (species-info-operon-slots (second (assoc class-name *species-info-alist*))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -65,10 +65,7 @@
   ((raw-genotype :initarg :raw :initform nil)
    (decoder :initform nil)
    (operons :initform nil)   
-   (pheno :initform nil))
-  (:metaclass species))    
-
-(setf (operon-initarg (find-class 'specimen)) 'num-operons)
+   (pheno :initform nil)))    
 
 (om::defclas operon ()
   ((owner))) ;; specimen to which this operon belongs (parent would be confusing in the genetic algorithm context)
@@ -180,10 +177,12 @@
            ;;; created symbols must be uppercase
 
     (let* ((namestring (prin1-to-string species-name))
-           (superclass (if inheritance (find-class (car inheritance))
-                         (find-class 'specimen)))
+           (superclass (if inheritance (car inheritance)
+                         'specimen))
 
-           (operon-initarg (operon-initarg superclass))
+           (operon-name (operon-name superclass))
+           operonstring
+           operon-initarg
            direct-species-slots
            direct-operon-slots
            species-slots
@@ -196,7 +195,7 @@
             (if (keywordp arg)
                 (setf target arg)
               (case target
-                (:operon-initarg (setf operon-initarg arg))
+                (:operon-name (setf operon-name arg))
                 (:phenotyper (setf phenotyper-body arg))
                 (:species-slots (push arg direct-species-slots))
                 (:operon-slots (push arg direct-operon-slots))))
@@ -204,16 +203,27 @@
             finally do
             (setf direct-species-slots (reverse direct-species-slots))
             (setf direct-operon-slots (reverse direct-operon-slots)))
-
       
+      (setf operonstring (prin1-to-string operon-name))
 
+      (setf operon-initarg (symbol+ "num-" operonstring "s"))
       (setf species-slots (combine-slotdefs direct-species-slots (species-slots superclass)))
       (setf operon-slots (combine-slotdefs direct-operon-slots (operon-slots superclass)))
+
+      ;;; set species-info for fake inheritance (during expansion, not evaulation!)
+      (let ((entry (make-species-info :operon-name operon-name
+                                      :species-slots species-slots
+                                      :operon-slots operon-slots))
+            (lookup (assoc species-name *species-info-alist*)))
+        (if lookup
+            (setf (second lookup) entry)
+          (push (list species-name entry) *species-info-alist*)))
+
 
       `(let (;(bogus (print (om::string+ "evaluating " ,(prin1-to-string species-name))))
              (species (om::defclas! ,species-name ,(or inheritance '(specimen))
 
-                                    ((,operon-initarg :initform ,*default-num-operons*)   ;;; default for number of operons is 8
+                                    ((,operon-initarg :initform ,*default-num-operons*)  
 
                       ;species-slots -- custom parameters that do not get mutated
                                      ,@(mapcar #'(lambda (slotdef)
@@ -222,21 +232,22 @@
                                                      (list (first slotdef) :initform (second slotdef))))
                                                direct-species-slots))
 
-                                    (:metaclass species))))
+                                    ;(:metaclass species)
+                                    )))
 
          ;;; create operon class
-         (om::defclas ,(symbol+ namestring "-operon") 
+         (om::defclas ,(symbol+ namestring "-" operonstring) 
                       ,(if (and inheritance (not (equalp (car inheritance) 'specimen)))
-                           (list (symbol+ (prin1-to-string (car inheritance)) "-operon"))
+                           (list (symbol+ (prin1-to-string (car inheritance)) "-" operonstring))
                          '(operon))
                       ,(mapcar #'(lambda (slotdef) 
                                    (list (first slotdef))) 
                                direct-operon-slots))
 
-         ;;; set class slots
-         (setf (operon-initarg species) ',operon-initarg)
-         (setf (species-slots species) ',species-slots)
-         (setf (operon-slots species) ',operon-slots)
+         ;;; create operons accessor
+         ,@(unless (equalp operonstring "operon")
+             `((defmethod ,(symbol+ operonstring "s") ((self ,species-name))
+                 (operons self))))
 
          ;;; specialize the phenotype method (if given)
          ,@(when phenotyper-body
@@ -249,7 +260,7 @@
          (defmethod update-geno ((self ,species-name))
            (setf (operons self)
                  (loop for list-operon in (p.codes (raw-genotype self) (decoder self))
-                       collect (mki ',(symbol+ namestring "-operon")
+                       collect (mki ',(symbol+ namestring "-" operonstring)
                                     ,@(loop for slot in operon-slots
                                             for k from 0
                                             collect (make-keyword (first slot))

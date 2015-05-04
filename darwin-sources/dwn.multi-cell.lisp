@@ -5,8 +5,7 @@
 
 (defclass multi-cell (specimen)
   ((cells :initform nil :initarg :cells :accessor cells)
-   (concatenator :initform nil :initarg :concatenator :accessor concatenator))
-  (:metaclass species))
+   (concatenator :initform nil :initarg :concatenator :accessor concatenator)))
 
 (defmethod species-concatenator ((self t)) #'append)
 
@@ -49,7 +48,7 @@
 ;;;;
 
 
-(defclass stack (multi-cell) () (:metaclass species))    ;;; should probably inherit in the other direction ...
+(defclass stack (multi-cell) ())    ;;; should probably inherit in the other direction ...
 
 (om::defmethod! om::make-stack ((cells list))
                 :icon 703

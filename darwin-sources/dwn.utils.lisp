@@ -65,7 +65,8 @@
              (>= num (- hi tolerance))
              (<= num (+ lo tolerance)))))
 
-  (export 'om::withinp "OM"))
+  ;(export 'om::withinp "OM")
+)
 
 
 (unless (fboundp 'om::om-clip)
@@ -75,7 +76,8 @@
       (if (and max (> val max))
           max
         val)))
-  (export 'om::om-clip "OM"))
+  ;(export 'om::om-clip "OM")
+)
 
 
 

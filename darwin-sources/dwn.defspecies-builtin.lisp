@@ -1,7 +1,9 @@
 (in-package dwn)
 
 (defspecies music-mixin (specimen)
+  :operon-name note
   :phenotyper
+  ;OM default voice
   (loop for k from 0 to 3
         collect (make-region (/ k 4) 1/4 1 (+ 60 k))))
 
@@ -10,7 +12,6 @@
 (defmethod finalizer ((self music-mixin)) #'arrange->poly)
 
 (defspecies melody (music-mixin)   
-  :operon-initarg num-notes
   :species-slots (range '(6000 7200))
   :operon-slots (pitch :range `(,@(range self) 100))           
   :phenotyper (make-even-melody (mapcar 'pitch (operons self))
@@ -33,6 +34,11 @@
                     do (incf start len)))
 
 
+(defspecies ga-chord (melody)
+  :phenotyper
+  (loop for note in (notes self)
+                     collect (make-region 0 1/4 1 (pitch note))))
+
 (defspecies arrangement (music-mixin)
 
   :species-slots
@@ -52,11 +58,6 @@
   (loop for op in (operons self)
         collect (make-region (start op) (len op) (channel op) (pitch op))))
   
-
-
-
-
-
 
 (defspecies dx-melody (music-mixin)      
   :species-slots

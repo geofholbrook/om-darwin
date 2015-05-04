@@ -70,8 +70,7 @@
                
 
 (defclass d::om-specimen (d::specimen) 
-  ((om-function :initform nil :accessor om-function))
-  (:metaclass d::species))
+  ((om-function :initform nil :accessor om-function)))
 
 (defmethod omNG-copy ((self d::om-specimen))
   `(let ((copy ,(call-next-method)))

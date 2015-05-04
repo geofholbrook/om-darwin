@@ -47,19 +47,12 @@
          ))
 
 ;--------------------------------------------------
-;Create globals needed for compile 
-;--------------------------------------------------
-
-
-;--------------------------------------------------
 ;Load files 
 ;--------------------------------------------------
 
-(mapc #'(lambda (file) (let ((path
-                              (make-pathname :directory (append (pathname-directory *lib-folder*) (list "darwin-sources")) 
-                                             :name file)))
-                         (load path)
-                         (compile&load path)))
+(mapc #'(lambda (file) (compile&load (make-pathname :directory (append (pathname-directory *lib-folder*) 
+                                                                       (list "darwin-sources")) 
+                                                    :name file)))
       *source-files*) 
 
 ;--------------------------------------------------
