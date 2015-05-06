@@ -72,7 +72,7 @@
 (defmethod om::om-geof-keys ((self om::patchPanel) char) 
   (let ((actives (om::get-actives self)))
     (case char
-      (#\E (om::om-encapsulate self actives))
+      ;(#\E (om::om-encapsulate self actives))
       (#\L (om::om-funnel self actives))
       (#\Y (om::om-align self actives)
            (om::make-move-after self actives))
