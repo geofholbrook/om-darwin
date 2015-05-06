@@ -70,7 +70,11 @@
                
 
 (defclass d::om-specimen (d::specimen) 
-  ((om-function :initform nil :accessor om-function)))
+  ((om-function :initform nil :accessor om-function)
+   (om-finalizer :initarg :finalizer :initform #'d::arrange->poly :accessor om-finalizer)))
+
+(defmethod d::finalizer ((self d::om-specimen))
+  #'(lambda (pheno) (funcall (om-finalizer self) pheno)))
 
 (defmethod omNG-copy ((self d::om-specimen))
   `(let ((copy ,(call-next-method)))
@@ -100,10 +104,11 @@
 (defun raw-from-function (fun)
   (d::random-raw-genotype (count-gene-calls fun)))
 
-(defmethod! define-species ((fun function))
+(defmethod! define-species ((fun function) &key finalizer)
   :icon 703
   (let ((spec (mki 'd::om-specimen 
                    :raw (d::random-raw-genotype (count-gene-calls fun))
+                   
                    )))
     (setf (om-function spec) fun)
     spec))
