@@ -67,7 +67,9 @@
 
 
 
-
+(defun make-chord (pitches &key (start 0) (len 1/4) (channel 1))
+  (loop for p in pitches
+        collect (make-region start len channel p)))
 
 ;*****************
 ;*** arrange operations
@@ -89,12 +91,15 @@
         collect `(,@(first-n region 4)
                   ,vel)))
 
+(defun set-channel (region chan)
+  `(,(first region)
+    ,(second region)
+    ,chan
+    ,@(nthcdr 3 region)))
+
 (defun arr-set-channel (arr chan)
   (loop for region in arr
-        collect `(,(first region)
-                  ,(second region)
-                  ,chan
-                  ,@(nthcdr 3 region))))
+        collect (set-channel region chan)))
 
 (defun arr-select (arr start end)
   (arr-time-shift (remove-if-not #'(lambda (region)
