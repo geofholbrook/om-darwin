@@ -61,7 +61,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(om::defclas specimen ()
+(om::defclas! specimen ()
   ((raw-genotype :initarg :raw :initform nil)
    (decoder :initform nil)
    (operons :initform nil)   

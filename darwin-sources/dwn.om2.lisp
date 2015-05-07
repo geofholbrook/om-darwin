@@ -69,16 +69,17 @@
   (nth (om-gene 0 (1- (length lis))) lis))
                
 
-(defclass d::om-specimen (d::specimen) 
+(defclass! d::om-specimen (d::specimen) 
   ((om-function :initform nil :accessor om-function)
-   (om-finalizer :initarg :finalizer :initform #'d::arrange->poly :accessor om-finalizer)))
+   (om-finalizer :initform #'d::arrange->poly :accessor om-finalizer)))
 
 (defmethod d::finalizer ((self d::om-specimen))
   #'(lambda (pheno) (funcall (om-finalizer self) pheno)))
 
 (defmethod omNG-copy ((self d::om-specimen))
-  `(let ((copy ,(call-next-method)))
-     (setf (om-function copy) ,(om-function self))   ;;; seems to work ... obviously won't work for saving though
+  `(let ((copy (mki 'd::om-specimen)))
+     (setf (om-function copy) ,(om-function self))
+     (setf (om-finalizer copy) ,(om-finalizer self))  ;;; seems to work ... obviously won't work for saving though
      copy))
 
 (defmethod d::phenotype ((self d::om-specimen))
@@ -108,9 +109,9 @@
   :icon 703
   (let ((spec (mki 'd::om-specimen 
                    :raw (d::random-raw-genotype (count-gene-calls fun))
-                   
                    )))
     (setf (om-function spec) fun)
+    (setf (om-finalizer spec) (or finalizer #'d::arrange->poly))
     spec))
 
 

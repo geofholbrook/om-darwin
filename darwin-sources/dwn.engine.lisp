@@ -394,7 +394,8 @@
      spec))
      
 (defmethod om::omNG-save ((self ga-engine) &optional (values? nil))
-  `(let ((ga ,(call-next-method)))
+  `(let ((ga (mki 'ga-engine)))
+     (setf (model ga) ,(om::omng-save (model self)))
      (setf (population ga) ,(om::omng-save (population self)))
      (setf (generation ga) ,(om::omng-save (generation self)))
      (setf (result ga) ,(om::omng-save (result self))) 
