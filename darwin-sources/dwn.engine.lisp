@@ -235,7 +235,11 @@
                                      (om::frames (box self)))
                             (first (om::frames (box self))))))
       (when frame
-        (om::om-draw-contents frame))))) 
+        (om::om-draw-contents frame)))
+
+    ;;; for front maquette
+    (om::engine-in-front-maquette self)
+))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;
@@ -315,7 +319,7 @@
   (unless (box self)
     (setf (box self) (get-my-box self)))  ;;; just to be sure
 
-  ;(om::lock-after-modif (car (om::frames (box self))))
+  (om::lock-after-modif (car (om::frames (box self))))
 
   (if (process self) (om-kill-process (process self)))
   (set-process self

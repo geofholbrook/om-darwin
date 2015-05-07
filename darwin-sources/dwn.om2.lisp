@@ -1,28 +1,6 @@
 (in-package om)
 
-
-;;; EVOULTE METHOD (update ... been using ga-engine) ;;;;;;;;
-
-(defmethod! evolute ((model t) (criterion function) (generations number))
-  :initvals (list nil nil 100)
-  :icon 701
-  (d::run model criterion generations))
-
-(defmethod! evaluate ((spec t) (criterion t))
-  :icon 704
-  (d::evaluate spec criterion))
-
-;;;;;;;;;;;
-
-(defmethod Objfromobjs ((self d::specimen) (type tonal-object))
-  (d::finalize self))
-
-(defmethod Objfromobjs ((self d::ga-engine) (type tonal-object))
-  (d::finalize (cadar (d::population self))))
-
-
-
-;;;;;;;;
+;;;;;;;; OM-GENE ;;;;;;;;;;
 
 
 (defvar *gene-counter* nil)
@@ -105,17 +83,39 @@
 (defun raw-from-function (fun)
   (d::random-raw-genotype (count-gene-calls fun)))
 
-(defmethod! define-species ((fun function) &key finalizer)
+(defmethod! define-species ((fun function) &key finalizer tempo)
   :icon 703
   (let ((spec (mki 'd::om-specimen 
                    :raw (d::random-raw-genotype (count-gene-calls fun))
                    )))
     (setf (om-function spec) fun)
-    (setf (om-finalizer spec) (or finalizer #'d::arrange->poly))
+    (setf (om-finalizer spec) (or finalizer #'(lambda (arr)
+                                                (d::arrange->poly arr (or tempo 60)))))
     spec))
 
 
   
+
+;;; EVOULTE METHOD (update ... been using ga-engine) ;;;;;;;;
+
+(defmethod! evolute ((model t) (criterion function) (generations number))
+  :initvals (list nil nil 100)
+  :icon 701
+  (d::run model criterion generations))
+
+(defmethod! evaluate ((spec t) (criterion t))
+  :icon 704
+  (d::evaluate spec criterion))
+
+;;;;;;;;;;;
+
+(defmethod Objfromobjs ((self d::specimen) (type tonal-object))
+  (d::finalize self))
+
+(defmethod Objfromobjs ((self d::ga-engine) (type tonal-object))
+  (d::finalize (cadar (d::population self))))
+
+
 
 
 
