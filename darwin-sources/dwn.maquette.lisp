@@ -43,15 +43,23 @@
      (otherwise (call-next-method))))
 
 
+(defmethod d::get-tempobjs ((self relationPanel))
+  (remove-if-not #'(lambda (icon)
+                     (subtypep (type-of icon) 'tempobjframe))
+                 (om-subviews self)))
+
 (defmethod maq-toggle-evolution ((self MaquettePanel))
-  (let ((boxes (print (get-actives self 'tempobjframe))))
+  (print "maq-toggle")
+  (let ((boxes (or (get-actives self 'tempobjframe)
+                   (d::get-tempobjs self))))
+    
     (loop for box in boxes do 
           (let ((box-connected-to-tempout
                  (first (connected? 
                          (first (inputs (find-if #'(lambda (b)
                                                      (equalp (type-of b) 'omtempout))
                                                  (boxes (reference (object box))))))))))
-            ;(print box-connected-to-tempout)
+            (print box-connected-to-tempout)
             (when (d::is-ga-box-p box-connected-to-tempout)
               (let ((engine (value box-connected-to-tempout)))
                 (if (print (d::running engine))
@@ -61,6 +69,9 @@
 ;;;;; have to do this:
 ;;;;; get-mus-ob !!
 
+
+(defmethod get-obj-for-maquette-display ((self d::ga-engine)) 
+  (d::result self))
 
 
 

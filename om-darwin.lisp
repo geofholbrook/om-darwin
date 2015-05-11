@@ -37,13 +37,13 @@
          "dwn.engine"
          "dwn.om2"
 
+         "dwn.maquette"
+         
          "dwn.criterion2"
          "dwn.criterion-utils" 
 
          "dwn.tests"
-
          
-        
          ))
 
 ;--------------------------------------------------
