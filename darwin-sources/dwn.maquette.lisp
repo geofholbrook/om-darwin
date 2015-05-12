@@ -61,5 +61,16 @@
 )
 
 
-(defmethod! get-overlap () ())
+;;;;;;;;; DIAGNOSTIC ;;;;;;;;;;;;;;
+
+(defmethod! d::overlap () 
+  :icon 707
+  )
+
+(defclass d::om-overlap-box (omboxcall) ())
+(defmethod get-boxcallclass-fun ((self (eql 'd::overlap))) 'd::om-overlap-box)
+
+(defmethod omNG-box-value ((self d::om-overlap-box) &optional (numout 0))
+  nil)
+
 
