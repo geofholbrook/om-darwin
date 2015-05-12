@@ -50,7 +50,7 @@
     (loop for box in boxes
           for engine = (nth 0 (value (object box)))
           do
-          (when (print engine)
+          (when engine
             (if (d::running engine)
                   (d::stop engine)
                 (d::start engine))))))
@@ -60,17 +60,16 @@
   (d::result self)
 )
 
+;;;; for use with temporal input (first outlet)
+;;
+(defmethod get-temporal-siblings ((self temporalbox))
+  (when (mycontainer self)
+    (remove self
+            (boxes (mycontainer self)))))
 
-;;;;;;;;; DIAGNOSTIC ;;;;;;;;;;;;;;
-
-(defmethod! d::overlap () 
-  :icon 707
-  )
-
-(defclass d::om-overlap-box (omboxcall) ())
-(defmethod get-boxcallclass-fun ((self (eql 'd::overlap))) 'd::om-overlap-box)
-
-(defmethod omNG-box-value ((self d::om-overlap-box) &optional (numout 0))
-  nil)
+(defmethod get-maq-overlaps ((self temporalbox) spec)
+  (let ((siblings (get-temporal-siblings self)))
+    (print (length siblings))
+    0))
 
 
