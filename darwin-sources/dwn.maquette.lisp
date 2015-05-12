@@ -42,38 +42,42 @@
      
      (otherwise (call-next-method))))
 
-
+;;; not necessary?
 (defmethod d::get-tempobjs ((self relationPanel))
   (remove-if-not #'(lambda (icon)
                      (subtypep (type-of icon) 'tempobjframe))
                  (om-subviews self)))
 
-(defmethod maq-toggle-evolution ((self MaquettePanel))
-  (print "maq-toggle")
-  (let ((boxes (or (get-actives self 'tempobjframe)
-                   (d::get-tempobjs self))))
-    
-    (loop for box in boxes do 
-          (let ((box-connected-to-tempout
-                 (first (connected? 
+(defmethod find-connected-ga-box ((self tempobjframe))
+  ;;; finds the first box connected to the tempout inside the represented patch
+  (let ((connected-box (first (connected? 
                          (first (inputs (find-if #'(lambda (b)
                                                      (equalp (type-of b) 'omtempout))
-                                                 (boxes (reference (object box))))))))))
-            (print box-connected-to-tempout)
-            (when (d::is-ga-box-p box-connected-to-tempout)
-              (let ((engine (value box-connected-to-tempout)))
-                (if (print (d::running engine))
-                    (d::stop engine)
-                  (d::start engine))))))))
+                                                 (boxes (reference (object self))))))))))
+    (when (d::is-ga-box-p connected-box)
+      connected-box)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;;;; have to do this:
-;;;;; get-mus-ob !!
+(defmethod maq-toggle-evolution ((self MaquettePanel))
+  (let ((boxes 
+         (get-actives self 'tempobjframe)))
+    
+    (loop for box in boxes
+          for engine = (nth 0 (value (object box)))
+          do
+          (when (print engine)
+            (if (d::running engine)
+                  (d::stop engine)
+                (d::start engine))))))
 
 
 (defmethod get-obj-for-maquette-display ((self d::ga-engine)) 
-  (d::result self))
+  (d::result self)
+)
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;
+;;; not necessary?
 
 (defmethod is-editorwindow ((self editorwindow)) t)
 (defmethod is-editorwindow ((self t)) nil)
@@ -82,10 +86,13 @@
   (let ((front (om-front-window)))
     (when (is-editorwindow front)
       (when (equalp (type-of (obj front)) 'ommaquette)
-        (let ((frame (first (frames (find engine
-                                          (boxes (object (editorframe (obj front))))
-                                          :key #'(lambda (b) (first (value b))))))))
-          (redraw-frame frame)
-          (omg-select frame))
-        ))))
+        (let ((box (find engine
+                         (boxes (object (editorframe (obj front))))
+                         :key #'(lambda (b) (first (value b))))))
+          (when box
+            (let ((frame (first (frames box))))
+              (redraw-frame frame)
+             ; (when (om-view-container frame)
+             ;  (omg-select frame))
+            )))))))
   

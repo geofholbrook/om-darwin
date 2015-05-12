@@ -24,8 +24,12 @@
 ;; GA-ENGINE-BOX    (stores GA process)
 
 (defmethod om::get-type-of-ed-box ((self ga-engine)) 'ga-engine-box)
-(defclass ga-engine-box (om::omboxeditcall)
+
+(defclass ga-engine-container ()
   ((process :initform nil :accessor process)))
+(defclass ga-engine-box (om::omboxeditcall ga-engine-container)
+  ())
+
 
 (defmethod is-ga-box-p ((self t)) nil)
 (defmethod is-ga-box-p ((self ga-engine-box)) t)
@@ -33,7 +37,20 @@
 (defmethod process ((self ga-engine)) 
   (when (box self) (process (box self))))
 (defmethod set-process ((self ga-engine) process)
-  (when (box self) (setf (process (box self)) process)))
+  (when (box self) (set-process (box self) process)))
+
+(defmethod set-process ((self ga-engine-box) process)
+  (setf (process self) process))
+
+
+;;;;;;;;;
+;;; hack for storing the process in a temporalbox
+
+(defmethod process ((self om::temporalbox))
+  (om::free-store self))
+
+(defmethod set-process ((self om::temporalbox) process)
+  (setf (om::free-store self) process))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
@@ -232,13 +249,14 @@
  
     ;;; for miniview
     (let ((frame (when (and (box self)
-                                     (om::frames (box self)))
-                            (first (om::frames (box self))))))
+                            (om::frames (box self)))
+                   (first (om::frames (box self))))))
       (when frame
-        (om::om-draw-contents frame)))
+        (om::om-redraw-view frame)
+        ))
 
     ;;; for front maquette
-    (om::engine-in-front-maquette self)
+    ;(om::engine-in-front-maquette self)
 ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
@@ -319,14 +337,21 @@
   (unless (box self)
     (setf (box self) (get-my-box self)))  ;;; just to be sure
 
-  (om::lock-after-modif (car (om::frames (box self))))
+  ;(om::lock-after-modif (car (om::frames (box self))))
+
+  (when (and (equalp (type-of (box self)) 'om::temporalbox)
+             (equalp (process self) 0))
+    (set-process self nil)  ;;; free-store
+    )
 
   (if (process self) (om-kill-process (process self)))
+
   (set-process self
                (run-process (om::string+ "GA PROCESS " (prin1-to-string 
                                                        (incf *process-counter*)))
                             #'(lambda ()
-                                (run-engine self)))))
+                                (run-engine self))))
+)
 
 
 (defmethod stop ((self ga-engine))
@@ -339,14 +364,17 @@
     (initialize-engine self)))
 
 
-; searches all boxes of all patch windows ...
+; searches all boxes of all patch and maquette windows ...
 (defun get-my-box (obj)
-  (let ((patches (remove-if-not #'(lambda (obj) (equal (type-of obj) 'om::ompatch))
+  (let ((patches (remove-if-not #'(lambda (obj) (member (type-of obj) '(om::ompatch om::ommaquette)))
                                 (mapcar 'om::obj (om::om-get-all-windows 'om::EditorWindow)))))
  
     (loop for patch in patches
           for box = (find obj (om::boxes patch)
-                          :key 'om::value)
+                          :key #'(lambda (box)
+                                   (if (listp (om::value box))
+                                       (nth 0 (om::value box))
+                                     (om::value box))))
 
           if box 
           return box)))
