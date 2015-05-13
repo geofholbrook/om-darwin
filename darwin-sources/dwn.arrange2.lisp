@@ -107,8 +107,7 @@
                               (>= (region-start region) start))
                           (or (null end)
                               (< (region-end region) end))))
-                 arr)
-  (- (or start 0)))
+                 arr))
 
 
 (defmethod append-arrangements ((arr1 list) (arr2 list) &key (overlap 0) (ceiling t))
@@ -304,6 +303,56 @@
                                      (region-start other-region)))))
                 until stop))
         finally return count)) 
+
+
+
+
+
+;***************************************
+;***** dealing with verticalities ******
+;***************************************
+
+
+(defun starts-and-ends (time-block)
+  ;outputs a sorted and demixed list of 3-element terminal indicators of the form ({:start or :end} <time> <region>)
+  ;pretty organized way of doing things ... not necessarily efficient.
+  (sort (demix (loop for region in time-block
+                     collect (list :start (region-start region) region)
+                     collect (list :end (region-end region) region))
+               #'second)
+        #'< :key #'cadar))  ;cadar: first <time> of a list of indicators
+
+;try: (pprint (starts-and-ends '((5 2 1 68) (0 2 1 65) (2 3 1 65) (2 2 2 60) (0 2 2 62))))
+
+
+(defmethod convert-to-chord-list ((self list) &optional silences domain)
+;organize regions of time-block into "time-slices", exactly as necessary to include all vertical simultaneities
+;most units of time-block will occur more than once 
+ 
+;**** for now does not record length of slices ****
+
+  (let ((start-ends (starts-and-ends self))
+        current-chord
+        result)
+    (if (and silences
+             (> (cadar (first start-ends)) (or (first domain) 0)))
+        (push :silence result))
+    (loop for point on start-ends
+          do (loop for se in (car point)
+                   do (case (first se)
+                        (:start (push (third se) current-chord))
+                        (:end (setf current-chord
+                                    (remove (third se) current-chord :count 1 :test 'equalp)))))
+
+          if (or current-chord  ;don't put in a :silence if this is the end of the block
+                 (and silences (or (cdr point)
+                                   (and domain (< (cadar (car point)) (second domain))))))   
+                      
+          do (push (or current-chord :silence) result)
+          finally return (nreverse result))))
+
+(defmethod convert-to-attack-list ((self list))
+  (demix self #'region-start t))
 
 
 

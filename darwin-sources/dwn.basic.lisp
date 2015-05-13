@@ -184,7 +184,11 @@
                      ;               (length (remove-duplicates (mapcar 'first (append population crosses offspring))))))
 
                        
-    (let ((sorted (sort (append population 
+    (let ((sorted (sort (append ;;; recalculate fitnesses! because of dynamic maqutte stuff
+                                (loop for entry in population 
+                                      collect (list (evaluate (second entry) criterion)
+                                                    (second entry)
+                                                    (third entry)))
                                 offspring 
                                 crosses)
 

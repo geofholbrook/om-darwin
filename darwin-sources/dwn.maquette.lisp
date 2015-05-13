@@ -57,8 +57,7 @@
 
 
 (defmethod get-obj-for-maquette-display ((self d::ga-engine)) 
-  (d::result self)
-)
+  (d::result self))
 
 ;;;; for use with temporal input (first outlet)
 ;;
@@ -68,8 +67,24 @@
             (boxes (mycontainer self)))))
 
 (defmethod get-maq-overlaps ((self temporalbox) spec)
-  (let ((siblings (get-temporal-siblings self)))
-    (print (length siblings))
-    0))
+  (when (value self)
+    (let ((siblings (get-temporal-siblings self))
+          (this (d::phenotype (cadar (d::population (car (value self)))))))
+      (let ((start (d::region-start (car this)))
+            (end (d::region-end (last-elem this)))
+            (beats-per-ms (/ (qtempo (d::result (car (value self))))
+                             60000 4)))
+        
+        (loop for sibling in siblings
+              append
+              (d::arr-select (d::arr-time-shift 
+                              (d::phenotype (cadar (d::population (car (value sibling)))))
+                              (* (- (offset sibling)
+                                    (offset self)) beats-per-ms))
+                             start
+                             end)
+              )))))
+
+        
 
 

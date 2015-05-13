@@ -7,6 +7,7 @@
       (loop for crit in cs
             sum (evaluate x crit))))
 
+
 (defmethod! c-print ()
   :icon 702
   #'(lambda (x)
@@ -18,9 +19,11 @@
   :icon 702
   (criterion nil :pitch-class test-value nil))
 
+
 (defmethod! c-pitch (test-value)
   :icon 702
   (criterion nil :pitch test-value nil))
+
 
 (defmethod! c-melodic (test-value &optional signed?)
   :icon 702
@@ -30,6 +33,7 @@
                :melodic)
              test-value 
              nil))
+
 
 (defmethod! c-rate ((self d::criterion) rate)
   :icon 702
