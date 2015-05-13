@@ -102,13 +102,13 @@
         collect (set-channel region chan)))
 
 (defun arr-select (arr start end)
-  (arr-time-shift (remove-if-not #'(lambda (region)
-                                     (and (or (null start)
-                                              (>= (region-start region) start))
-                                          (or (null end)
-                                              (< (region-end region) end))))
-                                 arr)
-                  (- (or start 0))))
+  (remove-if-not #'(lambda (region)
+                     (and (or (null start)
+                              (>= (region-start region) start))
+                          (or (null end)
+                              (< (region-end region) end))))
+                 arr)
+  (- (or start 0)))
 
 
 (defmethod append-arrangements ((arr1 list) (arr2 list) &key (overlap 0) (ceiling t))
