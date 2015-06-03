@@ -46,14 +46,25 @@
          
          ))
 
+
 ;--------------------------------------------------
 ;Load files 
 ;--------------------------------------------------
 
-(mapc #'(lambda (file) (compile&load (make-pathname :directory (append (pathname-directory *lib-folder*) 
-                                                                       (list "darwin-sources")) 
-                                                    :name file)))
-      *source-files*) 
+(mapc #'(lambda (file)
+
+          ;; to populate dwn::*species-info-alist*
+          (when (member file '("dwn.defspecies-builtin" "dwn.multi-cell" "dwn.om2") :test #'string-equal)
+            (load (make-pathname :directory (append (pathname-directory *lib-folder*) 
+                                                    (list "darwin-sources")) 
+                                 :name file
+                                 :type "lisp")))
+
+          (compile&load (make-pathname :directory (append (pathname-directory *lib-folder*) 
+                                                          (list "darwin-sources")) 
+                                       :name file)))
+
+      *source-files*)
 
 ;--------------------------------------------------
 ; OM subpackages initialization

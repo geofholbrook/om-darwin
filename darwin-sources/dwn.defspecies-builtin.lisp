@@ -18,13 +18,11 @@
                      1/16))
 
 (defspecies even-melody (melody)
-  :operon-initarg num-notes
   :species-slots (note-value 1/16)
   :phenotyper (make-even-melody (mapcar 'pitch (operons self))
                                 (note-value self)))
 
 (defspecies grid-melody (even-melody)
-  :operon-initarg num-notes
   :species-slots (len-range '(1 4)) ;; measured in units
   :operon-slots (units :range (len-range self))
   :phenotyper (loop for op in (operons self)
@@ -38,6 +36,16 @@
   :phenotyper
   (loop for note in (notes self)
                      collect (make-region 0 1/4 1 (pitch note))))
+
+(defspecies ga-chord-seq (music-mixin)
+  :operon-name chord
+  :species-slots (cardinality 3) (range '(6000 7200)) (note-value 1/8)
+  :operon-slots (notes :range `(,@(range self) 100) :cardinality (cardinality self))
+  :phenotyper (loop for op in (operons self)
+                    for start from 0 by (note-value self)
+                    append (loop for note in (notes op)
+                                 collect (make-region start (note-value self) 1 note))))
+
 
 (defspecies arrangement (music-mixin)
 

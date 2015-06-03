@@ -11,4 +11,4 @@
                      collect (make-region start (resolution self)
                                           (channel op)
                                           (+ (pitch op) (if (evenp k)
-                                                            0 1))))))
+                                                            0 100))))))

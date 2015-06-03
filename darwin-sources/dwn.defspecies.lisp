@@ -210,7 +210,8 @@
       (setf species-slots (combine-slotdefs direct-species-slots (species-slots superclass)))
       (setf operon-slots (combine-slotdefs direct-operon-slots (operon-slots superclass)))
 
-      ;;; set species-info for fake inheritance (during expansion, not evaulation!)
+      ;;; set species-info for fake inheritance. this means that lisp files that use this have to be loaded and compiled ...
+
       (let ((entry (make-species-info :operon-name operon-name
                                       :species-slots species-slots
                                       :operon-slots operon-slots))
@@ -238,7 +239,7 @@
          ;;; create operon class
          (om::defclas ,(symbol+ namestring "-" operonstring) 
                       ,(if (and inheritance (not (equalp (car inheritance) 'specimen)))
-                           (list (symbol+ (prin1-to-string (car inheritance)) "-" operonstring))
+                           (list (symbol+ (prin1-to-string (car inheritance)) "-" (prin1-to-string (operon-name superclass))))
                          '(operon))
                       ,(mapcar #'(lambda (slotdef) 
                                    (list (first slotdef))) 
@@ -279,10 +280,9 @@
                                for card = (om::find-keyword :cardinality (cdr slotdef))
 
                                collect (if card
-                                           (if (atom card)
-                                               (create-list card range)
-
-                                             `(:length ,card ,@(create-list (second card) range)))  
+                                          `(if (atom ,card)
+                                               (create-list ,card ,range)
+                                             `(:length ,card ,@(create-list (second ,card) ,range)))  
                                          ;;; adds the cardinality gene, then the number of genes
                                          ;;; corresponding to upper range of cardinality 
 
