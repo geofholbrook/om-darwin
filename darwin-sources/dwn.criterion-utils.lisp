@@ -1,16 +1,12 @@
 
 (in-package om)
 
-(defmethod! c-list (&rest args)
+(defmethod! c-list (&rest cs)
   :icon 702
-  (flet (
   #'(lambda (x)
-      (loop for sub on args
-            unless (or (numberp (car sub))
-                       (and (listp (car sub))
-                            (numberp (caar sub))))
-            for crit = 
+      (loop for crit in cs
             sum (evaluate x crit))))
+
 
 
 (defmethod! c-print ()
