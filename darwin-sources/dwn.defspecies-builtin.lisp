@@ -13,7 +13,10 @@
 
 (defspecies melody (music-mixin)   
   :species-slots (range '(6000 7200))
-  :operon-slots (pitch :range `(,@(range self) 100))           
+  :operon-slots (pitch :range (if (= (length (range self)) 2)
+                                  `(,@(range self) 100)
+                                (range self)))
+                                
   :phenotyper (make-even-melody (mapcar 'pitch (operons self))
                      1/16))
 

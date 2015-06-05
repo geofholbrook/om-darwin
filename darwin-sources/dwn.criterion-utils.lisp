@@ -1,10 +1,15 @@
 
 (in-package om)
 
-(defmethod! c-list (&rest cs)
+(defmethod! c-list (&rest args)
   :icon 702
+  (flet (
   #'(lambda (x)
-      (loop for crit in cs
+      (loop for sub on args
+            unless (or (numberp (car sub))
+                       (and (listp (car sub))
+                            (numberp (caar sub))))
+            for crit = 
             sum (evaluate x crit))))
 
 
@@ -31,6 +36,15 @@
              (if signed?
                  :signed-melodic
                :melodic)
+             test-value 
+             nil))
+
+(defmethod! c-harmonic (test-value &optional signed?)
+  :icon 702
+  (criterion nil 
+             (if signed?
+                 :signed-harmonic
+               :harmonic)
              test-value 
              nil))
 

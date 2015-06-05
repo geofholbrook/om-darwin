@@ -355,5 +355,32 @@
   (demix self #'region-start t))
 
 
+;;;; simpler, probably faster.
+
+(defun get-vertical-diads (arr)
+  (loop with sounding = nil
+        for region in (sort arr #'< :key #'region-start)
+        
+        do
+        (setf sounding (remove-if #'(lambda (r)
+                                      (<= (region-end r) (region-start region)))
+                                  sounding
+                                  ))
+
+        append (loop for other in sounding
+                     collect (sort (list region other) #'< :key #'region-chan))
+                                      
+        do (push region sounding)))
+
+
+
+
+        
+
+
+
+
+
+
 
 

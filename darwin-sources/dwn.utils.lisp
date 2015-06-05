@@ -628,6 +628,8 @@ in between are possible."
 (defmethod offby ((self number) (value number))
   (abs (- value self)))
 
+(defmethod offby ((self (eql :n/a)) (value t)) :n/a)
+
 (defmethod offby ((self number) (value list))
   (case (car value)
     (:unsigned (offby (abs self) (cdr value)))

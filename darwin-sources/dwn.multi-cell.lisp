@@ -3,7 +3,7 @@
 
 ;; multi-cell
 
-(defclass multi-cell (specimen)
+(defclass! multi-cell (specimen)
   ((cells :initform nil :initarg :cells :accessor cells)
    (concatenator :initform nil :initarg :concatenator :accessor concatenator)))
 
@@ -48,7 +48,7 @@
 ;;;;
 
 
-(defclass stack (multi-cell) ())    ;;; should probably inherit in the other direction ...
+(defclass! stack (multi-cell) ())    ;;; should probably inherit in the other direction ...
 
 (om::defmethod! om::make-stack ((cells list))
                 :icon 703
@@ -63,8 +63,8 @@
                                     maximize (region-chan region) into max
                                     finally return (list min max)))
 
-                      (offset (1+ (- (first minmax) 
-                                     highest-channel))))
+                      (offset (- (first minmax) 
+                                 highest-channel)))
 
                  (incf highest-channel (1+ (- (second minmax)
                                               (first minmax))))

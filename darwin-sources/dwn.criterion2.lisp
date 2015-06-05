@@ -20,6 +20,18 @@
 
 
 
+(defmethod evaluate ((self t) (crit criterion) &rest args)
+  (expt (* (process-evaluator-output (funcall (fun crit) self) crit)
+           (weight crit))
+        (exponent crit)))
+
+(defmethod evaluate ((self t) (crit list) &rest args)
+  (evaluate self (apply 'om::c-list crit)))
+
+
+
+
+
 (defmethod correct-boolean ((output (eql t))) 0)
 (defmethod correct-boolean ((output number)) output)
 (defmethod correct-boolean ((outpu (eql nil))) 1)
@@ -34,13 +46,7 @@
     (apply '+ (list! (om^ (correct-boolean output)
                           (index-exponent crit))))))
 
-(defmethod evaluate ((self t) (crit criterion) &rest args)
-  (expt (* (process-evaluator-output (funcall (fun crit) self) crit)
-           (weight crit))
-        (exponent crit)))
 
-(defmethod evaluate ((self t) (crit list) &rest args)
-  (evaluate self (apply 'om::c-list crit)))
 
 
 (defmacro special-make-criterion (kind class lambda-list &body body)
@@ -63,6 +69,7 @@
                      if (cdr sub)
                      collect (first-n sub 2))))
 
+
 (defmethod get-subject-list ((cseq chord-seq) (subject-keyword t))
   (case subject-keyword
     (:chord (om::inside cseq))
@@ -76,13 +83,10 @@
     (:pitch-class (mapcar #'(lambda (midic) (mod midic 1200))
                           (flat (mapcar #'om::lmidic (om::inside cseq)))))
 
-    ;compat
-    (:signed-melodic (get-subject-list cseq '(:melodic :signed)))
-    ('(:melodic :signed) (x->dx (get-subject-list cseq :pitch)))
+
+    (:signed-melodic (x->dx (get-subject-list cseq :pitch)))
 
     (:melodic (om-abs (get-subject-list cseq :signed-melodic)))
-    
-    ; working on this (:harmonic (
 
     ))
 
@@ -98,11 +102,19 @@
 
     (:adjacent (adjacent-pairs-by-channel arr))
 
-    (:signed-melodic (loop for pairs in (adjacent-pairs-by-channel arr)
-                           collect (- (region-pitch (second pairs))
-                                      (region-pitch (first pairs)))))
+    
+    (:signed-melodic (loop for pair in (adjacent-pairs-by-channel arr)
+                           collect (- (region-pitch (second pair))
+                                      (region-pitch (first pair)))))
 
-    (:melodic (om-abs (get-subject-list arr :signed-melodic)))))
+    (:melodic (om-abs (get-subject-list arr :signed-melodic)))
+
+
+    (:signed-harmonic (get-vertical-intervals arr))
+     
+    (:harmonic (om-abs (get-subject-list arr :signed-harmonic)))
+
+))
 
 (defmethod get-subject-list ((self specimen) (subject-keyword t))
   (case subject-keyword
@@ -145,6 +157,8 @@
     (loop for elt in (get-subject-list spec subject)
           collect (compare-to-test-value (funcall (or evaluator #'identity) elt)
                                          test-value))))
+
+
 
 (defmethod! om::criterion ((evaluator t) (subject (eql :nthcdr)) (test-value t) (rate t)
                            &optional weight exponent index-exponent)

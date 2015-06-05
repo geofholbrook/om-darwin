@@ -184,19 +184,22 @@
                      ;               (length (remove-duplicates (mapcar 'first (append population crosses offspring))))))
 
                        
-    (let ((sorted (sort (append ;;; recalculate fitnesses! because of dynamic maqutte stuff
+    (let ((sorted (sort (append ;;; recalculate fitnesses! because of dynamic maquette stuff
                                 (loop for entry in population 
+                                      do (update (second entry))
                                       collect (list (evaluate (second entry) criterion)
                                                     (second entry)
                                                     (third entry)))
+                                ;population
                                 offspring 
                                 crosses)
 
                         #'<
-                        :key #'(lambda (s)
-                                 (* (car s)
-                                    (1+ (expt (* (max (- (caddr s) 
-                                                         *longevity*) 0) 0.01) 2))))
+                        :key 
+                        #'(lambda (s)
+                           (* (car s)
+                              (1+ (expt (* (max (- (caddr s) 
+                                                   *longevity*) 0) 0.01) 2))))
                         
                         ;#'(lambda (s1 s2)
                         ;    (if (= (car s1) (car s2))
@@ -206,7 +209,7 @@
 
           ;;; sorts first by fitness, then by age ... older specimens survive so that they can't survive
           ;;; by just alternating between equivalent raw genotypes. if it weren't for this problem,
-          ;;; really the younger specimens should survive!
+          ;;; really the younger specimens should survive!    
 
           (loop for sp in sorted
                               

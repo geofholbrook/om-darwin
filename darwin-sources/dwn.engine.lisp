@@ -383,39 +383,45 @@
 
 (defmethod run-engine ((self ga-engine))
 
-  (when (and (model self)
-             (fitness-function self))
+  (let ((prev))
+
+    (when (and (model self)
+               (fitness-function self))
       
-    (setf (message-flag self) nil)
+      (setf (message-flag self) nil)
     ;(setf (generation self) 0)
     
     ; for now, always reinitialize
     
-    (loop until (equal (message-flag self) :stop)
+      (loop until (equal (message-flag self) :stop)
           
-          do
+            do
 
-          (incf (generation self))
+            (incf (generation self))
 
-          (when (equal (message-flag self) :reinit)
-            (setf (message-flag self) nil)
-            (setf (generation self) 0)
-            (randomize-population self))
+            (when (equal (message-flag self) :reinit)
+              (setf (message-flag self) nil)
+              (setf (generation self) 0)
+              (randomize-population self))
               
-          (when (equal (message-flag self) :new-fitness-function)
-            (setf (message-flag self) nil)
-            (evaluate-population self))
+            (when (equal (message-flag self) :new-fitness-function)
+              (setf (message-flag self) nil)
+              (evaluate-population self))
 
-          (setf (population self)
-                (iterate (population self) 
-                                 (fitness-function self)))     ;;; only sets raw genotypes
+            (setf (population self)
+                  (iterate (population self) 
+                           (fitness-function self)))     ;;; only sets raw genotypes
    
-          (update (cadar (population self)))
+            (update (cadar (population self)))
 
-          (update-best-candidate self)
-          (redraw-editors self)  ;;; causes the 'animation' of score editors
-
-          )))
+            (unless (eql (cadar (population self))
+                         prev)
+              (setf prev (cadar (population self)))
+              (update-best-candidate self)
+              (redraw-editors self)  ;;; causes the 'animation' of score editors
+              )
+          
+            ))))
                 
 
 

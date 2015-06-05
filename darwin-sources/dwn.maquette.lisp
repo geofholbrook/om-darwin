@@ -66,7 +66,7 @@
     (remove self
             (boxes (mycontainer self)))))
 
-(defmethod get-maq-overlaps ((self temporalbox) spec)
+(defmethod get-maq-overlaps ((self temporalbox))
   (when (value self)
     (let ((siblings (get-temporal-siblings self))
           (this (d::phenotype (cadar (d::population (car (value self)))))))

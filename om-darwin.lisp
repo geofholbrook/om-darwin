@@ -39,7 +39,7 @@
 
          "dwn.maquette"
          
-         "dwn.criterion2"
+         "dwn.criterion3"
          "dwn.criterion-utils" 
 
          "dwn.tests"
