@@ -25,6 +25,11 @@
 ;****** except, it's not a LISP structure ... so that the G.A. doesn't get slowed down? so that printouts are easier to read?
 ;*****************
 
+
+;**** arrangements can begin with a header, like this:
+;** (:header (:this 5 :that tada) <regions>)
+;**********
+
 (defun region-start (region) (first region))
 (defun region-len (region) (second region))
 (defun region-end (region) (+ (first region) (second region)))
@@ -45,6 +50,31 @@
 
 ;*****************
 ;*** region generating functions
+
+(defun make-arr (starts pitches &key lengths channels time-sig)
+  (let ((regions (loop for start on starts
+                       for pitch on pitches
+                       with chan = channels
+                       with len = lengths
+                       
+                       collect (make-region (car start) 
+                                            (or (car len) 
+                                                (- (or (cadr start) 1/16) (car start)))
+                                            (or (car chan) 1)
+                                            (car pitch))
+                       
+                       do 
+                       (when len (setf len (cdr len)))
+                       (when chan (setf chan (cdr chan))))))
+    (if time-sig
+        `(:header (:time-sig ,(if (atom (car time-sig))
+                                  (create-list (ceiling (arr-end regions) 
+                                                        (/ (car time-sig) (cadr time-sig)))
+                                               time-sig)
+                                time-sig))
+                   ,@regions)
+      regions)))
+
 
 (defun make-even-melody (props length &key (start 0) (channel 1) (legato t) (lengthen-last-note 0))
   (loop for PL in props
@@ -71,23 +101,34 @@
   (loop for p in pitches
         collect (make-region start len channel p)))
 
+
+
+(defun has-header-p (arr)
+  (equalp (car arr) :header))
+
+(defun arr-regions (arr)
+  (if (has-header-p arr)
+      (nthcdr 2 arr)
+    arr))
+
 ;*****************
 ;*** arrange operations
+
 
 
 (defun arr-time-shift (arr delta)
   (if (= delta 0)
       arr
-    (loop for region in arr
-        collect (cons (+ (car region) delta)
-                      (cdr region)))))
+    (loop for region in (arr-regions arr)
+          collect (cons (+ (car region) delta)
+                        (cdr region)))))
 
 (defun arr-transpose (arr delta) 
-  (loop for region in arr
+  (loop for region in (arr-regions arr)
         collect (subs-posn (copy-list region) 3 (+ (region-pitch region) delta))))
 
 (defun arr-set-velocities (arr vel)
-  (loop for region in arr
+  (loop for region in (arr-regions arr)
         collect `(,@(first-n region 4)
                   ,vel)))
 
@@ -98,7 +139,7 @@
     ,@(nthcdr 3 region)))
 
 (defun arr-set-channel (arr chan)
-  (loop for region in arr
+  (loop for region in (arr-regions arr)
         collect (set-channel region chan)))
 
 (defun arr-select (arr start end)
@@ -107,22 +148,28 @@
                               (>= (region-start region) start))
                           (or (null end)
                               (< (region-end region) end))))
-                 arr))
+                 (arr-regions arr)))
 
 
 (defmethod append-arrangements ((arr1 list) (arr2 list) &key (overlap 0) (ceiling t))
   (let* ((extent1 (/ (funcall (if ceiling
                                   #'ceiling
                                 #'identity)
-                              (* (arr-end arr1) 4)) 4))
+                              (* (arr-end (arr-regions arr1)) 4)) 4))
 
          (shifted-arr2 (mapcar #'(lambda (a) `(,(+ (- extent1 overlap) (first a))    
                                           ,@(cdr a)))
-                               arr2)))
+                               (arr-regions arr2))))
     (values
      
-     (append arr1 ; (cutout-to-fit arr1 shifted-arr2) 
-             shifted-arr2)
+     (let ((ts1 (get-arr-property arr1 :time-sig))
+           (ts2 (get-arr-property arr2 :time-sig))
+           (regions (append (arr-regions arr1) ; (cutout-to-fit arr1 shifted-arr2) 
+                                              shifted-arr2)))
+       (if ts1
+         `(:header (:time-sig ,(append ts1 ts2)) ,@regions)
+         regions))
+
      (- extent1 overlap))))
 
 
@@ -130,13 +177,13 @@
 ;**** measurements
 
 (defmethod arr-start (arr)
-  (least-of (mapcar 'region-start arr)))
+  (least-of (mapcar 'region-start (arr-regions arr))))
 
 (defmethod arr-end (arr)
-  (greatest-of (mapcar 'region-end arr)))
+  (greatest-of (mapcar 'region-end (arr-regions arr))))
 
 (defun regions-at-time (arr time)
-  (loop for region in arr
+  (loop for region in (arr-regions arr)
         if (and (<= (region-start region) time)
                 (> (region-end region) time))
         collect region))
@@ -149,7 +196,7 @@
 
 ;;; groups regions into single regions if they start at the same time
 (defun group-pitches-by-start (arr)
-  (loop for region-list in (demix arr #'region-start t)
+  (loop for region-list in (demix (arr-regions arr) #'region-start t)
         collect `(,@(subseq (car region-list) 0 3)
 
                   ,(flat (mapcar #'region-pitch region-list))
@@ -192,13 +239,18 @@
 
 (defparameter *perserve-channel-default* t)
 
+(defun get-arr-property (arr prop)
+  (when (has-header-p arr)
+    (om::find-keyword prop (second arr))))
+      
 
 (om::defmethod* arrange->voice ((arr-1 list) &optional (tempo 60) (time-sig '(4 4)))
   :icon 141
   ;ignores channel
-  (let ((arr (group-pitches-by-start arr-1)))
+  (let ((arr (group-pitches-by-start (arr-regions arr-1))))
     (om::mki 'voice
-         :tree (mktree (or (make-ratio-list arr) '(-1)) time-sig)
+         :tree (mktree (or (make-ratio-list arr) '(-1)) (or (get-arr-property arr-1 :time-sig)
+                                                            time-sig))
          :chords (mapcar #'(lambda (region)
                              (om::mki 'chord
                                   :lmidic (list! (region-prop region 1))
@@ -234,18 +286,19 @@
 (om::defmethod* voice->arrange ((self om::voice))
  :icon 141
   (let ((ratios (om::tree2ratio (om::tree self))))
-    (loop for length in (remove-if #'(lambda (r) (< r 0)) ratios)
-          for onset in (mapcar 'first
-                               (remove-if #'(lambda (pair) (< (second pair) 0))
-                                          (mat-trans (list (om::butlast (om::dx->x 0 (om::om-abs ratios)))
-                                                           ratios))))
-          for chord in (om::chords self)
-          if (> length 0)
-          collect (make-region onset
-                               length
-                               (car (om::lchan chord))
-                               (om::om/ (om::lmidic chord) 100)
-                               (car (om::lvel chord))))))
+    `(:header (:time-sig ,(mapcar 'first (second (om::tree self))))
+      ,@(loop for length in (remove-if #'(lambda (r) (< r 0)) ratios)
+              for onset in (mapcar 'first
+                                   (remove-if #'(lambda (pair) (< (second pair) 0))
+                                              (mat-trans (list (om::butlast (om::dx->x 0 (om::om-abs ratios)))
+                                                               ratios))))
+              for chord in (om::chords self)
+              if (> length 0)
+              collect (make-region onset
+                                   length
+                                   (car (om::lchan chord))
+                                   (om::om/ (om::lmidic chord) 100)
+                                   (car (om::lvel chord)))))))
 
 
 (om::defmethod* poly->arrange ((self om::poly))
@@ -281,7 +334,7 @@
 
 (defmethod count-collisions ((self list) &optional extent)
   (loop with count = 0
-        for sub on (sort self #'< :key #'first)
+        for sub on (sort (arr-regions self) #'< :key #'first)
         do
         (let ((end (+ (region-start (car sub))
                       (region-len (car sub)))))
@@ -313,10 +366,10 @@
 ;***************************************
 
 
-(defun starts-and-ends (time-block)
+(defun starts-and-ends (arr)
   ;outputs a sorted and demixed list of 3-element terminal indicators of the form ({:start or :end} <time> <region>)
   ;pretty organized way of doing things ... not necessarily efficient.
-  (sort (demix (loop for region in time-block
+  (sort (demix (loop for region in (arr-regions arr)
                      collect (list :start (region-start region) region)
                      collect (list :end (region-end region) region))
                #'second)
@@ -352,14 +405,14 @@
           finally return (nreverse result))))
 
 (defmethod convert-to-attack-list ((self list))
-  (demix self #'region-start t))
+  (demix (arr-regions self) #'region-start t))
 
 
 ;;;; simpler, probably faster.
 
 (defun get-vertical-diads (arr)
   (loop with sounding = nil
-        for region in (sort arr #'< :key #'region-start)
+        for region in (sort (arr-regions arr) #'< :key #'region-start)
         
         do
         (setf sounding (remove-if #'(lambda (r)
