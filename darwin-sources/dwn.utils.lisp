@@ -22,6 +22,22 @@
 
 
 
+
+;;; could be defined by om-geof
+(unless (fboundp 'om::defclas!)
+  (defmacro om::defclas! (name inheritance &rest rest)
+  "simpler defclass!"
+  (let ((slots (pop rest)))
+    `(om::defclass!
+       ,name
+       ,inheritance
+       ,(mapcar #'(lambda (slot) 
+                    `( ,(first slot) :accessor ,(first slot) :initarg 
+                       ,(intern (symbol-name (first slot)) 'keyword)
+                       ,. (rest slot)))
+                slots)
+       ,. rest))))
+
 (unless (fboundp 'om::find-keyword)
   (defun om::find-keyword (keyword keylist)
     (system::zzzz-simple-find-keyword keyword keylist)))
@@ -55,6 +71,9 @@
         (nreverse (mapcar #'nreverse result)))))
 
   (export 'om::demix "OM"))
+
+
+
 
 
 (unless (fboundp 'om::withinp)
