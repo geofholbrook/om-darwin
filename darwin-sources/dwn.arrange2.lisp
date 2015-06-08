@@ -272,7 +272,7 @@
   ;demixes by channel
   (prog1
       (om::mki 'poly
-               :voices (loop for ch in (demix arr ;(time-shift-to-zero arr) 
+               :voices (loop for ch in (demix (arr-regions arr) ;(time-shift-to-zero arr) 
                                               #'region-chan t)
                              collect (arrange->voice (if preserve-channel
                                                          ch
