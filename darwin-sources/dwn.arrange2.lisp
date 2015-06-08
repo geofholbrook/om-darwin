@@ -180,6 +180,17 @@
 
 
 
+
+(defmethod combine-rhythms-and-pitches ((rhythm-arr list) (pitches list))
+  (append (arr-header rhythm-arr)
+          (loop for region in rhtyhm-arr
+                for pitch in pitches
+                collect (make-region (region-start region)
+                                     (region-len region)
+                                     (region-chan region)
+                                     (region-pitch pitches)))))
+
+
 ;**** measurements
 
 (defmethod arr-start (arr)
