@@ -106,6 +106,10 @@
 (defun has-header-p (arr)
   (equalp (car arr) :header))
 
+(defun arr-header (arr)
+  (when (has-header-p arr)
+    (first-n arr 2)))
+
 (defun arr-regions (arr)
   (if (has-header-p arr)
       (nthcdr 2 arr)
@@ -139,8 +143,10 @@
     ,@(nthcdr 3 region)))
 
 (defun arr-set-channel (arr chan)
-  (loop for region in (arr-regions arr)
-        collect (set-channel region chan)))
+  (append 
+   (arr-header arr)
+   (loop for region in (arr-regions arr)
+         collect (set-channel region chan))))
 
 (defun arr-select (arr start end)
   (remove-if-not #'(lambda (region)
@@ -272,8 +278,9 @@
   ;demixes by channel
   (prog1
       (om::mki 'poly
-               :voices (loop for ch in (demix (arr-regions arr) ;(time-shift-to-zero arr) 
-                                              #'region-chan t)
+               :voices (loop for ch-regions in (demix (arr-regions arr) ;(time-shift-to-zero arr) 
+                                                      #'region-chan t)
+                             for ch = (append (arr-header arr) ch-regions)
                              collect (arrange->voice (if preserve-channel
                                                          ch
                                                        (arr-set-channel ch 1))  ;;; set channel to 1 for playback!
