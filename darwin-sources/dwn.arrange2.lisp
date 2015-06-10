@@ -37,7 +37,7 @@
 (defun region-prop (region n) (nth (+ 2 n) region))    ;starts at 1
 
 ;but usually:
-(defun region-pitch (region) (let ((p (fourth region))) (if (listp p) (car p) p)))
+(defun region-pitch (region) (fourth region))
 (defun region-vel (region) (fifth region))
 
 (defun make-region (start len &optional (chan 1) &rest properties)
