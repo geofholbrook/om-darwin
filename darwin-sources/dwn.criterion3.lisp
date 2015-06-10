@@ -17,6 +17,23 @@
               (index-exponent :initform *default-index-expt*)))
 
 
+(defmethod alter-weight ((self criterion) weight)
+"a number is a weight multiplier. a list (<weight> <exponent>) multipies the weight and sets the exponent"
+  (mki (class-name (class-of self)) 
+       :evaluator (evaluator self)
+       :subject (subject self)
+       :test-value (test-value self)
+       :rate (rate self)
+       :weight (* (weight self)
+                  (if (atom weight)
+                      weight
+                    (first weight)))
+       :exponent (if (and (listp weight) (second weight))
+                     (second weight)
+                   (exponent self))
+       :index-exponent (index-exponent self)))
+
+
 (defun applicable-average (lis)
   (om::average (correct-boolean (remove :n/a lis))))
 

@@ -3,10 +3,17 @@
 
 (defmethod! c-list (&rest cs)
   :icon 702
-  #'(lambda (x)
-      (loop for crit in cs
-            sum (evaluate x crit))))
-
+  (flet ((is-weight (x) (or (numberp x)
+                            (and (listp x)
+                                 (numberp (car x))))))
+    #'(lambda (x)
+        (loop for sub on cs
+              sum 
+              (if (is-weight (car sub))
+                  0
+                (evaluate x (if (is-weight (cadr sub))
+                                (d::alter-weight (car sub) (cadr sub))
+                              (car sub))))))))
 
 
 (defmethod! c-print ()
