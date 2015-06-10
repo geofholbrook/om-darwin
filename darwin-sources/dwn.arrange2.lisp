@@ -445,7 +445,10 @@
 
 
 
+;;;;
 
+(om::defmethod* om::Objfromobjs ((self list) (type om::poly)) 
+  (arrange->poly self))
         
 
 
