@@ -115,6 +115,10 @@
       (nthcdr 2 arr)
     arr))
 
+
+
+
+
 ;*****************
 ;*** arrange operations
 
@@ -260,6 +264,12 @@
   (when (has-header-p arr)
     (om::find-keyword prop (second arr))))
       
+;; TODO
+;;(defun set-arr-property (arr prop)
+  
+  
+
+
 
 (om::defmethod* arrange->voice ((arr-1 list) &optional tempo (time-sig '(4 4)))
   :icon 141

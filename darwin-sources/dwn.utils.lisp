@@ -21,6 +21,11 @@
   (intern (string-upcase str) :keyword))
 
 
+(defun alter-nth (lis n element)   ;non-destructive version of subs-posn (OM function)
+  `(,@(subseq lis 0 n)
+    ,element
+    ,@(subseq lis (1+ n))))
+
 
 
 ;;; could be defined by om-geof
