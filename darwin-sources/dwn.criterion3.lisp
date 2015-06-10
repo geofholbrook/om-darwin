@@ -166,7 +166,9 @@
   (let ((regions (arr-regions self)))
     (case subject-keyword
       (:elements self)
-      (:adjacent-elements (loop for sub on self while (cdr sub) collect (first-n sub 2)))
+      (:adjacent-elements (loop for sub on self 
+                                while (cdr sub) 
+                                collect (first-n sub 2)))
 
       (:regions regions)
     
@@ -238,4 +240,17 @@
        :subject subject
        :test-value test-value
        :rate rate))
+
+(om::defclas with-criterion (criterion) ())
+
+(defmethod! om::with-pheno ((evaluator t) (subject t))
+  :icon 702
+
+  (mki 'with-criterion 
+       :evaluator evaluator
+       :subject subject))
+
+(defmethod evaluate ((self t) (crit with-criterion) &rest args)
+  (evaluate (funcall (subject crit) self)
+            (evaluator crit)))
 
