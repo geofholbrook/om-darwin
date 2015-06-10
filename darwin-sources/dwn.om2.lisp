@@ -47,6 +47,22 @@
   (nth (om-gene 0 (1- (length lis))) lis))
                
 
+(defmethod! embed-specimen ((spec d::specimen))
+  :icon 706
+  (let ((num-nucleos (length (d::raw-genotype spec))))
+    (when (equalp *om-gene-mode* :test)
+      (incf *gene-counter* num-nucleos))
+
+    (let ((nucleos (if (member *om-gene-mode* '(:random :test))
+                       (d::random-raw-genotype num-nucleos)
+                     (if *raw-buffer*
+                         (loop repeat num-nucleos collect (pop *raw-buffer*))
+                       (error "Error: raw genotype buffer depleted. Raw genotype size should be determinate.")))))
+      (d::raw+model nucleos spec))))
+
+
+
+
 (defclass! d::om-specimen (d::specimen) 
   ((om-function :initform nil :accessor om-function)
    (om-finalizer :initform #'d::arrange->poly :accessor om-finalizer)
@@ -93,6 +109,7 @@
     (setf (om-finalizer spec) (or finalizer #'(lambda (arr)
                                                 (d::arrange->poly arr (or tempo 60)))))
     spec))
+
 
 
   
