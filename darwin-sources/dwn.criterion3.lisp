@@ -163,34 +163,38 @@
     ))
 
 (defmethod get-subject-list ((self list) (subject-keyword t))   ;;; hope it's an arrangement?
-  (case subject-keyword
-    (:regions self)
+  (let ((regions (arr-regions self)))
+    (case subject-keyword
+      (:elements self)
+      (:adjacent-elements (loop for sub on self while (cdr sub) collect (first-n sub 2)))
+
+      (:regions regions)
     
-    (:pitch (flat (mapcar 'region-pitch self)))
-    (:pitch-class (flat (mapcar #'(lambda (r)
-                                    (second (multiple-value-list 
-                                             (om// (om/ (region-pitch r) 100) 12))))
-                                self)))
+      (:pitch (flat (mapcar 'region-pitch regions)))
+      (:pitch-class (flat (mapcar #'(lambda (r)
+                                      (second (multiple-value-list 
+                                               (om// (om/ (region-pitch r) 100) 12))))
+                                  regions)))
 
-    (:adjacent (adjacent-pairs-by-channel self))
+      (:adjacent (adjacent-pairs-by-channel regions))
 
     
-    (:signed-melodic (loop for pair in (adjacent-pairs-by-channel self)
-                           collect (- (region-pitch (second pair))
-                                      (region-pitch (first pair)))))
+      (:signed-melodic (loop for pair in (adjacent-pairs-by-channel regions)
+                             collect (- (region-pitch (second pair))
+                                        (region-pitch (first pair)))))
 
-    (:melodic (om-abs (get-subject-list self :signed-melodic)))
+      (:melodic (om-abs (get-subject-list regions :signed-melodic)))
 
 
-    (:signed-harmonic (loop for pair  in (get-vertical-diads self)
-                           collect (- (region-pitch (second pair))
-                                       (region-pitch (first pair)))))
+      (:signed-harmonic (loop for pair  in (get-vertical-diads regions)
+                              collect (- (region-pitch (second pair))
+                                         (region-pitch (first pair)))))
      
-    (:harmonic (om-abs (get-subject-list self :signed-harmonic)))
+      (:harmonic (om-abs (get-subject-list regions :signed-harmonic)))
 
-    (:attacks (demix self #'region-start))
+      (:attacks (demix regions #'region-start))
 
-))
+      )))
 
 (defmethod get-subject-list ((self specimen) (subject-keyword t))
   (case subject-keyword

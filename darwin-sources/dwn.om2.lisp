@@ -49,7 +49,8 @@
 
 (defclass! d::om-specimen (d::specimen) 
   ((om-function :initform nil :accessor om-function)
-   (om-finalizer :initform #'d::arrange->poly :accessor om-finalizer)))
+   (om-finalizer :initform #'d::arrange->poly :accessor om-finalizer)
+   (tempo :initform 60 :accessor tempo)))
 
 (defmethod d::finalizer ((self d::om-specimen))
   #'(lambda (pheno) (funcall (om-finalizer self) pheno)))

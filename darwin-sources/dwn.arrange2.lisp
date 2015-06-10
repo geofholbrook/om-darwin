@@ -44,7 +44,7 @@
   `(,start ,len ,chan ,@properties))
 
 
-(defparameter *output-tempo* 60)
+(defparameter *output-tempo* 90)
 
 
 
@@ -183,12 +183,12 @@
 
 (defmethod combine-rhythms-and-pitches ((rhythm-arr list) (pitches list))
   (append (arr-header rhythm-arr)
-          (loop for region in rhtyhm-arr
+          (loop for region in (arr-regions rhythm-arr)
                 for pitch in pitches
                 collect (make-region (region-start region)
                                      (region-len region)
                                      (region-chan region)
-                                     (region-pitch pitches)))))
+                                     pitch))))
 
 
 ;**** measurements
@@ -261,7 +261,7 @@
     (om::find-keyword prop (second arr))))
       
 
-(om::defmethod* arrange->voice ((arr-1 list) &optional (tempo 60) (time-sig '(4 4)))
+(om::defmethod* arrange->voice ((arr-1 list) &optional tempo (time-sig '(4 4)))
   :icon 141
   ;ignores channel
   (let ((arr (group-pitches-by-start (arr-regions arr-1))))
