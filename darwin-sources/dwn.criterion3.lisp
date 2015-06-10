@@ -162,41 +162,56 @@
 
     ))
 
+
+(defun get-subject-list-flat (self subject-keyword)
+  (case subject-keyword
+    (:elements self)
+    (:adjacent-elements (loop for sub on self 
+                                  while (cdr sub) 
+                                  collect (first-n sub 2)))
+    (:melodic (om-abs (x->dx self)))
+    (:signed-melodic (x->dx self))))
+
 (defmethod get-subject-list ((self list) (subject-keyword t))   ;;; hope it's an arrangement?
-  (let ((regions (arr-regions self)))
-    (case subject-keyword
-      (:elements self)
-      (:adjacent-elements (loop for sub on self 
-                                while (cdr sub) 
-                                collect (first-n sub 2)))
 
-      (:regions regions)
+  (if (and (atom (car self))
+           (not (equalp (car self) :header)))
+      ;flat list
+      (get-subject-list-flat self subject-keyword)
+    (let ((regions (arr-regions self)))
+      (case subject-keyword
+        (:elements self)
+        (:adjacent-elements (loop for sub on self 
+                                  while (cdr sub) 
+                                  collect (first-n sub 2)))
+
+        (:regions regions)
     
-      (:pitch (flat (mapcar 'region-pitch regions)))
-      (:pitch-class (flat (mapcar #'(lambda (r)
-                                      (second (multiple-value-list 
-                                               (om// (om/ (region-pitch r) 100) 12))))
-                                  regions)))
+        (:pitch (flat (mapcar 'region-pitch regions)))
+        (:pitch-class (flat (mapcar #'(lambda (r)
+                                        (second (multiple-value-list 
+                                                 (om// (om/ (region-pitch r) 100) 12))))
+                                    regions)))
 
-      (:adjacent (adjacent-pairs-by-channel regions))
+        (:adjacent (adjacent-pairs-by-channel regions))
 
     
-      (:signed-melodic (loop for pair in (adjacent-pairs-by-channel regions)
-                             collect (- (region-pitch (second pair))
-                                        (region-pitch (first pair)))))
+        (:signed-melodic (loop for pair in (adjacent-pairs-by-channel regions)
+                               collect (- (region-pitch (second pair))
+                                          (region-pitch (first pair)))))
 
-      (:melodic (om-abs (get-subject-list regions :signed-melodic)))
+        (:melodic (om-abs (get-subject-list regions :signed-melodic)))
 
 
-      (:signed-harmonic (loop for pair  in (get-vertical-diads regions)
-                              collect (- (region-pitch (second pair))
-                                         (region-pitch (first pair)))))
+        (:signed-harmonic (loop for pair  in (get-vertical-diads regions)
+                                collect (- (region-pitch (second pair))
+                                           (region-pitch (first pair)))))
      
-      (:harmonic (om-abs (get-subject-list regions :signed-harmonic)))
+        (:harmonic (om-abs (get-subject-list regions :signed-harmonic)))
 
-      (:attacks (demix regions #'region-start))
+        (:attacks (demix regions #'region-start))
 
-      )))
+        ))))
 
 (defmethod get-subject-list ((self specimen) (subject-keyword t))
   (case subject-keyword
@@ -251,6 +266,6 @@
        :subject subject))
 
 (defmethod evaluate ((self t) (crit with-criterion) &rest args)
-  (evaluate (funcall (subject crit) self)
+  (evaluate (funcall (subject crit) (phenotype self))
             (evaluator crit)))
 
