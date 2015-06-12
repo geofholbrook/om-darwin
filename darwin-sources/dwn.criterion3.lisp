@@ -201,9 +201,7 @@
         (:adjacent-elements (loop for sub on self 
                                   while (cdr sub) 
                                   collect (first-n sub 2)))
-
-        (:regions regions)
-    
+ 
         (:pitch (flat (mapcar 'region-pitch regions)))
         (:pitch-class (flat (mapcar #'(lambda (r)
                                         (second (multiple-value-list 
