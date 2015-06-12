@@ -100,14 +100,18 @@
 (defun raw-from-function (fun)
   (d::random-raw-genotype (count-gene-calls fun)))
 
-(defmethod! define-species ((fun function) &key finalizer tempo)
+(defmethod! define-species ((fun function) &key finalizer tempo prop->pitch)
   :icon 703
   (let ((spec (mki 'd::om-specimen 
                    :raw (d::random-raw-genotype (count-gene-calls fun))
                    )))
     (setf (om-function spec) fun)
-    (setf (om-finalizer spec) (or finalizer #'(lambda (arr)
-                                                (d::arrange->poly arr (or tempo 60)))))
+    (setf (om-finalizer spec) (if prop->pitch
+                                  #'(lambda (arr)
+                                      (d::arrange->poly
+                                       (d::arr-process-pitches arr prop->pitch)))
+                                (or finalizer #'(lambda (arr)
+                                                  (d::arrange->poly arr (or tempo 60))))))
     spec))
 
 
@@ -136,7 +140,8 @@
 
 
 
-
+;;;;;;;;;;
+  
  
                
 

@@ -124,6 +124,13 @@
 
 
 
+
+(defun arr-process-pitches (arr fun)
+  (append (arr-header arr)
+          (loop for reg in (arr-regions arr)
+                collect `(,@(first-n reg 3)
+                          ,(funcall fun (region-pitch reg))))))
+
 (defun arr-time-shift (arr delta)
   (if (= delta 0)
       arr
