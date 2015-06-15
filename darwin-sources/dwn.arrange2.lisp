@@ -124,6 +124,11 @@
 
 
 
+(defun map-regions (fun arr &rest lists)
+  (append (arr-header arr)
+          (loop for reg in (arr-regions arr)
+                for args in (mat-trans lists)
+                collect (apply fun `(,reg ,@args)))))
 
 (defun arr-process-pitches (arr fun)
   (append (arr-header arr)
