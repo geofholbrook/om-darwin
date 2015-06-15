@@ -197,10 +197,13 @@
       (get-subject-list-flat self subject-keyword)
     (let ((regions (arr-regions self)))
       (case subject-keyword
-        (:elements self)
-        (:adjacent-elements (loop for sub on self 
-                                  while (cdr sub) 
-                                  collect (first-n sub 2)))
+        (:regions regions)
+        (:adjacent-regions (loop for sub on regions 
+                                 while (cdr sub) 
+                                 collect (first-n sub 2)))
+        (:adjacent-pitches (loop for sub on regions 
+                                 while (cdr sub) 
+                                 collect (mapcar 'region-pitch (first-n sub 2))))
  
         (:pitch (flat (mapcar 'region-pitch regions)))
         (:pitch-class (flat (mapcar #'(lambda (r)
