@@ -109,7 +109,8 @@
     (setf (om-finalizer spec) (if prop->pitch
                                   #'(lambda (arr)
                                       (d::arrange->poly
-                                       (d::arr-process-pitches arr prop->pitch)))
+                                       (d::arr-process-pitches arr prop->pitch)
+                                       (or tempo d::*output-tempo*)))
                                 (or finalizer #'(lambda (arr)
                                                   (d::arrange->poly arr (or tempo 60))))))
     spec))
