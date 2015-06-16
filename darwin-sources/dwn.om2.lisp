@@ -38,7 +38,9 @@
                     (rrnd (d::get-param :gene-range))
                   (if *raw-buffer*
                       (pop *raw-buffer*)
-                    (error "Error: raw genotype buffer depleted. Raw genotype size should be determinate.")))))
+                    (progn
+                      (setf *om-gene-mode* :random)
+                      (error "Error: raw genotype buffer depleted. Raw genotype size should be determinate."))))))
     (d::mod-to-range nucleo (list min max) step floatp)))
 
 
@@ -57,7 +59,9 @@
                        (d::random-raw-genotype num-nucleos)
                      (if *raw-buffer*
                          (loop repeat num-nucleos collect (pop *raw-buffer*))
-                       (error "Error: raw genotype buffer depleted. Raw genotype size should be determinate.")))))
+                       (progn
+                         (setf *om-gene-mode* :random)
+                         (error "Error: raw genotype buffer depleted. Raw genotype size should be determinate."))))))
       (d::raw+model nucleos spec))))
 
 
