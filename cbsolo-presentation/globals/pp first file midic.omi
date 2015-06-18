@@ -1,0 +1,4 @@
+; OM File Header - Saved 2015/06/12 17:07:40
+; (6.1 :inst (om-make-point 0 0) (om-make-point 50 50) (om-make-point 500 400) "" 129 0 "2015/06/12 17:07:17" "2015/06/12 17:07:40")
+; End File Header
+(in-package :om)(load-lib-for (quote nil))(setf *instance-to-load* (om-load-ominstance1 (quote omlistinstance) "pp first file midic" 129 (list (list 3400) (list 3100) (list 3000) (list 4300) (list 4300) (list 4300) (list 4100) (list 4900) (list 2200) (list 2200) (list 3000) (list 3300) (list 3300) (list 3300) (list 4200) (list 4200) (list 4200) (list 4200) (list 2900) (list 2900) (list 2900) (list 3100)) (pairlis (quote (winsize winpos)) (list (om-make-point 335 275) (om-make-point 10 40))) nil ""))

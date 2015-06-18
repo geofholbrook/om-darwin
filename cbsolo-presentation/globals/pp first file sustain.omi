@@ -1,0 +1,4 @@
+; OM File Header - Saved 2015/06/12 17:33:44
+; (6.1 :inst (om-make-point 0 0) (om-make-point 50 50) (om-make-point 500 400) "" 129 0 "2015/06/12 17:33:26" "2015/06/12 17:33:44")
+; End File Header
+(in-package :om)(load-lib-for (quote nil))(setf *instance-to-load* (om-load-ominstance1 (quote omlistinstance) "pp first file sustain" 129 (list 0 1 2 1 0 1 0 2 1 0 0 0 2 1 2 0 1 0 2 0 1 0) (pairlis (quote (winsize winpos)) (list (om-make-point 335 275) (om-make-point 10 40))) nil ""))

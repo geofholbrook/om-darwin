@@ -1,0 +1,4 @@
+; OM File Header - Saved 2013/02/24 15:21:45
+; (6.050102 :lisp (om-make-point 10 10) (om-make-point 50 50) (om-make-point 500 400) "" 124 0 "2013/02/09 13:34:13" "2013/02/24 15:21:45")
+; End File Header
+(in-package :om)(load-lib-for (quote nil))(setf *om-current-persistent* (om-load-lisp-patch "set-kernel-path" 6.050102 ";;; Edit a valid LAMBDA EXPRESSION for \"set-kernel-paths\"$;;; e.g. (lambda (arg1 arg2 ...) ( ... ))$$(lambda () $  (let ((global (get-inst-from-globals \"modres-path\")))$    (if global$        (set-slot (instance (get-inst-from-globals \"modres-path\"))$                  'value$                  (directory-namestring (om::om-choose-directory-dialog $                               :prompt \"choose path for modress and snd kernels\")))$      (print \"modres-path global not created yet\"))))"))

@@ -1,0 +1,4 @@
+; OM File Header - Saved 2015/06/18 19:12:24
+; (6.1 :patc (om-make-point 388 10) (om-make-point 208 127) (om-make-point 820 474) "" 183 0 "2015/06/08 18:55:07" "2015/06/12 12:49:45")
+; End File Header
+(in-package :om)(load-lib-for (quote nil))(setf *om-current-persistent* (om-load-patch1 "mapping species" (quote nil) (quote nil) nil 6.1))
