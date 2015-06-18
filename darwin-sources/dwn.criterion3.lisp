@@ -270,17 +270,19 @@
                      &optional weight exponent index-exponent)
 
 ;;; use this to express multiple criteria for one subject type
-  (apply #'om::c-list
-         (loop for ev in evaluator
-               for tv in (or test-value
-                             (create-list (length evaluator) nil))
-               for r in (or rate
-                            (create-list (length evaluator) nil))
-               collect (mki 'criterion 
-                            :evaluator ev
-                            :subject subject
-                            :test-value tv
-                            :rate r))))
+  (if (null evaluator)
+      (call-next-method)
+    (apply #'om::c-list
+           (loop for ev in evaluator
+                 for tv in (or test-value
+                               (create-list (length evaluator) nil))
+                 for r in (or rate
+                              (create-list (length evaluator) nil))
+                 collect (mki 'criterion 
+                              :evaluator ev
+                              :subject subject
+                              :test-value tv
+                              :rate r)))))
 
 
 (om::defclas with-criterion (criterion) ())
