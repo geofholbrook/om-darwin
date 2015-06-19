@@ -6,14 +6,14 @@
   (flet ((is-weight (x) (or (numberp x)
                             (and (listp x)
                                  (numberp (car x))))))
-    #'(lambda (x)
-        (loop for sub on cs
-              sum 
-              (if (is-weight (car sub))
-                  0
-                (evaluate x (if (is-weight (cadr sub))
-                                (d::alter-weight (car sub) (cadr sub))
-                              (car sub))))))))
+    (mki 'd::list-criterion
+         :evaluator (loop for sub on cs
+                          unless (is-weight (car sub))
+                          collect 
+                          (if (is-weight (cadr sub))
+                              (d::alter-weight (car sub) (cadr sub))
+                            (car sub))))))
+
 
 
 (defmethod! c-print ()

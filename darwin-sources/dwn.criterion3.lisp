@@ -8,10 +8,10 @@
 (defparameter *default-index-expt* 1.2)
 
 (om::defclas criterion ()
-             ((evaluator) 
-              (subject)
-              (test-value) 
-              (rate) 
+             ((evaluator :initform nil) 
+              (subject :initform nil)
+              (test-value :initform nil) 
+              (rate :initform nil) 
               (weight :initform *default-weight*)
               (exponent :initform *default-expt*)
               (index-exponent :initform *default-index-expt*)))
@@ -186,6 +186,8 @@
     (:adjacent-elements (loop for sub on self 
                                   while (cdr sub) 
                                   collect (first-n sub 2)))
+    (:dx (om-abs (x->dx self)))
+    (:signed-dx (x->dx self))
     (:melodic (om-abs (x->dx self)))
     (:signed-melodic (x->dx self))))
 
@@ -294,7 +296,15 @@
        :evaluator evaluator
        :subject subject))
 
-(defmethod evaluate ((self t) (crit with-criterion) &rest args)
+(defmethod evaluate ((self specimen) (crit with-criterion) &rest args)
   (evaluate (funcall (subject crit) (phenotype self))
             (evaluator crit)))
 
+
+;---------
+
+(om::defclas list-criterion (criterion) ())
+
+(defmethod evaluate ((self specimen) (crit list-criterion) &rest args)
+  (loop for ev in (evaluator crit)
+        sum (evaluate self ev)))
