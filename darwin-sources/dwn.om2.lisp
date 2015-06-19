@@ -80,7 +80,7 @@
 
 (defun om-default-finalizer (pheno tempo)
   ;; assumes it's an arrangement, unless:  #'(lambda (pheno)
-  (if (and (listp pheno)
+ (if (and (listp pheno)
            (numberp (car pheno)))
       (mki 'chord-seq 
            :lmidic (if (< (car pheno) 128)

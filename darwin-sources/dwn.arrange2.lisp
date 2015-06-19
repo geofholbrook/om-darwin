@@ -174,7 +174,7 @@
                  (arr-regions arr)))
 
 
-(defmethod append-arrangements ((arr1 list) (arr2 list) &key (overlap 0) (ceiling t))
+(defmethod append-arrangements ((arr1 list) (arr2 list) &key (overlap 0) (ceiling nil))
   (let* ((extent1 (/ (funcall (if ceiling
                                   #'ceiling
                                 #'identity)
