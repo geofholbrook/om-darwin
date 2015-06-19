@@ -71,8 +71,14 @@
   ((owner))) ;; specimen to which this operon belongs (parent would be confusing in the genetic algorithm context)
 
 
+
+
 (defmethod update-geno ((self specimen)) nil)
 (defmethod phenotype ((self specimen)) self)  ;;; t?      ;; so that code will work in cases where there is no phenotype
+
+(defmethod evaluate ((self specimen) (crit function) &rest args)
+  (evaluate (phenotype self) crit))
+
 
 (defmethod update ((self specimen))
   (update-geno self)
