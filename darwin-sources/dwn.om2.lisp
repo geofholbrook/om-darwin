@@ -66,10 +66,22 @@
 
 
 
+(defun om-default-finalizer (pheno tempo)
+  ;; assumes it's an arrangement, unless:  #'(lambda (pheno)
+  (if (and (listp pheno)
+           (numberp (car pheno)))
+      (mki 'chord-seq 
+           :lmidic (if (< (car pheno) 128)
+                       (om* pheno 100)
+                     pheno)
+           :lonset '(0 500)
+           :ldur '(500))
+    (d::arrange->poly pheno tempo)))
+    
 
 (defclass! d::om-specimen (d::specimen) 
   ((om-function :initform nil :accessor om-function)
-   (om-finalizer :initform #'d::arrange->poly :accessor om-finalizer)
+   (om-finalizer :initform nil :accessor om-finalizer)
    (tempo :initform 60 :accessor tempo)))
 
 (defmethod d::finalizer ((self d::om-specimen))
@@ -116,7 +128,7 @@
                                        (d::arr-process-pitches arr prop->pitch)
                                        (or tempo d::*output-tempo*)))
                                 (or finalizer #'(lambda (arr)
-                                                  (d::arrange->poly arr (or tempo 60))))))
+                                                  (om-default-finalizer arr (or tempo 60))))))
     spec))
 
 
