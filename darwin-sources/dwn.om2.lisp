@@ -49,7 +49,9 @@
   (nth (om-gene 0 (1- (length lis))) lis))
                
 
-(defmethod! embed-specimen ((spec d::specimen))
+
+
+(defmethod! embed-species ((spec d::specimen))
   :icon 706
   (let ((num-nucleos (length (d::raw-genotype spec))))
     (when (equalp *om-gene-mode* :test)
@@ -63,6 +65,12 @@
                          (setf *om-gene-mode* :random)
                          (error "Error: raw genotype buffer depleted. Raw genotype size should be determinate."))))))
       (d::raw+model nucleos spec))))
+
+
+;compat
+(defmethod! embed-specimen ((spec d::specimen))
+  :icon 706
+  (embed-species spec))
 
 
 
