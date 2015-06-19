@@ -145,8 +145,9 @@
                         (cdr region)))))
 
 (defun arr-transpose (arr delta) 
-  (loop for region in (arr-regions arr)
-        collect (subs-posn (copy-list region) 3 (+ (region-pitch region) delta))))
+  (append (arr-header arr)
+          (loop for region in (arr-regions arr)
+                collect (subs-posn (copy-list region) 3 (+ (region-pitch region) delta)))))
 
 (defun arr-set-velocities (arr vel)
   (loop for region in (arr-regions arr)
