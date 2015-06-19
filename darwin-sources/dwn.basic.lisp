@@ -60,11 +60,14 @@
 
 (defmethod evaluate ((self t) (crit function) &rest args)
   (let ((result 
-         (funcall crit (phenotype self))))
+         (funcall crit self)))
     (if (numberp result)
         result
       (if result 0 1))))  ;;; i.e., true means 0, which means good.
 
+
+(defmethod evaluate ((self specimen) (crit function) &rest args)
+  (evaluate (phenotype self) crit))
 
 (defmethod mutate ((self list) &optional ga-params)
   (let ((range (get-param :gene-range ga-params))
