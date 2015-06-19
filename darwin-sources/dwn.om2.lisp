@@ -20,6 +20,7 @@
                  ((error #'(lambda (err)
                              (setf *om-gene-mode* ,tmp)
                              (capi::display-message "An error of type ~a occurred: ~a" (type-of err) (format nil "~A" err))
+                             (break)
                              (abort err))))
                ,@body)
            (setf *om-gene-mode* ,tmp))))))
@@ -40,7 +41,7 @@
                       (pop *raw-buffer*)
                     (progn
                       (setf *om-gene-mode* :random)
-                      (error "Error: raw genotype buffer depleted. Raw genotype size should be determinate."))))))
+                      (break "Error: raw genotype buffer depleted. Raw genotype size should be determinate."))))))
     (d::mod-to-range nucleo (list min max) step floatp)))
 
 
@@ -63,7 +64,7 @@
                          (loop repeat num-nucleos collect (pop *raw-buffer*))
                        (progn
                          (setf *om-gene-mode* :random)
-                         (error "Error: raw genotype buffer depleted. Raw genotype size should be determinate."))))))
+                         (break "Error: raw genotype buffer depleted. Raw genotype size should be determinate."))))))
       (d::raw+model nucleos spec))))
 
 (defmethod! embed-species ((spec function))
@@ -97,7 +98,6 @@
    (tempo :initform 60 :accessor tempo)))
 
 
-
 (defmethod d::finalizer ((self d::om-specimen))
   #'(lambda (pheno) (funcall (om-finalizer self) pheno)))
 
@@ -111,9 +111,11 @@
 
 (defmethod d::phenotype ((self d::om-specimen))
   (when (om-function self)
-    (with-om-gene-mode :buffer
-      (setf *raw-buffer* (d::raw-genotype self))
-      (funcall (om-function self)))))
+    (let ((inside (equalp *om-gene-mode* :buffer)))
+      (with-om-gene-mode :buffer
+        ;(unless inside
+          (setf *raw-buffer* (d::raw-genotype self));)
+        (funcall (om-function self))))))
 
 (defun count-gene-calls (fun)
   (with-om-gene-mode :test
