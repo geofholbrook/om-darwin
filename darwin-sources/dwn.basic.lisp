@@ -60,7 +60,7 @@
 
 (defmethod evaluate ((self t) (crit function) &rest args)
   (let ((result 
-         (funcall crit self)))
+         (funcall crit (phenotype self))))
     (if (numberp result)
         result
       (if result 0 1))))  ;;; i.e., true means 0, which means good.
