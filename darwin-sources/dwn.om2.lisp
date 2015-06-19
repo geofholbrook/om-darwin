@@ -66,6 +66,10 @@
                          (error "Error: raw genotype buffer depleted. Raw genotype size should be determinate."))))))
       (d::raw+model nucleos spec))))
 
+(defmethod! embed-species ((spec function))
+  :icon 706
+  (embed-species (define-species spec)))
+
 
 ;compat
 (defmethod! embed-specimen ((spec d::specimen))
@@ -92,8 +96,12 @@
    (om-finalizer :initform nil :accessor om-finalizer)
    (tempo :initform 60 :accessor tempo)))
 
+
+
 (defmethod d::finalizer ((self d::om-specimen))
   #'(lambda (pheno) (funcall (om-finalizer self) pheno)))
+
+
 
 (defmethod omNG-copy ((self d::om-specimen))
   `(let ((copy (mki 'd::om-specimen)))
