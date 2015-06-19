@@ -308,3 +308,7 @@
 (defmethod evaluate ((self specimen) (crit list-criterion) &rest args)
   (loop for ev in (evaluator crit)
         sum (evaluate self ev)))
+
+(defmethod evaluate ((self t) (crit list-criterion) &rest args)
+  (loop for ev in (evaluator crit)
+        sum (evaluate self ev)))
