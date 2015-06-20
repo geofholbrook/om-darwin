@@ -59,8 +59,8 @@
 
 
 
-(defmethod get-subfitnesses ((self specimen) (crit criterion))
-  (get-subfitnesses (phenotype self) crit))
+;(defmethod get-subfitnesses ((self specimen) (crit criterion))
+;  (get-subfitnesses (phenotype self) crit))
 
 (defmethod get-subfitnesses ((self t) (crit criterion))
   (flet ((agrees (subj test-value)
@@ -159,7 +159,6 @@
 
 
 (defmethod get-subject-list ((self om::chord-seq) (subject-keyword t))
-  (break)
  (case subject-keyword
     (:chord (om::inside self))
 
@@ -192,7 +191,7 @@
     (:signed-melodic (x->dx self))))
 
 (defmethod get-subject-list ((self list) (subject-keyword t))   ;;; hope it's an arrangement?
-
+  (break)
   (if (and (atom (car self))
            (not (equalp (car self) :header)))
       ;flat list
