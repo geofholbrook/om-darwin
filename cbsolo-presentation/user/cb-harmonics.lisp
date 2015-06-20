@@ -9,9 +9,9 @@
   :phenotyper
   
   (loop for op in (operons self)
-        for start from 0 by 1/16
+        for start from 0 by 1/8
         collect (make-region start 
-                             1/16 
+                             1/8 
                              1 
                              (om* (+ (nth (corde op)
                                           om::*cb-open-strings*)
