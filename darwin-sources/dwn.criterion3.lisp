@@ -254,13 +254,27 @@
   :icon 702
   :initvals (list nil nil nil nil)
 
-  :menuins '((1 (("regions" :regions)
+  :menuins '((1 (("operons" :operons)
+                 ("regions" :regions)
+                 
                  ("adjacent" :adjacent)
+                 ("adjacent-regions" :adjacent-regions)
+                 ("adjacent-pitches" :adjacent-pitches)
+
+                 ("elements" :elements)
+                 ("adjacent-elements" :adjacent-elements)
+                 ("dx" :dx)
+                 ("signed-dx" :signed-dx)
+
+                 ("attacks" :attacks)
+
                  ("nthcdr" :nthcdr)
                  ("pitch" :pitch)
                  ("pitch-class" :pitch-class)
                  ("melodic" :melodic)
-                 ("signed-melodic" :signed-melodic))))
+                 ("signed-melodic" :signed-melodic)
+
+                 ("chord" :chord))))
 
   (mki 'criterion 
        :evaluator evaluator
