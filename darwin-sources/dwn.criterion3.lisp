@@ -191,7 +191,7 @@
     (:signed-melodic (x->dx self))))
 
 (defmethod get-subject-list ((self list) (subject-keyword t))   ;;; hope it's an arrangement?
-  (break)
+
   (if (and (atom (car self))
            (not (equalp (car self) :header)))
       ;flat list
@@ -235,6 +235,7 @@
 (defmethod get-subject-list ((self specimen) (subject-keyword t))
   (case subject-keyword
     (:operons (operons self))
+    (:onoperons (loop for sub on (operons self) collect sub))
     (otherwise (get-subject-list (phenotype self)
                                  subject-keyword))))
     
@@ -254,6 +255,7 @@
   :initvals (list nil nil nil nil)
 
   :menuins '((1 (("operons" :operons)
+                 ("onoperons" :onoperons)
                  ("regions" :regions)
                  
                  ("adjacent" :adjacent)
