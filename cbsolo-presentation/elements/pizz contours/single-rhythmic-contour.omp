@@ -1,5 +1,5 @@
-; OM File Header - Saved 2015/06/19 22:29:30
-; (6.1 :patc (om-make-point 172 10) (om-make-point 1166 440) (om-make-point 1009 978) "" 183 0 "2015/06/19 13:35:59" "2015/06/19 22:29:30")
+; OM File Header - Saved 2015/06/20 15:12:47
+; (6.1 :patc (om-make-point 172 10) (om-make-point 1040 252) (om-make-point 1009 978) "" 183 0 "2015/06/19 13:35:59" "2015/06/20 15:12:47")
 ; End File Header
 ; External resources 
 ; (list (list (quote :abstraction) "#P\"../contours and pitch mapping/ratio2timesig.oml\"" "#P\"single-contour (genetic).omp\""))

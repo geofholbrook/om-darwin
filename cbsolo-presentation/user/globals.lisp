@@ -1,6 +1,7 @@
 (in-package om)
 
 (defparameter *cb-open-strings* '(28 33 38 43))
+
 (defparameter *nat-harmonic-guide* '((3 31)
                                      (4 28)
                                      (5 24)
@@ -11,4 +12,7 @@
                                      (16 28)
                                      (19 19)
                                      (22 33.5)
-                                     (24 24)))
+                                     (24 24)
+                                     (28 28)
+                                     (31 31)
+                                     (34 33.5)))
