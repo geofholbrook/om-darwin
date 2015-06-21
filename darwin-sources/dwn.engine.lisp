@@ -414,7 +414,7 @@
    
             (update (cadar (population self)))
 
-            (unless nil (eql (cadar (population self))
+            (unless (eql (cadar (population self))
                          prev)
               (setf prev (cadar (population self)))
               (update-best-candidate self)
@@ -423,31 +423,6 @@
           
             ))))
                 
-
-
-(defmethod om::evolute ((model specimen) (crit criterion) (max-generations integer))
-  :icon 701
-  (let ((generation 0) 
-        (population
-          (population-from-model model crit)))
-
-    (loop until (or (= (caar population) 0)
-                    (= generation max-generations))
-          
-          do
-
-          (incf generation)
-
-          (setf population
-                (iterate population 
-                         crit))     ;;; only sets raw genotypes
-   
-          ;(update (cadar (population self)))
-
-          finally return (cadar population)
-          )))
-
-
 
 
 (defmethod om::omNG-save ((self specimen) &optional (values? nil))
