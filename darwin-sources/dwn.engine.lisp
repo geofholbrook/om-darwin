@@ -425,7 +425,7 @@
                 
 
 
-(defmethod om::evolute ((model specimen) (crit criterion) (max-generations integer))
+(defmethod! om::evolute ((model specimen) (crit criterion) (max-generations integer))
   :icon 701
   (let ((generation 0) 
         (population

@@ -33,14 +33,16 @@
          "dwn.defspecies-builtin"   ;; rename
          "dwn.spec.trees"
 
+         "dwn.criterion3"
+         "dwn.criterion-utils" 
+
          ;reorganize these two files
          "dwn.engine"
          "dwn.om2"
 
          "dwn.maquette"
          
-         "dwn.criterion3"
-         "dwn.criterion-utils" 
+
 
          "dwn.tests"
          
