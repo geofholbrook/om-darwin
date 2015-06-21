@@ -155,10 +155,10 @@
 
 ;;; EVOULTE METHOD (update ... been using ga-engine) ;;;;;;;;
 
-(defmethod! evolute ((model t) (criterion function) (generations number))
+(defmethod! evolute ((model t) (crit d::criterion) (generations number))
   :initvals (list nil nil 100)
   :icon 701
-  (d::run model criterion generations))
+  (d::run model crit generations))
 
 (defmethod! evaluate ((spec t) (criterion t))
   :icon 704
@@ -172,13 +172,13 @@
 (defmethod Objfromobjs ((self d::ga-engine) (type tonal-object))
   (d::finalize (cadar (d::population self))))
 
-
-
-
 ;;;;;;;;;;
   
  
-               
+             
+(defmethod! phenotype ((self d::specimen))
+  :icon 700
+  (d::phenotype self))
 
 
 

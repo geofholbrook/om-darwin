@@ -166,6 +166,12 @@
    (loop for region in (arr-regions arr)
          collect (set-channel region chan))))
 
+(defun arr-channel-filter (arr chan)
+  (append
+   (arr-header arr)
+   (remove-if-not #'(lambda (reg) (= (region-chan reg) chan))
+                  (arr-regions arr))))
+
 (defun arr-select (arr start end)
   (remove-if-not #'(lambda (region)
                      (and (or (null start)
@@ -195,6 +201,14 @@
          regions))
 
      (- extent1 overlap))))
+
+
+(defmethod pile-arrangements ((arr1 list) (arr2 list))
+  (append (arr-header arr1)
+          (sort (append (arr-regions arr1)
+                        (arr-regions arr2))
+                #'<
+                :key #'region-start)))
 
 
 

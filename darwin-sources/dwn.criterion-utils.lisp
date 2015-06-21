@@ -15,6 +15,14 @@
                             (car sub))))))
 
 
+(defmethod! c-operons (eval test rate)
+  :icon 702
+  (criterion eval :operons test rate))
+
+(defmethod! c-onoperons (eval test rate)
+  :icon 702
+  (criterion eval :onoperons test rate))
+
 
 (defmethod! c-print ()
   :icon 702
