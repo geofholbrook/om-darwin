@@ -172,13 +172,13 @@
 (defmethod Objfromobjs ((self d::ga-engine) (type tonal-object))
   (d::finalize (cadar (d::population self))))
 
-
-
-
 ;;;;;;;;;;
   
  
-               
+             
+(defmethod! phenotype ((self d::specimen))
+  :icon 700
+  (d::phenotype self))
 
 
 
