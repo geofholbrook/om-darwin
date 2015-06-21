@@ -52,10 +52,15 @@
 (defun dynamic-proximities (goal lis)
   ;;; dynamic part not implemented
   
-  (if (numberp goal)
-      (mapcar #'(lambda (sub)
-                  (offby sub goal))
-              lis)))
+  (if (and (listp goal)
+           (equalp (car goal) :bpf))
+      (loop for elt in lis
+            for g in (interpolation (second goal) (third goal) (length lis) 0.0)
+            collect (offby elt g))
+    (mapcar #'(lambda (sub)
+                (offby sub goal))
+            lis)))
+
 
 
 
@@ -102,7 +107,9 @@
                                             sub-evals))
 
                   ;;; ### disagreements [ of evaluator values ]  LINES 7 12
-                  (mapcar #'(lambda (sub) (offby sub (test-value crit))) sub-evals)))
+                  ;(mapcar #'(lambda (sub) (offby sub (test-value crit))) sub-evals)
+                  (dynamic-proximities (test-value crit) sub-evals)
+                  ))
 
             ;;; no test-value
             (if (rate crit)

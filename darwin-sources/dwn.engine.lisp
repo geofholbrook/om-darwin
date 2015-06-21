@@ -425,6 +425,31 @@
                 
 
 
+(defmethod om::evolute ((model specimen) (crit criterion) (max-generations integer))
+  :icon 701
+  (let ((generation 0) 
+        (population
+          (population-from-model model crit)))
+
+    (loop until (or (= (caar population) 0)
+                    (= generation max-generations))
+          
+          do
+
+          (incf generation)
+
+          (setf population
+                (iterate population 
+                         crit))     ;;; only sets raw genotypes
+   
+          ;(update (cadar (population self)))
+
+          finally return (cadar population)
+          )))
+
+
+
+
 (defmethod om::omNG-save ((self specimen) &optional (values? nil))
   `(let ((spec ,(call-next-method)))
      (setf (raw-genotype spec) ,(om::omng-save (raw-genotype self)))
