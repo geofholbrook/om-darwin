@@ -183,6 +183,11 @@
 
     (:melodic (om-abs (get-subject-list self :signed-melodic)))
 
+    (:harmonic (loop for chord in (om::get-chords self)
+                     append (loop for note on (om::sort. (om::lmidic chord))
+                                   while (cdr note)
+                                   collect (abs (- (car note) (cadr note))))))
+
     ))
 
 
@@ -222,21 +227,38 @@
         (:adjacent (adjacent-pairs-by-channel regions))
 
     
-        (:signed-melodic (loop for pair in (adjacent-pairs-by-channel regions)
-                               collect (- (region-pitch (second pair))
-                                          (region-pitch (first pair)))))
+        (:signed-melodic ;(loop for pair in (adjacent-pairs-by-channel regions)
+                         ;      collect (- (region-pitch (second pair))
+                         ;                 (region-pitch (first pair))))
+
+         (loop for voice in (mat-trans (get-subject-list regions :chords))
+               append (loop for note on voice
+                            while (cdr note)
+                            collect (- (cadr note) (car note))))
+         )
 
         (:melodic (om-abs (get-subject-list regions :signed-melodic)))
 
 
-        (:signed-harmonic (loop for pair  in (get-vertical-diads regions)
-                                collect (- (region-pitch (second pair))
-                                           (region-pitch (first pair)))))
+        (:all-harmonic (loop for pair in (get-vertical-diads regions)
+                                collect (abs (- (region-pitch (second pair))
+                                           (region-pitch (first pair))))))
+
+        (:signed-harmonic 
+
+         (loop for chord in (get-subject-list regions :chords)
+               append (loop for note on (om::sort. chord)
+                            while (cdr note)
+                            collect (- (car note) (cadr note))))
+         )
      
         (:harmonic (om-abs (get-subject-list regions :signed-harmonic)))
 
         (:attacks (demix regions #'region-start))
 
+        (:chords (loop for attack in (demix regions #'region-start)
+                      collect (om::sort. (mapcar #'region-pitch attack))))
+        
         ))))
 
 (defmethod get-subject-list ((self specimen) (subject-keyword t))
