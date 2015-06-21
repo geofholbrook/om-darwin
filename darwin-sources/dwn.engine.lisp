@@ -414,7 +414,7 @@
    
             (update (cadar (population self)))
 
-            (unless (eql (cadar (population self))
+            (unless nil (eql (cadar (population self))
                          prev)
               (setf prev (cadar (population self)))
               (update-best-candidate self)
