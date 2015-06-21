@@ -52,20 +52,15 @@
 (defun dynamic-proximities (goal lis)
   ;;; dynamic part not implemented
   
-  (if (and (listp goal)
-           (equalp (car goal) :bpf))
-      (loop for elt in lis
-            for g in (interpolation (second goal) (third goal) (length lis) 0.0)
-            collect (offby elt g))
-    (mapcar #'(lambda (sub)
-                (offby sub goal))
-            lis)))
+  (if (numberp goal)
+      (mapcar #'(lambda (sub)
+                  (offby sub goal))
+              lis)))
 
 
 
-
-;(defmethod get-subfitnesses ((self specimen) (crit criterion))
-;  (get-subfitnesses (phenotype self) crit))
+(defmethod get-subfitnesses ((self specimen) (crit criterion))
+  (get-subfitnesses (phenotype self) crit))
 
 (defmethod get-subfitnesses ((self t) (crit criterion))
   (flet ((agrees (subj test-value)
@@ -107,9 +102,7 @@
                                             sub-evals))
 
                   ;;; ### disagreements [ of evaluator values ]  LINES 7 12
-                  ;(mapcar #'(lambda (sub) (offby sub (test-value crit))) sub-evals)
-                  (dynamic-proximities (test-value crit) sub-evals)
-                  ))
+                  (mapcar #'(lambda (sub) (offby sub (test-value crit))) sub-evals)))
 
             ;;; no test-value
             (if (rate crit)
@@ -166,6 +159,7 @@
 
 
 (defmethod get-subject-list ((self om::chord-seq) (subject-keyword t))
+  (break)
  (case subject-keyword
     (:chord (om::inside self))
 
@@ -242,7 +236,6 @@
 (defmethod get-subject-list ((self specimen) (subject-keyword t))
   (case subject-keyword
     (:operons (operons self))
-    (:onoperons (loop for sub on (operons self) collect sub))
     (otherwise (get-subject-list (phenotype self)
                                  subject-keyword))))
     
@@ -261,28 +254,13 @@
   :icon 702
   :initvals (list nil nil nil nil)
 
-  :menuins '((1 (("operons" :operons)
-                 ("onoperons" :onoperons)
-                 ("regions" :regions)
-                 
+  :menuins '((1 (("regions" :regions)
                  ("adjacent" :adjacent)
-                 ("adjacent-regions" :adjacent-regions)
-                 ("adjacent-pitches" :adjacent-pitches)
-
-                 ("elements" :elements)
-                 ("adjacent-elements" :adjacent-elements)
-                 ("dx" :dx)
-                 ("signed-dx" :signed-dx)
-
-                 ("attacks" :attacks)
-
                  ("nthcdr" :nthcdr)
                  ("pitch" :pitch)
                  ("pitch-class" :pitch-class)
                  ("melodic" :melodic)
-                 ("signed-melodic" :signed-melodic)
-
-                 ("chord" :chord))))
+                 ("signed-melodic" :signed-melodic))))
 
   (mki 'criterion 
        :evaluator evaluator
