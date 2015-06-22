@@ -67,6 +67,26 @@
              (d::test-value self)
              rate))
 
+(defmethod! c-oblique (eval test rate)
+  :icon 702
+  (criterion eval :oblique test rate))
+
+(defmethod! c-regions (eval test rate)
+  :icon 702
+  (criterion eval :regions test rate))
+
+(defmethod! c-voices (eval test rate)
+  :icon 702
+  (criterion eval :voices test rate))
+
+(defmethod! c-operons (eval test rate)
+  :icon 702
+  (criterion eval :operons test rate))
+
+(defmethod! c-pitches (eval test rate)
+  :icon 702
+  (criterion eval :pitches test rate))
+
 (defmethod! c-weight ((self d::criterion) weight &optional (expt d::*default-expt*) (index-expt d::*default-index-expt*))
   :icon 702
    (criterion (d::evaluator self)
