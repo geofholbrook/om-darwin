@@ -63,9 +63,9 @@
 
 
 
-
-;(defmethod get-subfitnesses ((self specimen) (crit criterion))
-;  (get-subfitnesses (phenotype self) crit))
+;;; STACK HACK!!! for presentation
+(defmethod get-subfitnesses ((self stack) (crit criterion))
+  (get-subfitnesses (phenotype self) crit))
 
 (defmethod get-subfitnesses ((self t) (crit criterion))
   (flet ((agrees (subj test-value)
