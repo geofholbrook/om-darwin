@@ -78,10 +78,14 @@
   (embed-species spec))
 
 
+(defmethod is-score-obj? ((self tonal-object)) t)
+(defmethod is-score-obj? ((self t)) nil)
 
 (defun om-default-finalizer (pheno tempo)
   ;; assumes it's an arrangement, unless:  #'(lambda (pheno)
- (if (and (listp pheno)
+  (if (is-score-obj? pheno)
+      pheno
+    (if (and (listp pheno)
            (numberp (car pheno)))
       (mki 'chord-seq 
            :lmidic (if (< (car pheno) 128)
@@ -89,7 +93,7 @@
                      pheno)
            :lonset '(0 500)
            :ldur '(500))
-    (d::arrange->poly pheno tempo)))
+    (d::arrange->poly pheno tempo))))
     
 
 (defclass! d::om-specimen (d::specimen) 
