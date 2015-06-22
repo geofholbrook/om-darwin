@@ -424,7 +424,6 @@
             ))))
                 
 
-
 (defmethod! om::evolute ((model specimen) (crit criterion) (max-generations integer))
   :icon 701
   (let ((generation 0) 
@@ -442,7 +441,7 @@
                 (iterate population 
                          crit))     ;;; only sets raw genotypes
    
-          ;(update (cadar (population self)))
+          (print `(generation ,generation best-fitness ,(caar population)))
 
           finally return (cadar population)
           )))
