@@ -226,7 +226,11 @@
 
         (:adjacent (adjacent-pairs-by-channel regions))
 
-    
+        ;hack for presentation
+        (:signed-melodic2 (loop for pair in (adjacent-pairs-by-channel regions)
+                              collect (- (region-pitch (second pair))
+                                         (region-pitch (first pair)))))
+
         (:signed-melodic ;(loop for pair in (adjacent-pairs-by-channel regions)
                          ;      collect (- (region-pitch (second pair))
                          ;                 (region-pitch (first pair))))
