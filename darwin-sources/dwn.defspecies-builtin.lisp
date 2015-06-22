@@ -72,10 +72,10 @@
 
 (defspecies dx-melody (music-mixin)      
   :species-slots
-  (start 48)
-  (melodic-range '(-3 3))
+  (start 4800)
+  (melodic-range '(-300 300))
 
-  :operon-slots (interval :range (melodic-range self))
+  :operon-slots (interval :range `(,@(melodic-range self) 100))
   :phenotyper
   (make-even-melody (dx->x (start self) 
                            (mapcar #'interval (operons self)))
