@@ -242,7 +242,9 @@
          )
 
         (:melodic (om-abs (get-subject-list regions :signed-melodic)))
-
+        
+         ;hack
+        (:melodic2 (om-abs (get-subject-list regions :signed-melodic2)))
 
         (:all-harmonic (loop for pair in (get-vertical-diads regions)
                                 collect (abs (- (region-pitch (second pair))
