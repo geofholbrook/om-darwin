@@ -75,9 +75,28 @@
 (defvar *darwin-subpackages* nil)
 (setf *darwin-subpackages*
 
-      '( ("species" nil nil (make-even-melody make-grid-melody make-ga-tree) nil) 
-         ("criteria" nil nil (c-list c-pitch c-rate))
-         ("engine" nil (d::ga-engine) (d::start d::stop d::set-fitness-function) nil)))
+      '( ("species" nil nil (make-ga-chord
+                             make-ga-chord-seq
+                             make-even-melody 
+                             make-grid-melody 
+                             make-ga-tree
+                             make-multi
+                             make-stack
+                             make-arrangement) nil) 
+         ("criteria" nil nil (c-list 
+                              c-pitches 
+                              c-melodic
+                              c-harmonic
+                              c-oblique
+                              c-regions
+                              c-chords
+                              c-voices
+                              c-operons
+                              c-block
+                              c-pc
+                              c-print
+                              ))
+         ("engine" nil (d::ga-engine) (evolute phenotype evaluate d::result d::start d::stop d::set-fitness-function) nil)))
 
 ;--------------------------------------------------
 ;filling packages

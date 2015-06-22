@@ -1,5 +1,5 @@
-; OM File Header - Saved 2015/06/21 16:07:01
-; (6.1 :patc (om-make-point 10 110) (om-make-point 1038 101) (om-make-point 1554 1133) "" 183 0 "2015/06/19 16:26:14" "2015/06/21 16:07:01")
+; OM File Header - Saved 2015/06/22 9:37:10
+; (6.1 :patc (om-make-point 10 110) (om-make-point 429 143) (om-make-point 1554 1133) "" 183 0 "2015/06/19 16:26:14" "2015/06/21 16:07:01")
 ; End File Header
 ; External resources 
 ; (list (list (quote :abstraction) "#P\"../multi-contour.omp\"") (list (quote :sound) "#P\"../../../out-files/easy-out-9.aiff\"") (list (quote :instance) "#P\"../../../globals/excerpt2-arr.omi\""))
