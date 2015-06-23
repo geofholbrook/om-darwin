@@ -86,30 +86,17 @@
 (defmethod om::play-obj? ((self ga-engine)) t)
 (defmethod om::get-obj-to-play ((self ga-engine-box)) (result (om::value self)))
 
-(defmethod om::om-geof-keys ((self om::patchPanel) char) 
-  (let ((actives (om::get-actives self)))
-    (case char
-      ;(#\E (om::om-encapsulate self actives))
-      (#\L (om::om-funnel self actives))
-      (#\Y (om::om-align self actives)
-           (om::make-move-after self actives))
-      (#\C (om::om-cascade self actives)))))
 
-(defmethod om::handle-key-event :around ((self om::patchPanel) char) 
-  (om::modify-patch self)
-  (let* ((ga-frames (om::get-actives self 'ga-engine-frame)))
-    (case char
-      (#\g  (let* ((boxes (mapcar 'om::object ga-frames))
-                   (vals (mapcar 'om::value boxes)))
-              (if (some #'running vals)
-                  (mapc #'stop vals)
-                (mapc #'start vals))))
+(defmethod om::handle-key-event ((self ga-engine-box) char) 
+  (case char
+    (#\g  (let ((engine (om::value self)))
+            (if (running engine)
+                (stop engine)
+              (start engine))))
 
-      (otherwise (progn 
-                   (when (find-library "om-geof") (om::om-geof-keys self char))
-                   (call-next-method self char))))))
-
-
+    (otherwise (progn 
+                 (when (find-library "om-geof") (om::om-geof-keys self char))
+                 (call-next-method self char)))))
 
 ;;;;;;;;;;;;;;;;;;;;
 ;;;; GA-EDITOR
