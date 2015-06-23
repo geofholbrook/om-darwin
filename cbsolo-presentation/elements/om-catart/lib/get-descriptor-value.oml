@@ -1,4 +1,0 @@
-; OM File Header - Saved 2015/06/21 17:02:54
-; (6.1 :lisp (om-make-point 24 24) (om-make-point 50 50) (om-make-point 500 400) "" 124 0 nil "2015/06/21 17:02:54")
-; End File Header
-(in-package :om)(load-lib-for (quote nil))(setf *om-current-persistent* (om-load-lisp-patch "get-descriptor-value" 6.1 ";;; Edit a valid LAMBDA EXPRESSION for \"get-descriptor-value\"$;;; e.g. (lambda (arg1 arg2 ...) ( ... ))$$(lambda (unitID desc corpus)$  (nth (position desc (mapcar 'first (corpus-descriptors corpus)))$       (nth unitID (corpus-data corpus))))"))

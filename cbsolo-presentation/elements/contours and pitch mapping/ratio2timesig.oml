@@ -1,4 +1,0 @@
-; OM File Header - Saved 2015/06/20 18:50:05
-; (6.1 :lisp (om-make-point 280 10) (om-make-point 50 50) (om-make-point 500 400) "" 124 0 "2015/06/08 16:36:59" "2015/06/20 18:50:05")
-; End File Header
-(in-package :om)(load-lib-for (quote nil))(setf *om-current-persistent* (om-load-lisp-patch "ratio2timesig" 6.1 ";;; Edit a valid LAMBDA EXPRESSION for \"LispFunction\"$;;; e.g. (lambda (arg1 arg2 ...) ( ... ))$$(lambda (r)$  (labels ((rec (n d)$             (if (or (integerp n)$                     (>= d 32))$                 (list n d)$               (rec (* n 2) (* d 2)))))$    (rec (* r 4) 4)))"))
