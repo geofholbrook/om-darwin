@@ -20,7 +20,7 @@
                  ((error #'(lambda (err)
                              (setf *om-gene-mode* ,tmp)
                              (capi::display-message "An error of type ~a occurred: ~a" (type-of err) (format nil "~A" err))
-                             (break)
+                             ;(break)
                              (abort err))))
                ,@body)
            (setf *om-gene-mode* ,tmp))))))
@@ -41,7 +41,7 @@
                       (pop *raw-buffer*)
                     (progn
                       (setf *om-gene-mode* :random)
-                      (break "Error: raw genotype buffer depleted. Raw genotype size should be determinate."))))))
+                      (abort "Error: raw genotype buffer depleted. Raw genotype size should be determinate."))))))
     (d::mod-to-range nucleo (list min max) step floatp)))
 
 
@@ -64,7 +64,7 @@
                          (loop repeat num-nucleos collect (pop *raw-buffer*))
                        (progn
                          (setf *om-gene-mode* :random)
-                         (break "Error: raw genotype buffer depleted. Raw genotype size should be determinate."))))))
+                         (abort "Error: raw genotype buffer depleted. Raw genotype size should be determinate."))))))
       (d::raw+model nucleos spec))))
 
 (defmethod! embed-species ((spec function))
