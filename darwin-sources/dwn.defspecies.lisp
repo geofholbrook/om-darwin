@@ -102,7 +102,7 @@
 
 (defun raw+model (raw model)
 "make a new specimen that is like the model (same species, same species-slot values) but with new raw-genotype"
-  (let ((spec (eval (om::omng-copy model))))
+  (let ((spec (clos::copy-standard-instance model)))
     (setf (raw-genotype spec) raw)
     (update spec)))
 
