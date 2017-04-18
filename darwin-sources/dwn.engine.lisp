@@ -94,8 +94,8 @@
                 (stop engine)
               (start engine))))
 
-    (otherwise (progn 
-                 (when (find-library "om-geof") (om::om-geof-keys self char))
+    (otherwise (let ((glib (find-library "om-geof")))
+                 (when (and glib (om::loaded? glib)) (om::om-geof-keys self char))
                  (call-next-method self char)))))
 
 ;;;;;;;;;;;;;;;;;;;;
@@ -151,7 +151,7 @@
                                         :di-action #'(lambda (button)
                                                        (reinit (om::object (om-view-container button)))))
 
-                   (om-make-dialog-item 'om-check-box (om-make-point 150 50) (om-make-point 200 20)
+                   #| (om-make-dialog-item 'om-check-box (om-make-point 150 50) (om-make-point 200 20)
                                   "retain best candidate")
                                   ;:font *controls-font*
 
@@ -198,7 +198,7 @@
 
 
 
-
+                   |#
 
                    )
   )

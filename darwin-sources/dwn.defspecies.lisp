@@ -86,6 +86,8 @@
         nil)
   self)
 
+(defmethod update ((self t)) self)
+
 
 (defmethod mutate ((self specimen) &optional ga-params)
   (let ((copy (clos::copy-standard-instance self)))

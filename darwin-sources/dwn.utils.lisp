@@ -27,10 +27,7 @@
     ,@(subseq lis (1+ n))))
 
 
-
-;;; could be defined by om-geof
-(unless (fboundp 'om::defclas!)
-  (defmacro om::defclas! (name inheritance &rest rest)
+(defmacro om::defclas! (name inheritance &rest rest)
   "simpler defclass!"
   (let ((slots (pop rest)))
     `(om::defclass!
@@ -41,11 +38,14 @@
                        ,(intern (symbol-name (first slot)) 'keyword)
                        ,. (rest slot)))
                 slots)
-       ,. rest))))
+       ,. rest)))
 
-(unless (fboundp 'om::find-keyword)
-  (defun om::find-keyword (keyword keylist)
-    (system::zzzz-simple-find-keyword keyword keylist)))
+(defun om::find-keyword (keyword keylist)
+  (loop for elt in keylist
+        with foundp
+        until foundp
+        do (if (equalp elt keyword) (setf foundp t))
+        finally return (and foundp elt)))
 
 (unless (fboundp 'om::rrnd)
   (defun om::rrnd (lower-limit &optional upper-limit)

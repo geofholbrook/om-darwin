@@ -82,6 +82,23 @@
                     1/16))
 
 
+;;; this was in new-arrangers.lisp which was in the users folder of dwn-demo-ws
+;;; but OM loads those files before loading user libraries for the WS, so no user-library-dependent code can be in there.
+;;; (this should be changed)
+
+(defspecies trills (arrangement)
+  :phenotyper   ;;; change only the pheno
+
+  (loop for op in (operons self)
+        append (loop for start from (start op) by (resolution self)
+                     repeat (floor (len op) (resolution self))
+                     for k from 0
+                     collect (make-region start (resolution self)
+                                          (channel op)
+                                          (+ (pitch op) (if (evenp k)
+                                                            0 100))))))
+
+
 
 
 
