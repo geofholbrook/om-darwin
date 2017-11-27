@@ -353,7 +353,7 @@
               collect (make-region onset
                                    length
                                    (car (om::lchan chord))
-                                   (om::om/ (om::lmidic chord) 100)
+                                   (om::lmidic chord)
                                    (car (om::lvel chord)))))))
 
 
