@@ -218,7 +218,7 @@
                                  while (cdr sub) 
                                  collect (mapcar 'region-pitch (first-n sub 2))))
  
-        (:pitch (flat (mapcar 'region-pitch regions)))
+        ((:pitch :pitches) (flat (mapcar 'region-pitch regions)))
         (:pitch-class (flat (mapcar #'(lambda (r)
                                         (second (multiple-value-list 
                                                  (om// (om/ (region-pitch r) 100) 12))))
