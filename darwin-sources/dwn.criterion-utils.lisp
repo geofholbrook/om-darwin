@@ -87,6 +87,10 @@
   :icon 702
   (criterion eval :pitches test rate))
 
+(defmethod! c-chords (eval test rate)
+  :icon 702
+  (criterion eval :chords test rate))
+
 (defmethod! c-weight ((self d::criterion) weight &optional (expt d::*default-expt*) (index-expt d::*default-index-expt*))
   :icon 702
    (criterion (d::evaluator self)
@@ -94,6 +98,8 @@
               (d::test-value self)
               (d::rate self)
               weight expt index-expt))
+
+
   
 
 
