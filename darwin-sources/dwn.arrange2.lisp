@@ -13,8 +13,6 @@
 
 ;*** conventions ***
 
-;pitches should be in keynums, e.g. 60 (= C3) or 64.5 (E3 quarter-sharp)
-
 ;times should be encoded in RATIOS (not sure of all code currently embraces this policy)
 ;i.e. 1/4 = quarternote
 
@@ -51,15 +49,17 @@
 ;*****************
 ;*** region generating functions
 
+;the last value for start will generate a rest that lasts for whatever is left in the bar
 (defun make-arr (starts pitches &key lengths channels time-sig)
-  (let ((regions (loop for start on starts
-                       for pitch on pitches
-                       with chan = channels
+  (let ((regions (loop with chan = channels
                        with len = lengths
+                       for start on starts
+                       for pitch on pitches
+                       for end = (or (cadr start) (ceiling (+ (car start) 0.0001)))
+                       ;; TODO put in those changs we did in the lesson
                        
                        collect (make-region (car start) 
-                                            (or (car len) 
-                                                (- (or (cadr start) 1/16) (car start)))
+                                            (- end (car start))
                                             (or (car chan) 1)
                                             (car pitch))
                        
@@ -76,12 +76,13 @@
       regions)))
 
 
-(defun make-even-melody (props length &key (start 0) (channel 1) (legato t) (lengthen-last-note 0))
-  (loop for PL in props
+(defun make-even-melody (property-lists length &key (start 0) (channel 1) (legato t) (lengthen-last-note 0))
+  (loop with arrangement-start = start
+        for properties in property-lists
         for k from 1
-        for st from start by length
+        for onset from arrangement-start by length
         collect (apply 'make-region 
-                       `(,st 
+                       `(,onset 
                          ,(+ (if (or legato (= length 1/8) (< length 2/20))
                                  length
                                (if (ratiop length)
@@ -93,7 +94,7 @@
                                  lengthen-last-note
                                0))
                          ,channel
-                         ,@(list! PL)))))
+                         ,@(list! properties)))))
 
 
 
