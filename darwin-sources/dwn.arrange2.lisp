@@ -90,7 +90,7 @@
                                        (/ length 2)
                                      (/ 1 (denominator length)))
                                  (floor (* .25 length))))
-                             (if (= k (length props))
+                             (if (= k (length property-lists))
                                  lengthen-last-note
                                0))
                          ,channel
