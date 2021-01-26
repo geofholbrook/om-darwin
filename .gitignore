@@ -10,5 +10,4 @@
 
 *.app/
 
-dev-ws/**
-presentation-ws/**
+reference-pages
