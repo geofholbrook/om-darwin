@@ -1,4 +1,0 @@
-; OM File Header - Saved 2015/06/02 21:42:50
-; (6.0901 :patc (om-make-point 172 60) (om-make-point 50 50) (om-make-point 500 400) "" 183 0 "2015/06/02 21:41:33" "2015/06/02 21:42:50")
-; End File Header
-(in-package :om)(load-lib-for (quote nil))(setf *om-current-persistent* (om-load-patch1 "chord-seq" (quote ((let ((box (om-load-boxcall (quote genfun) "MAKE-GA-CHORD-SEQ" (quote make-ga-chord-seq) (quote ((om-load-inputfun (quote input-funbox) "" "NUM-CHORDS" 8) (om-load-inputfun (quote input-funbox) "" "CARDINALITY" 3))) (om-make-point 106 90) nil nil nil nil 1))) (when (fboundp (quote set-active)) (set-active box nil)) box))) (quote nil) nil 6.0901))

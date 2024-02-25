@@ -1,7 +1,4 @@
-*.xfasl
-*.ofasl
-*.nfasl
-*.ufasl
+*.*fasl
 *.lisp~
 *.lisp#
 
@@ -10,4 +7,3 @@
 *.app/
 
 dev-ws/**
-presentation-ws/**
