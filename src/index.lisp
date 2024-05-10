@@ -20,7 +20,10 @@
   (run-script "stop"))
 
 (defun test-server ()
-  (om::om-terminal "curl localhost:32794"))
+  (om::om-term-cmd "curl localhost:32794"))
+
+(defmethod js-function ((fn string))
+  (om::om-term-cmd (string+ "curl localhost:32794/function -d " fn))
 
 (defmethod run-script ((script-name string)) 
   (let ((path (namestring (make-pathname 

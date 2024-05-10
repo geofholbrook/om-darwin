@@ -1,4 +1,4 @@
 #!/bin/bash
 
 THIS_DIR=$(dirname "$0")
-/usr/local/bin/node $THIS_DIR/server.js
+/Users/geof/.bun/bin/bun $THIS_DIR/server.ts
