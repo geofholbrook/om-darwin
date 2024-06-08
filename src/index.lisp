@@ -19,11 +19,20 @@
 (defun stop-server ()
   (run-script "stop"))
 
-(defun test-server ()
+(defmethod test-server ()
   (om::om-term-cmd "curl localhost:32794"))
 
-(defmethod js-function ((fn string))
-  (om::om-term-cmd (string+ "curl localhost:32794/function -d " fn))
+(defmethod test-js-fn ((js-function-string string))
+  (let ((payload 
+    (string+ 
+      "curl localhost:32794/function -H \"Content-Type: application/json\""
+      " -d '{ \"fnString\": \"" 
+      js-function-string 
+      ", \"arguments\": [] }'"
+      )))
+    (print payload)
+    (om::om-term-cmd payload)
+   ))
 
 (defmethod run-script ((script-name string)) 
   (let ((path (namestring (make-pathname 
