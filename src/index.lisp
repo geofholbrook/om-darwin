@@ -23,13 +23,9 @@
   (om::om-term-cmd "curl localhost:32794"))
 
 (defmethod test-js-fn ((js-function-string string))
-  (let ((payload 
-    (string+ 
-      "curl localhost:32794/function -H \"Content-Type: application/json\""
-      " -d '{ \"fnString\": \"" 
-      js-function-string 
-      ", \"arguments\": [] }'"
-      )))
+  (let ((payload (format nil 
+                         "curl -X POST localhost:32794/test-function -H \"Content-Type: application/json\" -d '{ \"fnString\": \"~a\" }'"
+                         js-function-string)))
     (print payload)
     (om::om-term-cmd payload)
    ))
