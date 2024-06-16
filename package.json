@@ -1,10 +1,15 @@
 {
+  "scripts": {
+    "test": "bun test"
+  },
   "dependencies": {
     "express": "^4.19.2",
+    "lodash": "^4.17.21",
     "typescript": "^5.4.5"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
+    "@types/lodash": "^4.17.5",
     "@types/node": "^20.12.7",
     "bun-types": "latest"
   },
