@@ -2,11 +2,6 @@
 (setf lp *load-pathname*)
 (defvar *darwin-server* nil)
 
-(defun reset-darwin-definitions ()
-  (do-symbols (s (find-package 'dwn)) 
-    (if (string-equal (package-name (symbol-package s)) "om-darwin") 
-        (unintern s))))
-
 (defun source-directory () (make-pathname :directory (pathname-directory lp)))
 
 (defun server-directory ()
@@ -19,7 +14,7 @@
 (defun stop-server ()
   (run-script "stop"))
 
-(defmethod test-server ()
+(defmethod terminal-test-server ()
   (om::om-term-cmd "curl localhost:32794"))
 
 (defmethod test-js-fn ((js-function-string string))
@@ -37,9 +32,39 @@
     (om-terminal (om::string+ "sh " path))))
 
 
+(defconstant +crlf+ (coerce (list #\Return #\Linefeed) 'string))
+
+(defun send-get-request (stream host path)
+  (format stream "GET ~A HTTP/1.0~AHost: ~A~A~A"
+    path +crlf+ host +crlf+ +crlf+)
+  (finish-output stream)
+)
+
+(defmethod test-server ()
+  (with-open-stream (http (comm:open-tcp-stream 
+                         "localhost" 32794))
+    (send-get-request http "localhost" "/")
+    (read-body http)))
+
+(defun read-body (stream)
+  "Read a TCP stream and return the JSON body as a string."
+  ;; http standard is that an empty line separates the headers from the body
+  (let ((body "")
+        (reading-headers t))
+    (loop
+      for line = (read-line stream nil nil)
+      while line
+      do
+        (unless reading-headers (setf body (concatenate 'string body line)))
+        (when (= (length line) 1)   
+          (setf reading-headers nil))
+    finally (return body))))
 
 
 
     
+
+
+
 
 

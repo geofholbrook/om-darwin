@@ -4,6 +4,11 @@ import bodyParser from "body-parser";
 const app = express();
 app.use(express.json());
 
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
+});
+
 app.get("/", async (req, res) => {
   res.json({ message: "om-darwin 2.0 server (root endpoint)" });
 });
