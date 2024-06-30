@@ -15,8 +15,9 @@
 
  (defvar *source-files* nil)
  (setf *source-files* 
-       '( "index"         
-          ))
+       '( "http"
+          "index"
+          "tests" ))
 
  (mapc #'(lambda (file)
        (compile&load (make-pathname :directory (append (pathname-directory *lib-folder*) 

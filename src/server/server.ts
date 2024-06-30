@@ -19,10 +19,10 @@ app.post("/test-function", async (req, res) => {
       fnString: string;
       arguments: unknown[];
     };
-
     const fn = eval(`(${body.fnString})`);
     const result = fn(...(body.arguments || []));
-    res.json({ result });
+    console.log(`returning result: ${result}`);
+    res.end(JSON.stringify(result) + "\n");
   } catch (error: any) {
     console.error(error.message);
     res.status(500).json({ error: "Internal Server Error" });

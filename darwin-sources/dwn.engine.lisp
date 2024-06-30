@@ -112,12 +112,10 @@
 (defmethod om::default-edition-params ((self ga-engine))
   (om::default-edition-params (result self)))
 
-
 (defmethod om::draw-mini-view ((self t) (value ga-engine))
   (if (equalp (mini-view-mode value) :result)
       (om::draw-mini-view self (result value))
      (call-next-method)))
-
 
 ;;; toggle miniview hack
 (defmethod om::get-frame-class ((self ga-engine-box)) 'ga-engine-frame)
