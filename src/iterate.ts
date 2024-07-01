@@ -9,9 +9,10 @@ export function iterate(
     new Array(population.config.numOffspringPerParent).fill(0).map(() => {
       const newSequence = [...s.sequence];
       const index = Math.floor(Math.random() * newSequence.length);
-      newSequence[index] = Math.floor(Math.random() * s.maxValue + 1);
+      newSequence[index] = _.clamp(newSequence[index] + (Math.random() > 0.5 ? -1 : 1), s.minValue, s.maxValue);
       return {
         sequence: newSequence,
+        minValue: s.minValue,
         maxValue: s.maxValue,
         score: fitnessFunction(newSequence),
       };
@@ -33,7 +34,6 @@ export function getBestNSpecimens(
   specimens: ISpecimen[],
   n: number
 ): ISpecimen[] {
-  console.log(_.countBy(specimens, (specimen) => specimen.score));
   let maxScore = Math.max(...specimens.map((specimen) => specimen.score));
   return specimens.reduce((acc: ISpecimen[], curr: ISpecimen) => {
     if (acc.length < n) {

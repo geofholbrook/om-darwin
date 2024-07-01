@@ -1,5 +1,6 @@
 export interface ISpecimen {
     sequence: number[];
+    minValue: number;
     maxValue: number;
     score: number;
 }
