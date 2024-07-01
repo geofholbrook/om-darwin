@@ -23,6 +23,7 @@ let population: IPopulation = {
   config: {
     populationSize: 5,
     numOffspringPerParent: 10,
+    numCrosses: 50,
   },
 };
 

@@ -9,5 +9,6 @@ export interface IPopulation {
     config: {
         populationSize: number;
         numOffspringPerParent: number;
+        numCrosses: number;
     };
 }

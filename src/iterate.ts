@@ -9,7 +9,11 @@ export function iterate(
     new Array(population.config.numOffspringPerParent).fill(0).map(() => {
       const newSequence = [...s.sequence];
       const index = Math.floor(Math.random() * newSequence.length);
-      newSequence[index] = _.clamp(newSequence[index] + (Math.random() > 0.5 ? -1 : 1), s.minValue, s.maxValue);
+      newSequence[index] = _.clamp(
+        newSequence[index] + _.random(-3, 3),
+        s.minValue,
+        s.maxValue
+      );
       return {
         sequence: newSequence,
         minValue: s.minValue,
@@ -20,10 +24,19 @@ export function iterate(
   );
 
   const newSpecimens = _.flatten(newSpecimenSets);
+  const crossSpecimens = Array.from({
+    length: population.config.numCrosses,
+  }).map(() =>
+    uniformCrossover(
+      _.sample([...population.specimens, ...newSpecimens])!,
+      _.sample([...population.specimens, ...newSpecimens])!
+    )
+  );
+  crossSpecimens.forEach((s) => (s.score = fitnessFunction(s.sequence)));
 
   return {
     specimens: getBestNSpecimens(
-      [...population.specimens, ...newSpecimens],
+      [...population.specimens, ...newSpecimens, ...crossSpecimens],
       population.config.populationSize
     ),
     config: population.config,
@@ -50,4 +63,19 @@ export function getBestNSpecimens(
     }
     return acc;
   }, []);
+}
+
+export function uniformCrossover(
+  specimen1: ISpecimen,
+  specimen2: ISpecimen
+): ISpecimen {
+  const newSequence = specimen1.sequence.map((gene, i) =>
+    Math.random() > 0.5 ? gene : specimen2.sequence[i]
+  );
+  return {
+    sequence: newSequence,
+    minValue: specimen1.minValue,
+    maxValue: specimen1.maxValue,
+    score: Infinity,
+  };
 }
