@@ -2,7 +2,8 @@
 
 ## javascript function repository
 
-* server with CRUD methods, storing named javascript functions
+* server with CRUD methods, storing named javascript functions in memory 
+* data persists only as long as the server runs
 * front end that allows creating and editing these functions
 
 ### endpoints:
