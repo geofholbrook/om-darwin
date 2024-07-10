@@ -1,3 +1,4 @@
+.env
 *.*fasl
 *.lisp~
 *.lisp#

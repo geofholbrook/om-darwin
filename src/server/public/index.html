@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Editor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        header {
+            background: #f4f4f4;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+        #editor {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        #editor textarea {
+            flex: 1;
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            font-family: monospace;
+            font-size: 1em;
+        }
+        #buttons {
+            display: flex;
+            gap: 10px;
+        }
+        #buttons button {
+            padding: 10px;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 id="filename">Untitled</h1>
+        <div id="buttons">
+            <button onclick="newFile()">New</button>
+            <button onclick="openFile()">Open</button>
+            <button onclick="saveFile()">Save</button>
+            <button onclick="saveAsFile()">Save As</button>
+        </div>
+    </header>
+    <div id="editor">
+        <textarea id="codeEditor" placeholder="Write your JavaScript code here..."></textarea>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

@@ -1,16 +1,45 @@
 import express from "express";
-import bodyParser from "body-parser";
+import { readFileSync } from "fs";
+import path from "path";
 
 const app = express();
 app.use(express.json());
 
 app.use((req, res, next) => {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-    next();
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
 });
 
-app.get("/", async (req, res) => {
-  res.json({ message: "om-darwin 2.0 server (root endpoint)" });
+app.use(express.static(path.join(__dirname, "public")));
+
+function getJSFilePath(filename: string) {
+  if (!process.env.JS_PATH) {
+    throw new Error("JS_PATH not set");
+  }
+  return path.join(process.env.JS_PATH, filename);
+}
+
+// Endpoint for opening a file
+app.get("/open/:filename", (req, res) => {
+  const filepath = getJSFilePath(req.params.filename);
+  const content = readFileSync(filepath).toString();
+  res.json({ filename: req.params.filename, content });
+});
+
+// Endpoint for saving a file
+app.post("/save", express.json(), (req, res) => {
+  const { filename, content } = req.body;
+
+  console.log(`Saving file: ${filename} with content: ${content}`);
+  res.json({ success: true });
+});
+
+// Endpoint for saving a file as
+app.post("/saveAs", express.json(), (req, res) => {
+  const { filename, content } = req.body;
+  // Placeholder logic for saving a file as
+  console.log(`Saving file as: ${filename} with content: ${content}`);
+  res.json({ success: true });
 });
 
 app.post("/test-function", async (req, res) => {

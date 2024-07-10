@@ -11,8 +11,8 @@ test("single iteration", () => {
       [5, 5, 0],
       [0, 5, 5],
       [5, 0, 5], // all of these are one mutation away from being perfect
-    ].map((s) => ({ sequence: s, maxValue: 10, score: fitnessFunction(s) })),
-    config: { populationSize: 3, numOffspringPerParent: 10 },
+    ].map((s) => ({ sequence: s, minValue: 0, maxValue: 10, score: fitnessFunction(s) })),
+    config: { populationSize: 3, numOffspringPerParent: 10, numCrosses: 10 },
   };
   const newPop = iterate(pop, fitnessFunction);
   expect(newPop.specimens).toHaveLength(pop.config.populationSize);

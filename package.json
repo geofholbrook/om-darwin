@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "test": "bun test"
+    "test": "bun test",
+    "server": "bun ./src/server/server.ts"
   },
   "dependencies": {
     "express": "^4.19.2",

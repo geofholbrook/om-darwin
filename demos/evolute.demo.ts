@@ -19,7 +19,7 @@ function createRandomSpecimen(
 }
 
 let population: IPopulation = {
-  specimens: Array.from({ length: 5 }, () => createRandomSpecimen(100, 0, 10)),
+  specimens: Array.from({ length: 5 }, () => createRandomSpecimen(100, 0, 100)),
   config: {
     populationSize: 5,
     numOffspringPerParent: 10,
