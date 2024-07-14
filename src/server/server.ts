@@ -1,16 +1,17 @@
 import express from "express";
 import { readFileSync } from "fs";
 import path from "path";
+import router from "../routes";
 
-const app = express();
-app.use(express.json());
+const app = express(); // essential
+app.use(express.json()); // essential = enables JSON body parser
 
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public"))); // ???
 
 function getJSFilePath(filename: string) {
   if (!process.env.JS_PATH) {
@@ -58,5 +59,7 @@ app.post("/test-function", async (req, res) => {
   }
 });
 
-app.listen(32794);
+app.use("/", router);
+
+app.listen(32794); // essential
 console.log("listening on 32794...");
