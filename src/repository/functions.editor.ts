@@ -1,4 +1,4 @@
-export interface EditorFunctions {
+export interface EditorFunction {
   id: number;
   name: string;
   function?: {
@@ -6,7 +6,7 @@ export interface EditorFunctions {
   };
 }
 
-const editorFunctions: Array<EditorFunctions> = [
+const editorFunctions: EditorFunction[] = [
   {
     id: 1,
     name: "function 1",
@@ -21,24 +21,28 @@ const editorFunctions: Array<EditorFunctions> = [
   },
 ];
 
-export const getAllFunctions = (): Array<EditorFunctions> => {
+export const getAllFunctions = (): EditorFunction[] => {
   return editorFunctions;
 };
 
-export const getOneFunction = (id: number): EditorFunctions | undefined => {
+export const getOneFunction = (id: number): EditorFunction | undefined => {
   return editorFunctions.find((editorFunction) => editorFunction.id === id);
 };
 
-export const createFunction = (editorFunction: EditorFunctions): void => {
+export const createFunction = (editorFunction: EditorFunction): void => {
   editorFunctions.push(editorFunction);
 };
 
-export const updateFunction = (editorFunction: EditorFunctions): void => {
-  const index = editorFunctions.findIndex((u) => u.id === editorFunction.id);
+export const updateFunction = (editorFunction: EditorFunction): void => {
+  const index = editorFunctions.findIndex(
+    (editorFunction) => editorFunction.id === editorFunction.id
+  );
   editorFunctions[index] = editorFunction;
 };
 
 export const deleteFunction = (id: number): void => {
-  const index = editorFunctions.findIndex((u) => u.id === id);
+  const index = editorFunctions.findIndex(
+    (editorFunction) => editorFunction.id === id
+  );
   editorFunctions.splice(index, 1);
 };
