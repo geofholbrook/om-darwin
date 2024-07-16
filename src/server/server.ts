@@ -1,7 +1,7 @@
 import express from "express";
 import { readFileSync } from "fs";
 import path from "path";
-import router from "../routes";
+import { router } from "../routes";
 
 const app = express();
 app.use(express.json());
