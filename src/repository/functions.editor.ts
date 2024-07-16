@@ -1,6 +1,6 @@
 export interface EditorFunction {
   name: string;
-  function?: {
+  function: {
     content: string;
   };
 }
@@ -8,12 +8,21 @@ export interface EditorFunction {
 const editorFunctions: EditorFunction[] = [
   {
     name: "function-1",
+    function: {
+      content: "code",
+    },
   },
   {
     name: "function-2",
+    function: {
+      content: "code",
+    },
   },
   {
     name: "function-3",
+    function: {
+      content: "code",
+    },
   },
 ];
 
