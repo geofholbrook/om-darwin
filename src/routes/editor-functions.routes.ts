@@ -11,10 +11,10 @@ export const editorFunctionsRouter = Router();
 
 editorFunctionsRouter.get("/", getAllFunctionsController);
 
-editorFunctionsRouter.get("/:id", getOneFunctionController);
+editorFunctionsRouter.get("/:name", getOneFunctionController);
 
 editorFunctionsRouter.post("/", createFunctionController);
 
-editorFunctionsRouter.put("/:id", updateFunctionController);
+editorFunctionsRouter.put("/:name", updateFunctionController);
 
-editorFunctionsRouter.delete("/:id", deleteFunctionController);
+editorFunctionsRouter.delete("/:name", deleteFunctionController);

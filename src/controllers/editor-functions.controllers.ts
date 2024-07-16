@@ -17,8 +17,8 @@ export const getAllFunctionsController = (
 };
 
 export const getOneFunctionController = (req: Request, res: Response): void => {
-  const id: number = parseInt(req.params.id, 10);
-  const editorFunction: EditorFunction | undefined = getOneFunction(id);
+  const name: string = req.params.name;
+  const editorFunction: EditorFunction | undefined = getOneFunction(name);
   if (editorFunction) {
     res.status(200).json({ editorFunction });
   } else {
@@ -36,9 +36,9 @@ export const createFunctionController = (req: Request, res: Response): void => {
 };
 
 export const updateFunctionController = (req: Request, res: Response): void => {
-  const id: number = parseInt(req.params.id, 10);
+  const name: string = req.params.name;
   const update: EditorFunction = req.body;
-  update.id = id;
+  update.name = name;
   updateFunction(update);
   res.status(200).json({
     message: "Function updated",
@@ -47,9 +47,9 @@ export const updateFunctionController = (req: Request, res: Response): void => {
 };
 
 export const deleteFunctionController = (req: Request, res: Response): void => {
-  const id: number = parseInt(req.params.id, 10);
-  deleteFunction(id);
+  const name = req.params.name;
+  deleteFunction(name);
   res.status(200).json({
-    message: `Function ${id} deleted`,
+    message: `${name} deleted`,
   });
 };
