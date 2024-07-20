@@ -1,6 +1,7 @@
 import express from "express";
 import { readFileSync } from "fs";
 import path from "path";
+import { router } from "../routes";
 
 const app = express();
 app.use(express.json());
@@ -57,6 +58,8 @@ app.post("/test-function", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+app.use("/", router);
 
 app.listen(32794);
 console.log("listening on 32794...");
