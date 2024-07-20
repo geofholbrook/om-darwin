@@ -3,7 +3,8 @@ import { readFileSync } from "fs";
 import path from "path";
 import { router } from "../routes";
 
-const app = express();
+export const app = express();
+
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -61,5 +62,3 @@ app.post("/test-function", async (req, res) => {
 
 app.use("/", router);
 
-app.listen(32794);
-console.log("listening on 32794...");
