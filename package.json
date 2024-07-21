@@ -14,6 +14,7 @@
     "@types/node": "^20.12.7",
     "@types/supertest": "^6.0.2",
     "bun-types": "latest",
+    "pre-commit": "^1.2.2",
     "supertest": "^7.0.0"
   },
   "name": "om-darwin",
@@ -21,5 +22,8 @@
   "type": "module",
   "peerDependencies": {
     "typescript": "^5.0.0"
-  }
+  },
+  "pre-commit": [
+    "test"
+  ]
 }
