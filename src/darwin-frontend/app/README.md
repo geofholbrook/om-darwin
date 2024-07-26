@@ -1,4 +1,4 @@
-# Getting Started
+# React + TypeScript + Vite
 
 ## Install Dependencies
 

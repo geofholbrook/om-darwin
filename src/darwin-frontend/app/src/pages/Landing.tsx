@@ -1,4 +1,4 @@
-import { Editor } from "~/components";
+import { Editor } from "../components";
 
 export const Landing = () => {
   return (
