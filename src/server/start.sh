@@ -1,4 +1,4 @@
 #!/bin/bash
 
 THIS_DIR=$(dirname "$0")
-/Users/geof/.bun/bin/bun $THIS_DIR/server.ts
+/Users/geof/.bun/bin/bun $THIS_DIR/spinupServer.ts
