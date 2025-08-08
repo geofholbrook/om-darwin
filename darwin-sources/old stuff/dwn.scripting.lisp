@@ -113,7 +113,8 @@ any list that begins with the symbol "set" is a goal set
   (loop for fun in funs
         with result = thing
         do (setf result (funcall fun result))
-        finally return result))
+        return result))
+
 
                           
                          

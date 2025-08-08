@@ -81,9 +81,9 @@
 
 
 
-;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
-;;; »»»»»»»»»» micronum / keynum  »»»»»»»»»»»»»»»
-;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ micronum / keynum  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 
 ;this is the "Finale-style" coding for microtones in integers (where the origin is 60)
@@ -110,9 +110,9 @@
 
 
 
-;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
-;;; »»»»»»»»»» mutation-correction for "dx" type specimens  »»»»»»»»»»»»»»»
-;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ mutation-correction for "dx" type specimens  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 
 (defun dx-mutation-correct (result mut-spec range) ;destructive
@@ -145,9 +145,9 @@
 
 
 
-;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
-;;; »»»»»»»»»» om specimen types  »»»»»»»»»»»»»»»
-;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ om specimen types  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 
 (defclass sp-chords (om-specimen) 
@@ -265,9 +265,9 @@
 
 
 
-;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
-;;; »»»»»»»»»» om criteria types  »»»»»»»»»»»»»»»
-;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ om criteria types  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 
 
@@ -615,9 +615,9 @@
 
 
 
-;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
-;;; »»»»»»»»»» histograms »»»»»»»»»»»»»»»»»»»»»»»
-;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ histograms ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 
 (om::defclass! histogram () 
@@ -644,50 +644,42 @@
                  
 
 
-;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
-;;; »»»»»»»»»» joining criteria »»»»»»»»»»»»»»»»»
-;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ joining criteria ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 
 
 (om::defmethod! c-list (&rest args)
   :icon 702
-  :doc "to join criteria together
+  :doc "Join criteria together.
 
- a numeric argument applies a weight to the criteria on the immediate left
- a list of two numbers applies a weight and an exponent
+A numeric argument applies a weight to the criteria on the immediate left.
+A list of two numbers applies a weight and an exponent.
 
- the exponent is applied first, then the weight. see calculate-score"
+The exponent is applied first, then the weight. See `calculate-score`."
 
-
-      
-  (loop for arg in args
-        with criteria
-        do
-        
-        ;(om-message-dialog "adding criteria")
-
-        (when (and arg (not (stringp arg)))
-          (if (and (numberp arg) criteria)
-              (setf (weight (car criteria)) arg)
-            
-            (if (and (listp arg) criteria)
-                (setf (weight (car criteria)) (first arg)
-                      (exponent (car criteria)) (second arg))
-              
-              (push arg criteria))))
-
-        finally return (om::mki 'list-criterion
-                            :criteria (reverse criteria)
-                            :name (when (stringp (car args))
-                                    (car args)
-                                    ))))
+  (let ((criteria '())
+        (name (when (stringp (car args)) (car args))))
+    (dolist (arg args)
+      (when (and arg (not (stringp arg)))
+        (cond
+          ((and (numberp arg) criteria)
+           (setf (weight (car criteria)) arg))
+          ((and (listp arg) criteria)
+           (setf (weight (car criteria)) (first arg)
+                 (exponent (car criteria)) (second arg)))
+          (t (push arg criteria)))))
+    (om::mki 'list-criterion
+             :criteria (nreverse criteria)
+             :name name)))
 
 
 
-;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
-;;; »»»»»»»»»» alteration criteria »»»»»»»»»»»»»»
-;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
+
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ alteration criteria ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 ;;; uses a different phenotyper INSTEAD of (phenotyper <specimen>) (so, this phenotyper operates on a specimen instance)
 (om::defmethod! c-alt-pheno ((crit criterion) (phenotyper t))
@@ -780,42 +772,37 @@
 
 ;;; updated may1st 2011
 (defmethod get-time-blocks ((self list) resolution &optional overlap (mode :list))
-  ;;;; modes are :list and :arrange ... arrange divides according to region-starts!!!
-  ;;; :list just cuts it up as a list.
+  ;; modes are :list and :arrange
+  ;; :list cuts by index, :arrange cuts by region-start positions
+  (declare (ignore overlap)) ; not implemented yet
 
-  ;;; ok, yes this is now redundant with get-time-blocks for sp-arrange-pheno-mixin
-
-   (declare (ignore overlap)) ;because i haven't implemented it yet ... 
-
-  (loop with result and block
+  (loop with result = nil
+        with block = nil
         with start = (if (equalp mode :list)
                          0
-                        (/ (floor (* (region-start (first self)) 4)) 4))       ;;; start of the beat of the first note in self
-                       
+                         (/ (floor (* (region-start (first self)) 4)) 4))
         with block-width = (/ (if (equalp mode :list)
                                   (length self)
-                                (- (/ (ceiling (* (region-start (last-elem self)) 4)) 4)  ;;; end of the beat of the last note in self
-                                   start))
+                                  (- (/ (ceiling (* (region-start (last-elem self)) 4)) 4)
+                                     start))
                               resolution)
-
         with block-index = 1
         for element in self
-        for index from 0   ;;; ignored if mode is :arrange!!!
+        for index from 0
         do
-        (if (and (< block-index resolution)
-                 (>= (if (equalp mode :list)
-                         index
-                       (region-start element))
-                     (+ (* block-width block-index)
-                        start)))
-            (progn
-              (push (nreverse block) result)
-              (incf block-index)
-              (setf block (list element)))
-          (push element block))
-        finally 
-        do (push (nreverse block) result)
+          (if (and (< block-index resolution)
+                   (>= (if (equalp mode :list)
+                           index
+                           (region-start element))
+                       (+ (* block-width block-index) start)))
+              (progn
+                (push (nreverse block) result)
+                (incf block-index)
+                (setf block (list element)))
+              (push element block))
+        finally (push (nreverse block) result)
         (return (nreverse result))))
+
 
 (defmethod get-time-blocks ((self specimen) resolution &optional overlap (mode :list))
   (get-time-blocks (pheno self) resolution overlap mode))
@@ -1019,55 +1006,63 @@
 (om::defmethod! c-pset ((pset list) (goal t) &optional (modulo 12) (zero 60))
   :icon 702 :initvals '((0 4 7) 1.0 12 60) 
   (om::mki 'simple-criterion
-       :eval-fun #'(lambda (pheno &optional index)
-                     (let ((notes (flat pheno)))
-                       (loop for note in notes
-                             sum (if (member (mod (+ note modulo (- (mod zero modulo)))
-                                                  modulo)
-                                             pset)
-                                     1
-                                   0) into trues
-                             finally return (/ trues (length notes)))))
-       :goal goal))
+           :eval-fun #'(lambda (pheno &optional index)
+                         (let ((notes (flat pheno))
+                               (trues 0))
+                           (dolist (note notes)
+                             (when (member (mod (+ note modulo (- (mod zero modulo))) modulo)
+                                           pset)
+                               (incf trues)))
+                           (/ trues (length notes))))
+           :goal goal))
+
 
 
 (om::defmethod! c-diatonish ((min number) (max number) &optional (goal 1.0))
-  :icon 702 :initvlas '(3 5 1.0)
+  :icon 702 :initvals '(3 5 1.0)
   (om::mki 'simple-criterion
-       :eval-fun #'(lambda (pheno &optional index)
-                     (loop for sub on pheno
-                           while (>= (length sub) min)
-                           count t into denom
-                           sum (if (> (belongs-to (flat (subseq sub 0 min))
-                                                       '(0 2 4 5 7 9 11)) 0)
-                                   (if (> (length sub) max)
-                                       (if (> (belongs-to (flat (subseq sub 0 (1+ max)))
-                                                               '(0 2 4 5 7 9 11)) 0)
-                                           0
-                                         1)
-                                     1)
-                                 0) into numer
-                           finally return (/ numer denom)))
-       :goal goal))
+           :eval-fun #'(lambda (pheno &optional index)
+                         (let ((denom 0)
+                               (numer 0))
+                           (loop for sub on pheno
+                                 while (>= (length sub) min)
+                                 do (incf denom)
+                                    (incf numer
+                                          (if (> (belongs-to (flat (subseq sub 0 min))
+                                                             '(0 2 4 5 7 9 11)) 0)
+                                              (if (> (length sub) max)
+                                                  (if (> (belongs-to (flat (subseq sub 0 (1+ max)))
+                                                                     '(0 2 4 5 7 9 11)) 0)
+                                                      0
+                                                      1)
+                                                1)
+                                            0)))
+                           (if (plusp denom)
+                               (/ numer denom)
+                               0.0))))
+           :goal goal)
 
-(om::defmethod! c-belonging ((min number) (max number) (alt-set list) &optional (goal 1.0) )
+
+(om::defmethod! c-belonging ((min number) (max number) (alt-set list) &optional (goal 1.0))
   :icon 702 :initvals '(3 5 (0 2 4 5 7 9 11) 1.0)
   (om::mki 'simple-criterion
-       :eval-fun #'(lambda (pheno &optional index)
-                     (loop for sub on pheno
-                           while (>= (length sub) min)
-                           count t into denom
-                           sum (if (> (belongs-to (flat (subseq sub 0 min))
-                                                       (or alt-set '(0 2 4 5 7 9 11))) 0)
-                                   (if (> (length sub) max)
-                                       (if (> (belongs-to (flat (subseq sub 0 (1+ max)))
-                                                               (or alt-set '(0 2 4 5 7 9 11))) 0)
-                                           0
-                                         1)
-                                     1)
-                                 0) into numer
-                           finally return (/ numer denom)))
-       :goal goal))
+           :eval-fun #'(lambda (pheno &optional index)
+                         (let ((denom 0)
+                               (numer 0)
+                               (set (or alt-set '(0 2 4 5 7 9 11))))
+                           (loop for sub on pheno
+                                 while (>= (length sub) min)
+                                 do (incf denom)
+                                    (let ((first-belong (belongs-to (flat (subseq sub 0 min)) set)))
+                                      (when (> first-belong 0)
+                                        (if (> (length sub) max)
+                                            (let ((second-belong (belongs-to (flat (subseq sub 0 (1+ max))) set)))
+                                              (when (= second-belong 0)
+                                                (incf numer)))
+                                          (incf numer)))))
+                           (/ numer denom)))
+           :goal goal))
+
 
 
 
@@ -1175,25 +1170,32 @@
                 collect (list (first measure)
                               (loop for beat in (second measure)
                                     if (and (listp beat)
-                                            (every 'atom (second beat))
-                                            (notevery #'(lambda (x) (= x 1)) (second beat))
-                                            (= (apply '+ (mapcar 'abs (second beat))) 6))
+                                            (listp (second beat))
+                                            (every #'atom (second beat))
+                                            (not (every #'(lambda (x) (= x 1)) (second beat)))
+                                            (= (apply '+ (mapcar #'abs (second beat))) 6))
                                     collect (list (first beat)
-                                                  (loop for div in (second beat)
-                                                        for sum = (apply '+ (mapcar 'abs first-half))
-                                                        if 
-                                                        (= sum 3)
-                                                        collect div into second-half
-                                                        else if 
-                                                        (<= (+ sum (abs div)) 3)
-                                                        collect div into first-half
-                                                        else
-                                                        collect (make-same-number-type-as (* (sign-of div) (- 3 sum)) div) into first-half
-                                                        and collect (* (sign-of div) (float (- (abs div) (- 3 sum)))) into second-half
-                                                        finally return `((1 ,first-half) ,(if (every #'(lambda (n) (< n 0)) second-half)
-                                                                                              -1
-                                                                                            `(1 ,second-half)))
-                                                        ))
+                                                  (let ((first-half nil)
+                                                        (second-half nil)
+                                                        (sum 0))
+                                                    (dolist (div (second beat))
+                                                      (cond
+                                                        ((= sum 3)
+                                                         (push div second-half))
+                                                        ((<= (+ sum (abs div)) 3)
+                                                         (push div first-half)
+                                                         (incf sum (abs div)))
+                                                        (t
+                                                         (let ((remaining (- 3 sum)))
+                                                           (push (make-same-number-type-as (* (sign-of div) remaining) div) first-half)
+                                                           (push (* (sign-of div) (float (- (abs div) remaining))) second-half))
+                                                         (setf sum 3))))
+                                                    (setf first-half (nreverse first-half))
+                                                    (setf second-half (nreverse second-half))
+                                                    `((1 ,first-half)
+                                                      ,(if (every #'(lambda (n) (< n 0)) second-half)
+                                                           -1
+                                                           `(1 ,second-half)))))
                                     else collect beat))))))
      
 
@@ -1219,32 +1221,39 @@
                 append (list (cons :forward next)
                              (cons :backward next)))))
 
-(defun best-quantify (ratios max/)
-  (let ((results (loop for fwd-back in (fwd-back-possibilities (length ratios))
-                       append (loop for q-divisor from 2 to max/
-                                    for divisor = (* q-divisor 4)
-                                    collect (loop for accum in (cdr (dx->x 0 (mapcar 'abs ratios)))
-                                                  for fb in fwd-back
-                                                  for new-accum = (multiple-value-list 
-                                                                   (om::snap-ratio-to-divisor accum divisor :dir fb))
-                                                  collect (first new-accum) into new-accum-list
-                                                  sum (abs (second new-accum)) into total-offset
-                                                  finally return (when (= (length (remove-duplicates new-accum-list))
-                                                                          (length ratios))
-                                                                   (list divisor 
-                                                                         total-offset 
-                                                                         (loop for ratio in ratios
-                                                                               for a in (x->dx (cons 0 new-accum-list))
-                                                                               collect (* (sign-of ratio)
-                                                                                          a)))))))))
-    (when (remove-if 'null results)
-      (if (> (least-of (mapcar 'first results)) 6)
-          (third (first (sort (remove-if 'null results) '< :key 'first)))
-        (third (first (sort (remove-if #'(lambda (result)
-                                           (or (null result)
-                                               (> (first result) 6)))
-                                       results)
-                            '< :key 'second)))))))
+(defun best-quantify (ratios max-div)
+  (let* ((results
+           (loop for fwd-back in (fwd-back-possibilities (length ratios))
+                 append
+                 (loop for q-divisor from 2 to max-div
+                       for divisor = (* q-divisor 4)
+                       collect
+                       (let ((accum-list (cdr (dx->x 0 (mapcar #'abs ratios))))
+                             (total-offset 0)
+                             (new-accum-list '()))
+                         (loop for accum in accum-list
+                               for fb in fwd-back
+                               for snapped = (multiple-value-list (om::snap-ratio-to-divisor accum divisor :dir fb))
+                               do
+                                 (push (first snapped) new-accum-list)
+                                 (incf total-offset (abs (second snapped)))
+                               finally
+                                 (setf new-accum-list (nreverse new-accum-list))
+                                 (when (= (length (remove-duplicates new-accum-list)) (length ratios))
+                                   (return
+                                     (list divisor
+                                           total-offset
+                                           (loop for ratio in ratios
+                                                 for dx in (x->dx (cons 0 new-accum-list))
+                                                 collect (* (sign-of ratio) dx))))))))))
+    (when results
+      (let ((filtered (remove-if #'null results)))
+        (if (> (least-of (mapcar #'first filtered)) 6)
+            (third (first (sort filtered #'< :key #'first)))
+          (third (first (sort (remove-if #'(lambda (r)
+                                             (> (first r) 6))
+                                         filtered)
+                              #'< :key #'second)))))))))
 
 
 
@@ -1264,18 +1273,22 @@
                (cdr (second beat)))))
 
   
-(defun get-rid-of-inner-floats (beat)
-  (loop with result
-        for x in beat
-        do
-        (if result
-            (if (floatp x)
-                (if (floatp (car result))
-                    (push (float (+ (pop result) x)) result)
-                  (push (round (+ (pop result) x)) result))
-              (push x result))
-          (push x result))
-        finally return (nreverse result)))
+((defun get-rid-of-inner-floats (beat)
+  (let ((result '()))
+    (dolist (x beat)
+      (cond
+        ((null result)
+         (push x result))
+        ((floatp x)
+         (let ((prev (pop result)))
+           (push (if (floatp prev)
+                     (float (+ prev x))
+                   (round (+ prev x)))
+                 result)))
+        (t
+         (push x result))))
+    (nreverse result))))
+
 
 (defmethod quantify-complex-beats ((self list) &optional (max/ 6) (max/-in 8))   ;;;tree
   (let ((new (copy-tree self)))
@@ -1404,7 +1417,7 @@ all the same will return 0."
 
 #|
 
-;;; »»»»»»»»»»»»»» phenotype test »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ phenotype test ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 (defclas s-clarinet (om-specimen)
          ())

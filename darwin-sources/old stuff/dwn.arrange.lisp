@@ -251,31 +251,29 @@
 
 
 (defun make-ratio-list (regions)
-; uses negative numbers to fill in the gaps between regions
-; shortens notes on overlaps. ignores channel.
-  (loop with time = 0
-        with result
-        for R on (sort regions #'< :key 'region-start)
-        for this = (car R)
-        for next = (cadr R)
-        do
-        
-        ;insert rest if necessary (negative ratio)
+  ;; uses negative numbers to fill in the gaps between regions
+  ;; shortens notes on overlaps. ignores channel.
+  (let ((time 0)
+        (result '()))
+    (dolist (R (butlast (list* nil (sort regions #'< :key 'region-start))) result)
+      (let* ((this (second R))
+             (next (third R)))
+
+        ;; insert rest if necessary (negative ratio)
         (when (> (region-start this) time)
           (push (- time (region-start this)) result))
 
-        ;insert note (positive ratio) shortened if there is an overlap
+        ;; insert note (positive ratio), shortened if overlapping
         (let ((adjusted-length (if (and next
                                         (> (region-end this) (region-start next)))
-                                   (- (region-len this) (- (region-end this) (region-start next)))
+                                   (- (region-len this)
+                                      (- (region-end this) (region-start next)))
                                  (region-len this))))
           (unless (= adjusted-length 0)
             (push adjusted-length result))
-          (setf time (+ (region-start this) adjusted-length)))
+          (setf time (+ (region-start this) adjusted-length)))))
+    (nreverse result)))
 
-        
-        finally return (nreverse result)))
-            
 
 
 (defun group-pitches-by-start (arr)
@@ -400,29 +398,25 @@
   (count-collisions (pheno self) (greatest-of (mapcar #'region-end (pheno self)))))
 
 (defmethod count-collisions ((self list) &optional extent)
-  (loop with count = 0
-        for sub on (sort self #'< :key #'first)
-        do
-        (let ((end (+ (region-start (car sub))
-                      (region-len (car sub)))))
-            ;first check terminal end of arrangment
-          (when (and extent(> end extent))  
-            (incf count (- end extent)))
-            
-            ;then, collisions with other regions
-          (loop with stop
-                for other-region in (cdr sub)
-                do 
-                (if (>= (region-start other-region)
-                        end)
-                      ;done with this region
-                    (setf stop t)
-                  (if (= (region-chan (car sub))
-                         (region-chan other-region))
-                      (incf count (- end
-                                     (region-start other-region)))))
-                until stop))
-        finally return count)) 
+  (let ((count 0))
+    (loop for sub on (sort self #'< :key #'first)
+          do
+            (let ((end (+ (region-start (car sub))
+                          (region-len (car sub)))))
+              ;; Check if region exceeds terminal extent
+              (when (and extent (> end extent))
+                (incf count (- end extent)))
+
+              ;; Check for overlaps on same channel
+              (loop for other-region in (cdr sub)
+                    do (cond
+                         ((>= (region-start other-region) end)
+                          (return))
+                         ((= (region-chan (car sub))
+                             (region-chan other-region))
+                          (incf count (- end (region-start other-region))))))))
+    count))
+
                        
 (om::defmethod! no-collisions ()
   :icon 702
@@ -459,7 +453,7 @@
   (arr-extent self))
 
 (defmethod get-time-blocks ((self sp-arrange-pheno-mixin) resolution &optional overlap mode)
-; pheno is a list of regions 
+  ;; pheno is a list of regions 
   (let ((extent (get-extent self)))
     (let ((block-width (/ extent resolution)))
       (flet ((clip-to-block (region index)
@@ -467,19 +461,19 @@
                      (end (min (region-end region) (* (1+ index) block-width))))
                  `(,start ,(- end start) ,@(cddr region)))))
 
-        (let ((result (create-list resolution nil)))    ;list of nils
+        (let ((result (create-list resolution nil))) ; list of nils
           (loop for region in (pheno self)
                 do (loop for index 
                          from (min (1- resolution)
-                                   (floor (region-start region)     
+                                   (floor (region-start region)
                                           block-width)) 
                          to (min (1- resolution)
-                                 (floor (- (region-end region) .00001)   
-              ; -.00001 so that a region doesn't get included in a block that starts where the unit ends. (stupid band-aid)
+                                 (floor (- (region-end region) 0.00001)
                                         block-width))
                          do (unless (> index (1- resolution))
-                              (push (clip-to-block region index) (nth index result))))
-                finally return result))))))
+                              (push (clip-to-block region index) (nth index result)))))
+          result))))) ; move the return here
+
  
 |#
 
@@ -501,30 +495,33 @@
 
 
 (defmethod convert-to-chord-list ((self list) &optional silences domain)
-;organize regions of time-block into "time-slices", exactly as necessary to include all vertical simultaneities
-;most units of time-block will occur more than once 
- 
-;**** for now does not record length of slices ****
+  ;; Organize regions of a time-block into "time-slices" for vertical simultaneities.
+  ;; Each time-slice contains all active regions at that moment.
+  ;; Optionally inserts :silence markers when silences are requested.
 
   (let ((start-ends (starts-and-ends self))
         current-chord
         result)
-    (if (and silences
-             (> (cadar (first start-ends)) (or (first domain) 0)))
-        (push :silence result))
+    
+    (when (and silences
+               (> (cadar (first start-ends)) (or (first domain) 0)))
+      (push :silence result))
+    
     (loop for point on start-ends
           do (loop for se in (car point)
                    do (case (first se)
                         (:start (push (third se) current-chord))
                         (:end (setf current-chord
-                                    (remove (third se) current-chord :count 1 :test 'equalp)))))
+                                    (remove (third se) current-chord :count 1 :test #'equalp)))))
+          
+          if (or current-chord
+                 (and silences
+                      (or (cdr point)
+                          (and domain (< (cadar (car point)) (second domain))))))
+            do (push (or current-chord :silence) result)
 
-          if (or current-chord  ;don't put in a :silence if this is the end of the block
-                 (and silences (or (cdr point)
-                                   (and domain (< (cadar (car point)) (second domain))))))   
-                      
-          do (push (or current-chord :silence) result)
-          finally return (nreverse result))))
+          finally (return (nreverse result)))))
+
 ;+
 (defmethod convert-to-chord-list ((self sp-arrange) &optional silences domain)
   (convert-to-chord-list (pheno self) silences (or domain `(0 ,(arr-extent self)))))
@@ -634,19 +631,19 @@
         previous-start)
     (loop for region in arr
           do 
-          (if (and previous-start
-                   (> (- (region-start region)
-                         previous-start)
-                      thresh))
-              (progn
-                (push (nreverse temp) result)
-                (setf temp (list region)))
-            (push region temp))
-          (setf previous-start (region-start region))
-          finally
-          do
-          (push (nreverse temp) result))
+            (if (and previous-start
+                     (> (- (region-start region)
+                           previous-start)
+                        thresh))
+                (progn
+                  (push (nreverse temp) result)
+                  (setf temp (list region)))
+              (push region temp))
+            (setf previous-start (region-start region)))
+    (when temp
+      (push (nreverse temp) result))
     (nreverse result)))
+
 
 
 

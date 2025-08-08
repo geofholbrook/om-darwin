@@ -183,20 +183,17 @@
            operon-slots
            phenotyper-body)
 
-      (loop for arg in args
-            with target = :species-slots
-            do
-            (if (keywordp arg)
-                (setf target arg)
-              (case target
-                (:operon-name (setf operon-name arg))
-                (:phenotyper (setf phenotyper-body arg))
-                (:species-slots (push arg direct-species-slots))
-                (:operon-slots (push arg direct-operon-slots))))
-
-            finally do
-            (setf direct-species-slots (reverse direct-species-slots))
-            (setf direct-operon-slots (reverse direct-operon-slots)))
+      (let ((target :species-slots))
+      (dolist (arg args)
+        (if (keywordp arg)
+            (setf target arg)
+          (case target
+            (:operon-name (setf operon-name arg))
+            (:phenotyper (setf phenotyper-body arg))
+            (:species-slots (push arg direct-species-slots))
+            (:operon-slots (push arg direct-operon-slots)))))
+      (setf direct-species-slots (reverse direct-species-slots))
+      (setf direct-operon-slots (reverse direct-operon-slots)))
       
       (setf operonstring (prin1-to-string operon-name))
 
@@ -358,10 +355,9 @@
 
 (defmacro popn (symbol n)
   (let ((rep (gensym)))
-  `(let (,rep)
-     (loop repeat ,n
-           do (push (pop ,symbol) ,rep)
-           finally return (nreverse ,rep)))))
+    `(let ((,rep '()))
+       (dotimes (_ ,n (nreverse ,rep))
+         (push (pop ,symbol) ,rep)))))
 
 
 

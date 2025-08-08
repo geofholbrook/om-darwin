@@ -259,30 +259,29 @@
 
 
 (defun make-ratio-list (regions)
-; uses negative numbers to fill in the gaps between regions
-; shortens notes on overlaps. ignores channel.
-  (loop with time = 0
-        with result
-        for R on (sort regions #'< :key 'region-start)
-        for this = (car R)
-        for next = (cadr R)
-        do
-        
-        ;insert rest if necessary (negative ratio)
-        (when (> (region-start this) time)
-          (push (- time (region-start this)) result))
+  ;; Uses negative numbers to fill in the gaps between regions
+  ;; Shortens notes on overlaps. Ignores channel.
+  (let ((time 0)
+        (result '()))
+    (loop for R on (sort regions #'< :key #'region-start)
+          for this = (car R)
+          for next = (cadr R)
+          do
+            ;; insert rest if necessary (negative ratio)
+            (when (> (region-start this) time)
+              (push (- time (region-start this)) result))
 
-        ;insert note (positive ratio) shortened if there is an overlap
-        (let ((adjusted-length (if (and next
-                                        (> (region-end this) (region-start next)))
-                                   (- (region-len this) (- (region-end this) (region-start next)))
-                                 (region-len this))))
-          (unless (= adjusted-length 0)
-            (push adjusted-length result))
-          (setf time (+ (region-start this) adjusted-length)))
+            ;; insert note (positive ratio), shortened if overlapping with next
+            (let ((adjusted-length (if (and next
+                                            (> (region-end this) (region-start next)))
+                                       (- (region-len this)
+                                          (- (region-end this) (region-start next)))
+                                     (region-len this))))
+              (unless (= adjusted-length 0)
+                (push adjusted-length result))
+              (setf time (+ (region-start this) adjusted-length))))
+    (nreverse result)))
 
-        
-        finally return (nreverse result)))
 
 
 
@@ -389,29 +388,28 @@
 ;  (count-collisions (pheno self) (greatest-of (mapcar #'region-end (pheno self)))))
 
 (defmethod count-collisions ((self list) &optional extent)
-  (loop with count = 0
-        for sub on (sort (arr-regions self) #'< :key #'first)
-        do
-        (let ((end (+ (region-start (car sub))
-                      (region-len (car sub)))))
-            ;first check terminal end of arrangment
-          (when (and extent(> end extent))  
-            (incf count (- end extent)))
-            
-            ;then, collisions with other regions
-          (loop with stop
-                for other-region in (cdr sub)
-                do 
-                (if (>= (region-start other-region)
-                        end)
-                      ;done with this region
-                    (setf stop t)
-                  (if (= (region-chan (car sub))
-                         (region-chan other-region))
-                      (incf count (- end
-                                     (region-start other-region)))))
-                until stop))
-        finally return count)) 
+  (let ((count 0))
+    (loop for sub on (sort (arr-regions self) #'< :key #'first)
+          do
+            (let* ((this (car sub))
+                   (end (+ (region-start this)
+                           (region-len this))))
+              ;; check terminal extent overrun
+              (when (and extent (> end extent))
+                (incf count (- end extent)))
+
+              ;; check collisions on same channel
+              (loop with stop = nil
+                    for other-region in (cdr sub)
+                    until stop
+                    do
+                      (if (>= (region-start other-region) end)
+                          (setf stop t)
+                        (when (= (region-chan this)
+                                 (region-chan other-region))
+                          (incf count (- end (region-start other-region))))))))
+    count))
+
 
 
 
@@ -435,30 +433,33 @@
 
 
 (defmethod convert-to-chord-list ((self list) &optional silences domain)
-;organize regions of time-block into "time-slices", exactly as necessary to include all vertical simultaneities
-;most units of time-block will occur more than once 
- 
-;**** for now does not record length of slices ****
+  ;; Organize regions of time-block into "time-slices", exactly as necessary to include all vertical simultaneities
+  ;; Most units of time-block will occur more than once 
+  ;; For now, does not record length of slices
 
   (let ((start-ends (starts-and-ends self))
         current-chord
         result)
-    (if (and silences
-             (> (cadar (first start-ends)) (or (first domain) 0)))
-        (push :silence result))
-    (loop for point on start-ends
-          do (loop for se in (car point)
-                   do (case (first se)
-                        (:start (push (third se) current-chord))
-                        (:end (setf current-chord
-                                    (remove (third se) current-chord :count 1 :test 'equalp)))))
+    
+    (when (and silences
+               (> (cadar (first start-ends)) (or (first domain) 0)))
+      (push :silence result))
+    
+    (dolist (point start-ends)
+      (dolist (se point)
+        (case (first se)
+          (:start (push (third se) current-chord))
+          (:end (setf current-chord
+                      (remove (third se) current-chord :count 1 :test 'equalp)))))
+      
+      (when (or current-chord
+                (and silences
+                     (or (not (eq point (last start-ends))) ; not last point
+                         (and domain (< (cadar point) (second domain))))))
+        (push (or current-chord :silence) result)))
+    
+    (nreverse result)))
 
-          if (or current-chord  ;don't put in a :silence if this is the end of the block
-                 (and silences (or (cdr point)
-                                   (and domain (< (cadar (car point)) (second domain))))))   
-                      
-          do (push (or current-chord :silence) result)
-          finally return (nreverse result))))
 
 (defmethod convert-to-attack-list ((self list))
   (demix (arr-regions self) #'region-start t))

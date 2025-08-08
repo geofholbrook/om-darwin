@@ -36,14 +36,13 @@
 
 
 (defun additive-from-bits (bits)
-  (loop with result = '(1)
-        for bit in bits
-        do
-        (setf result
-              (if (= bit 1)
-                  `(,@result 1)
-                `(,@(butlast result) ,(1+ (last-elem result)))))
-        finally return result))
+  (let ((result '(1)))
+    (dolist (bit bits result)
+      (setf result
+            (if (= bit 1)
+                `(,@result 1)
+              `(,@(butlast result) ,(1+ (last-elem result))))))))
+
 
 
 (defspecies ga-simple-tree ()
@@ -140,23 +139,26 @@
         (ties? (allow-ties (owner op))))
     (if (not (or rests? ties?))
         (call-next-method)
-      (loop with rests = (and rests?
-                              (om- (om* (last-n (binary-expansion (rests op) (division op)) 
-                                                (division op)) 2) 1))  ;;; bits become -1 and 1
-            with pos = 0
-            for part in (additive-from-bits 
-                         (last-n (binary-expansion (on-off op) (1- (division op))) 
-                                 (1- (division op))))
-        
-            collect (if rests? (* (nth pos rests) part) part)
-            into parts
+      (let* ((rests (and rests?
+                         (om- (om* (last-n (binary-expansion (rests op) (division op))
+                                           (division op))
+                                   2)
+                              1)))
+             (pos 0)
+             (bits (last-n (binary-expansion (on-off op) (1- (division op)))
+                           (1- (division op))))
+             (parts-raw (additive-from-bits bits))
+             (parts '()))
+        (dolist (part parts-raw)
+          (let ((val (if rests? (* (nth pos rests) part) part)))
+            (push val parts)
+            (incf pos part)))
+        (let ((parts (nreverse parts)))
+          (cons (if (and ties? (tied op))
+                    (float (car parts))
+                    (car parts))
+                (cdr parts)))))))
 
-            do (incf pos part) ;ex (1 3 1) --> (0 1 4)
-
-            finally return (cons (if (and ties? (tied op))
-                                                        (float (car parts))   ;haha
-                                                      (car parts))
-                                                    (cdr parts))))))
        
 
         

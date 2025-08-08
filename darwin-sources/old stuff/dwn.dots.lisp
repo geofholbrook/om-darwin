@@ -33,65 +33,51 @@
     (let* ((namestring (prin1-to-string species-name))
            (decoder-symbol (symbol+ "*" namestring "-decoder*"))
            (phenotyper-symbol (symbol+ namestring "-phenotyper"))
-           species-slots 
-           operon-slots 
+           (species-slots '())
+           (operon-slots '())
            (prefix (symbol+ namestring "-"))  ;; default
            phenotyper-body)
 
-      (loop for arg in args
-            with target
-            do
-            (if (keywordp arg)
-                (setf target arg)
-              (case target
-                (:prefix (setf prefix arg))
-                (:phenotyper (setf phenotyper-body arg))
-                (:species-slots (push arg species-slots))
-                (:operon-slots (push arg operon-slots))))
-
-            finally do
-            (setf species-slots (reverse species-slots))
-            (setf operon-slots (reverse operon-slots)))
+      (let ((target nil))
+        (dolist (arg args)
+          (if (keywordp arg)
+              (setf target arg)
+            (case target
+              (:prefix (setf prefix arg))
+              (:phenotyper (setf phenotyper-body arg))
+              (:species-slots (push arg species-slots))
+              (:operon-slots (push arg operon-slots)))))
+        (setf species-slots (reverse species-slots))
+        (setf operon-slots (reverse operon-slots)))
 
       `(progn
 
          ;;; create specimen structure
          (defstruct (,species-name (:conc-name ,prefix))
 
-         ;species-slots
-           ,@species-slots
-
-         ;default slots
-           (raw)
+           ,@species-slots       ; species-specific slots
+           (raw)                 ; default slots
            (operons)
            (phenotyper-function)
            (phenotype))
 
-
          ;;; create operon structure
          (defstruct (,(symbol+ (prin1-to-string prefix) "operon") (:conc-name ,prefix))
-           (parent) ;default
+           (parent)
            ,@(mapcar #'(lambda (slotdef) 
                          (list (first slotdef))) 
                      operon-slots))
 
-
          ;;; create decoder
          (defparameter ,decoder-symbol
            ',(loop for slotdef in operon-slots
-
                    for range = (om::find-keyword :range (cdr slotdef))
                    for card = (om::find-keyword :cardinality (cdr slotdef))
-
                    collect (if card
                                (if (atom card)
                                    (create-list card range)
-
-                                 `(:length ,card ,@(create-list (second card) range)))  
-                             ;;; adds the cardinality gene, then the number of genes
-                             ;;; corresponding to upper range of cardinality 
-
-                             range)))
+                                   `(:length ,card ,@(create-list (second card) range)))
+                               range)))
 
          ;;; define the phenotype function
          (defun ,phenotyper-symbol (self)
@@ -104,28 +90,24 @@
            (let ((raw (s.codes num-operons ,decoder-symbol)))
            
              (let ((spec (,(symbol+ "make-" namestring)
-          
-                          ,@(mapcan #'(lambda (slotdef)
-                                        (list (om::make-keyword (first slotdef)) (first slotdef)))
+                          ,@(mapcan (lambda (slotdef)
+                                      (list (om::make-keyword (first slotdef)) (first slotdef)))
                                     species-slots)
-
                           :raw raw
                           :operons (let ((trans (mat-trans (p.codes raw ,decoder-symbol))))
                                      (mapcar #'(lambda ,(mapcar 'first operon-slots)
                                                  (,(symbol+ "make-" (prin1-to-string prefix) "operon")
-                                                  ,@(mapcan #'(lambda (slotdef)
-                                                                (list (om::make-keyword (first slotdef)) (first slotdef)))
+                                                  ,@(mapcan (lambda (slotdef)
+                                                              (list (om::make-keyword (first slotdef)) (first slotdef)))
                                                             operon-slots)))
                                              ,@(loop for k from 0 to (1- (length operon-slots))
                                                      collect `(nth ,k trans))))
                           :phenotype nil
                           :phenotyper-function ',phenotyper-symbol)))
 
-               (loop for op in (,(symbol+ prefix "operons") spec)
-                     do
-                     (setf (,(symbol+ prefix "parent") op) spec)))))
-         
-         ))))
+               (dolist (op (,(symbol+ prefix "operons") spec))
+                 (setf (,(symbol+ prefix "parent") op) spec))))))
+         )))
 
 
 (defun nucleotides-per-operon (decoder)
@@ -145,10 +127,10 @@
 
 (defmacro popn (symbol n)
   (let ((rep (gensym)))
-  `(let (,rep)
-     (loop repeat ,n
-           do (push (pop ,symbol) ,rep)
-           finally return (nreverse ,rep)))))
+    `(let ((,rep '()))
+       (loop repeat ,n
+             do (push (pop ,symbol) ,rep))
+       (nreverse ,rep))))
 
 
 

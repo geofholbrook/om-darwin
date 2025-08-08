@@ -2,9 +2,9 @@
 
 
 
-;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
-;;; »»»»»»» SP-LIST : basic specimen »»»»»»»»»»»»
-;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ SP-LIST : basic specimen ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 (defparameter *sp-list-max-mutations* 3)
 
@@ -31,35 +31,25 @@
 
 (defmethod mutate-once! ((self sp-list) &rest args)  ;;; destructive
   (let* ((spot (loop for spt = (rrnd 0 (1- (len self)))
-
-                     ;;; keep choosing spots until we find one that's not 'frozen' (see freeze format above)
-
                      until (not (and (freeze self)
                                      (member (mod spt (first (freeze self)))
                                              (om::list! (second (freeze self))))))
-
-                     finally return spt))
-                                 
+                     return spt))
          (new-value (rrnd (range self)))
-         (alteration (- new-value (nth spot (geno self)))))
-    
-    (if (= alteration 0)
-        (apply #'mutate-once! self args) ;; try again
+         (old-value (nth spot (geno self)))
+         (alteration (- new-value old-value)))
 
+    (if (= alteration 0)
+        (apply #'mutate-once! self args) ;; try again with a different mutation
       (progn
-        (setf (geno self)
-              `(,@(subseq (geno self) 0 spot)
-                ,new-value
-                ,@(subseq (geno self) (1+ spot))))
-        
+        ;; apply mutation to genotype destructively
+        (setf (nth spot (geno self)) new-value)
+
+        ;; record the mutation
         (push (mki 'mutation
                    :alteration alteration
                    :location spot)
-
-              (last-mutation self))))))    
-   ;;; when is 'last-mutation' cleared? 
-   ;;; it's meant to be used in conjuction with the stored phenotype, to calculate the new phenotype
-   ;;; faster, right? That means it should be cleared with the phenotype is calculated and stored. (check)
+              (last-mutation self))))))
 
 
 (defmethod mutate ((self sp-list) &rest args)
@@ -86,9 +76,9 @@
 
 
 
-;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
-;;; »»»»»»»»»»»»»»» PHENOTYPING »»»»»»»»»»»»»»»»»
-;;; »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ PHENOTYPING ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+;;; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 
 (om::defclas sp-pheno (specimen)

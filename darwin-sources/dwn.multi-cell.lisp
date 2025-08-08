@@ -56,23 +56,22 @@
                      :cells cells))
 
 (defmethod phenotype ((self stack))
-  (loop for arr in (mapcar 'phenotype (cells self))
+  (loop for arr in (mapcar #'phenotype (cells self))
         with highest-channel = 0
-        append (let* ((minmax (loop for region in arr
-                                    minimize (region-chan region) into min
-                                    maximize (region-chan region) into max
-                                    finally return (list min max)))
-
-                      (offset (- (first minmax) 
-                                 highest-channel)))
-
-                 (incf highest-channel (1+ (- (second minmax)
-                                              (first minmax))))
-
-                 (if (= highest-channel 0)
-                     arr
-                   (loop for region in arr
-                         collect `(,(region-start region)
-                                   ,(region-len region)
-                                   ,(+ (region-chan region) offset)
-                                   ,@(nthcdr 3 region)))))))
+        append
+        (let* ((min nil)
+               (max nil))
+          (dolist (region arr)
+            (let ((chan (region-chan region)))
+              (when (or (null min) (< chan min)) (setf min chan))
+              (when (or (null max) (> chan max)) (setf max chan))))
+          (let* ((offset (- min highest-channel)))
+            (incf highest-channel (1+ (- max min)))
+            (if (= highest-channel 0)
+                arr
+                (loop for region in arr
+                      collect `(,(region-start region)
+                                ,(region-len region)
+                                ,(+ (region-chan region) offset)
+                                ,@(nthcdr 3 region)))))))
+)
