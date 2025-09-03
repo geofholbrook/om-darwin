@@ -73,15 +73,15 @@
     (loop for sub on lis
           while (cdr sub)
           do   
-          (push (distance (cadr sub) (car sub)) temp)
-          (incf count)
-          (when (= count 3) 
-            (push (approx-decimals (coerce (average temp) 'float) 2) result)
-            (setf count 0)
-            (setf temp nil))
-          finally return (nreverse result))))
+            (push (distance (cadr sub) (car sub)) temp)
+            (incf count)
+            (when (= count 3) 
+              (push (approx-decimals (coerce (average temp) 'float) 2) result)
+              (setf count 0)
+              (setf temp nil))
+          finally (return (nreverse result))))
 
-;;;2nd degree dx reduction
+
 (defun 2D-dx2-reduce (lis)    
   (let (result
         (temp (list (super-curve (distance (cadr lis) (car lis)))))
@@ -89,14 +89,15 @@
     (loop for sub on lis
           while (cddr sub)
           do   
-          (push (* (super-curve (distance (caddr sub) (car sub))) .75) temp)   ;;; weigh 2-step interval less than 1-step
-          (push (super-curve (distance (caddr sub) (cadr sub))) temp)
-          (incf count)
-          (when (= count 3) 
-            (push (approx-decimals (coerce (average temp) 'float) 2) result)
-            (setf count 0)
-            (setf temp nil))
-          finally return (nreverse result))))
+            (push (* (super-curve (distance (caddr sub) (car sub))) 0.75) temp)   ; weigh 2-step interval less
+            (push (super-curve (distance (caddr sub) (cadr sub))) temp)
+            (incf count)
+            (when (= count 3) 
+              (push (approx-decimals (coerce (average temp) 'float) 2) result)
+              (setf count 0)
+              (setf temp nil))
+          finally (return (nreverse result)))))
+
 
 ;;; 2nd degree dx reduction with isolation between triplets
 (defun 2D-dx2-isol-reduce (lis)
@@ -120,17 +121,17 @@
   (let ((result (copy-list lis)))
     (loop for op in (reverse ops)
           do (setf result (if (equalp op 'd)
-                              ;(2D-dx2-isol-reduce result)  
                               (if (listp (car result))
                                   (2D-dx2-reduce result)
                                 (dx2-reduce result))
                             (if (listp (car result))
                                 (2D-avg-reduce result)
                               (avg-reduce result))))
-          finally return 
-          (if (= (length result) 1)
-              (car result)
-            result))))
+          finally (return 
+                    (if (= (length result) 1)
+                        (car result)
+                      result)))))
+
 
 (defun corelation-da-reduce (lis ops)
  (da-reduce

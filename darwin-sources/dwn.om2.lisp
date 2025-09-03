@@ -123,17 +123,16 @@
 
 (defun count-gene-calls (fun)
   (with-om-gene-mode :test
-    (loop repeat *number-of-tests*
-          with result
-          do 
-          (setf *gene-counter* 0)
-          (funcall fun)
-          (if result
-              (when (not (= result *gene-counter*))
-                (error "Error: om-gene called an indeterminate amount of times (redesign the phenotyper)"))
-            (setf result *gene-counter*))
+    (let ((result nil))
+      (dotimes (i *number-of-tests*)
+        (setf *gene-counter* 0)
+        (funcall fun)
+        (if result
+            (when (/= result *gene-counter*)
+              (error "Error: om-gene called an indeterminate amount of times (redesign the phenotyper)"))
+          (setf result *gene-counter*)))
+      result)))
 
-          finally return result)))
 
 (defun raw-from-function (fun)
   (d::random-raw-genotype (count-gene-calls fun)))

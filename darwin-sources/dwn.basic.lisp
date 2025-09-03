@@ -67,10 +67,12 @@
 
 (defmethod mutate ((self list) &optional ga-params)
   (let ((range (get-param :gene-range ga-params))
-        mut-ops)
-    
+        (mut-ops nil))
+
+    ;; Determine which mutation operations are allowed
     (mapc #'(lambda (key mut-op)
-              (when (get-param key ga-params) (push mut-op mut-ops)))
+              (when (get-param key ga-params)
+                (push mut-op mut-ops)))
           '(:allow-free :allow-dx :allow-swap)
           '(:free :dx :swap))
 
@@ -79,44 +81,44 @@
                      (1+ (- (second range) (first range))))
                 (first range))))
 
-      (loop with new = (copy-list self)
-            repeat (rrnd 1 (get-param :mutation-rpt ga-params))
+      (let ((new (copy-list self)))
+        (loop repeat (rrnd 1 (get-param :mutation-rpt ga-params))
+              for spot = (rrnd 0 (1- (length new)))
+              for mut-op = (nth-random mut-ops)
+              with tmp
 
-            for spot = (rrnd 0 (1- (length new)))
-            for mut-op = (nth-random mut-ops)
-            with tmp
+              do
+                ;; Save original value
+                (setf tmp (nth spot new))
 
-            do 
-
-          ;store original value
-            (setf tmp (nth spot new))
-               
-          ;primary alteration
-          (case mut-op
-            (:free (setf (nth spot new) 
+                ;; Apply primary mutation
+                (case mut-op
+                  (:free
+                   (setf (nth spot new)
                          (rnd-other (nth spot new) range)))
-            (:dx (setf (nth spot new)
-                       (constrain (+ (nth spot new)
-                                     (* (nth-random '(-1 1))
-                                        (rrnd 1 (get-param :max-dx ga-params)))))))
-            (:swap (let ((dist (rrnd (get-param :swap-dist-range ga-params))))
+
+                  (:dx
+                   (setf (nth spot new)
+                         (constrain (+ (nth spot new)
+                                       (* (nth-random '(-1 1))
+                                          (rrnd 1 (get-param :max-dx ga-params)))))))
+
+                  (:swap
+                   (let ((dist (rrnd (get-param :swap-dist-range ga-params))))
                      (when (< (+ spot dist) (length new))
                        (setf (nth spot new) (nth (+ spot dist) new))
                        (setf (nth (+ spot dist) new) tmp)))))
-                       
-               
-          ;'compensation' alteration
-            (when (and (member mut-op '(:free :dx))
-                       (weighted-coin (* (get-param :compensation-chance ga-params)
-                                    100)))
-              (let ((offset (get-param :compensation-offset ga-params)))
-                (when (< spot (- (length new) offset))
-                  (setf (nth (+ spot offset) new)
-                        (constrain (+ (nth (+ spot offset) new)
-                                      (- tmp (nth spot new))))))))
-                                   
 
-            finally return new))))
+                ;; Apply compensation mutation if allowed
+                (when (and (member mut-op '(:free :dx))
+                           (weighted-coin (* (get-param :compensation-chance ga-params) 100)))
+                  (let ((offset (get-param :compensation-offset ga-params)))
+                    (when (< spot (- (length new) offset))
+                      (setf (nth (+ spot offset) new)
+                            (constrain (+ (nth (+ spot offset) new)
+                                          (- tmp (nth spot new)))))))))
+        new))))
+
 
 (defmacro mutate! (thing)
   `(setf ,thing (mutate ,thing)))
@@ -171,71 +173,46 @@
                                                          (second (nth index2 population))))
                                          (fitness (evaluate crossed criterion)))
                                     (list fitness crossed 0)))))
+         
+         (offspring (loop for entry in (append population crosses)
+                          append (loop repeat *litter-size*
+                                       collect (let* ((mutated (mutate (second entry)))
+                                                      (fitness (evaluate mutated criterion)))
+                                                 (list fitness mutated 0)))))
 
-         (offspring  (loop for entry in (append population crosses)
-                               append (loop repeat *litter-size*
-                                            collect
-                                            (let* ((mutated (mutate (second entry)))
-                                                   (fitness (evaluate mutated criterion)))
-                                              (list fitness mutated 0))))))
+         (recalculated-population
+          (loop for entry in population
+                do (update (second entry))
+                collect (list (evaluate (second entry) criterion)
+                              (second entry)
+                              (third entry))))
 
-                     ;(print (format nil "number of unique fitnesses: ~D"
-                     ;               (length (remove-duplicates (mapcar 'first (append population crosses offspring))))))
+         (all-candidates (append recalculated-population offspring crosses))
 
-                       
-    (let ((sorted (sort (append ;;; recalculate fitnesses! because of dynamic maquette stuff
-                                (loop for entry in population 
-                                      do (update (second entry))
-                                      collect (list (evaluate (second entry) criterion)
-                                                    (second entry)
-                                                    (third entry)))
-                                ;population
-                                offspring 
-                                crosses)
+         (sorted (sort all-candidates
+                       #'<
+                       :key #'(lambda (s)
+                                (* (car s)
+                                   (1+ (expt (* (max (- (caddr s) *longevity*) 0) 0.01) 2))))))
 
-                        #'<
-                        :key 
-                        #'(lambda (s)
-                           (* (car s)
-                              (1+ (expt (* (max (- (caddr s) 
-                                                   *longevity*) 0) 0.01) 2))))
-                        
-                        ;#'(lambda (s1 s2)
-                        ;    (if (= (car s1) (car s2))
-                        ;        (> (caddr s1) (caddr s2))
-                        ;      (< (car s1) (car s2))))
-                        )))
-
-          ;;; sorts first by fitness, then by age ... older specimens survive so that they can't survive
-          ;;; by just alternating between equivalent raw genotypes. if it weren't for this problem,
-          ;;; really the younger specimens should survive!    
-
-          (loop for sp in sorted
-                              
-                for k from 0
-                with fitnesses = ()  
-                until (= (length result) *capacity*)
-
-                              
-                ;;; testing for duplicates using fitness
-                ;;; since different raw genotypes can have the same phenotype
-                ;;; this could potentially pare the population down to 1 if the fitness is low integers or something ...
-                      
-                if (or (= k 0) ;current best
-                       ;(and (< (caddr sp) ;age
-                       ;        *longevity*)
-                            (not (member (car sp) fitnesses))
-                            )
-                      
-                collect (list (* (car sp)
-                                 (let ((n (1+ (expt (* (max (- (caddr sp) 
-                                                      *longevity*) 0) 0.01) 2))))
-                                   ;(if (> n 1) (print n))
-                                   n))
-                              (second sp)
-                              (1+ (third sp))) into result
-                do (push (car sp) fitnesses)
-                finally return result))))
+         (result '())
+         (fitnesses '())
+         (k 0))
+    
+    (dolist (sp sorted (nreverse result))
+      (when (= (length result) *capacity*)
+        (return))
+      (when (or (= k 0)
+                (not (member (car sp) fitnesses)))
+        (let* ((age (caddr sp))
+               (penalty (1+ (expt (* (max (- age *longevity*) 0) 0.01) 2)))
+               (adjusted-fitness (* (car sp) penalty)))
+          (push (list adjusted-fitness
+                      (second sp)
+                      (1+ age))
+                result)
+          (push (car sp) fitnesses)))
+      (incf k))))
 
 
 
@@ -249,38 +226,29 @@
 
 
 
-(defmethod run ((model t) (criterion function) (max-generations number) &key (finalizer #'identity) variation-params)
-  (let ((best
-         (let ((population (population-from-model model criterion)))
-                       
-      
-           (loop for generation from 0 to max-generations
-                 until (or (> generation max-generations) 
-                           (= (first (first population)) 0))   ;;; perfect specimen
-
-                 do 
-
-                 (setf population
-                       (iterate population criterion variation-params))
-         
-                 ;;; verbosity
-                 (when (= (mod generation *display-interval*) 0)
-                   (print (format nil "generation #~D -- fitness ~D (runner up is ~D) size ~D" 
-                                  generation 
-                                  (first (first population))
-                                  (first (second population))
-                                  (length population))))
-
-                 finally 
-                 return (progn 
-                          (print population)
-                          (first population))))))
-
+(defmethod run ((model t) (criterion function) (max-generations number)
+                &key (finalizer #'identity) variation-params)
+  (let ((population (population-from-model model criterion))
+        (best nil))
+    
+    (loop for generation from 0 to max-generations
+          until (or (> generation max-generations)
+                    (= (first (first population)) 0)) ; perfect specimen
+          do
+            (setf population (iterate population criterion variation-params))
+            (when (= (mod generation *display-interval*) 0)
+              (print (format nil "generation #~D -- fitness ~D (runner up is ~D) size ~D" 
+                             generation 
+                             (first (first population))
+                             (first (second population))
+                             (length population)))))
+    
+    (setf best (first population))
+    (print population)
     (setf *most-recent-result* (second best))
 
-    (values (funcall finalizer (second best))  ;specimen
-            (first best)   ;fitness 
-            )))
+    (values (funcall finalizer (second best))  ; specimen
+            (first best))))                   ; fitness
 
 
 

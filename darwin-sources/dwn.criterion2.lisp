@@ -167,24 +167,3 @@
     (loop for sub on (phenotype spec)
           collect (compare-to-test-value (funcall (or evaluator #'identity) sub)
                                          test-value))))
-
-
-
-
-
-
-
-
-
-                                
-
-;(defcrit simple-iterator (:fun :iterator nil nil)
-;         (with-subject-loop (_input)
-;                            sum (funcall %evaluator _subj)
-;                            finally return (/ _subj _length)))
-          
-               
-
-
-         
-
