@@ -199,9 +199,9 @@
          (fitnesses '())
          (k 0))
     
-    (dolist (sp sorted (nreverse result))
+    (dolist (sp sorted)
       (when (= (length result) *capacity*)
-        (return))
+        (return (nreverse result)))
       (when (or (= k 0)
                 (not (member (car sp) fitnesses)))
         (let* ((age (caddr sp))
@@ -244,7 +244,6 @@
                              (length population)))))
     
     (setf best (first population))
-    (print population)
     (setf *most-recent-result* (second best))
 
     (values (funcall finalizer (second best))  ; specimen
